@@ -295,23 +295,65 @@ Route::middleware('auth:sanctum')->group(function () {
    - Problème: Les utilisateurs pouvaient s'inscrire via `/register`
    - Solution: Commenter les routes d'inscription dans `routes/auth.php`
 
+6. **Erreur Article::currentPrice**
+   - Problème: `Article::currentPrice must return a relationship instance`
+   - Cause: ArticleResource essayait d'utiliser `whenLoaded('currentPrice')` sur un accessor
+   - Solution: Acces direct a `$this->current_price` dans ArticleResource
+
+7. **Variable $families non definie**
+   - Problème: `$families` etait undefined dans sub-familles/index.blade.php
+   - Solution: Ajout de protection avec `?? []` dans la boucle foreach
+
+8. **Middleware UserController**
+   - Problème: Call to undefined method UserController::middleware()
+   - Cause: Middleware deja applique au niveau des routes
+   - Solution: Suppression de l'appel redondant dans le constructeur
+
+9. **ucfirst() sur enum UserRole**
+   - Problème: ucfirst() attend un string mais recevait App\Enums\UserRole
+   - Cause: Probleme de casting ou de valeur nulle
+   - Solution: Utilisation de l'operateur null-safe `$user->role?->value ?? $user->role ?? 'user'`
+
+10. **Division par array dans dashboard**
+    - Problème: Division par array dans le calcul des pourcentages
+    - Solution: Pre-calcul de `$maxCount` et utilisation de valeurs par defaut
+
+### **Nouvelle Fonctionnalite: Quantite Unitaire par Conditionnement**
+
+11. **Packaging Unit Quantity**
+    - Problème: Besoin de tracker la quantite par conditionnement (ex: 10kg dans un sac)
+    - Solution:
+      - Ajout du champ `packaging_unit_quantity` a la table `articles`
+      - Mise a jour de articles/create.blade.php et articles/edit.blade.php avec un champ dedie
+      - Suppression des champs `unit_id` et `unit_quantity` de la table `packagings`
+      - Mise a jour de PackagingController, PackagingResource, et des Requests
+    - Resultat: Chaque article a son propre conditionnement, unite, et quantite unitaire
+
+12. **Lien "Creer un fournisseur"**
+    - Problème: Besoin d'un lien pour creer un fournisseur lors de l'ajout de prix
+    - Solution: Lien deja present dans articles/show.blade.php (ligne 224-233)
+
+13. **Dates automatiques pour les prix**
+    - Problème: Les champs "Valide depuis" et "Valide jusqu'a" ne devraient pas etre visibles
+    - Solution: Champs deja caches avec `valid_from` automatiquement set a la date du jour
+
 ---
 
 ## 📊 **Statistiques du Projet**
 
 | Metrique | Valeur |
 |----------|--------|
-| Total Fichiers | 199 |
-| Lignes de Code | 23,395+ |
+| Total Fichiers | 199+ |
+| Lignes de Code | 23,000+ |
 | Modeles | 9 |
 | Controllers API | 8 |
 | Controllers Web | 8 |
 | API Resources | 8 |
 | Request Classes | 16 |
-| Migrations | 11 |
+| Migrations | 13 |
 | Vues Blade | 56 |
 | Routes | 90 |
-| Commit | 1 (2d70853) |
+| Commits | 2 |
 
 ---
 
@@ -465,6 +507,7 @@ Pour toute question ou probleme, consulter:
 ---
 
 **Derniere mise a jour:** 18 juin 2026  
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Auteur:** Mistral Vibe (avec co-auteur)  
-**Repository:** ssh://git@laboiteauxlettres.com:5196/mnt/srv/git/stock.git
+**Repository:** ssh://git@laboiteauxlettres.com:5196/mnt/srv/git/stock.git  
+**Commits:** 2
