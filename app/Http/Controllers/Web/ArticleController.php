@@ -82,8 +82,9 @@ class ArticleController extends Controller
         $article->load(['family', 'subFamily', 'unit', 'packaging', 'vat', 'priceHistories.supplier']);
         $suppliers = Supplier::orderBy('name')->get();
         
-        // Get latest valid price for each supplier (other than the current one)
-        $otherSupplierPrices = PriceHistory::where('article_id', $article->id)
+        // Get all valid prices for this article (valid_to >= now() OR valid_to is null)
+        // and group by supplier to get the latest price for each
+        $allValidPrices = PriceHistory::where('article_id', $article->id)
             ->where('valid_from', '<=', now())
             ->where(function($query) {
                 $query->where('valid_to', '>=', now())
@@ -97,6 +98,12 @@ class ArticleController extends Controller
                 return $group->first(); // Get latest price for each supplier
             })
             ->values();
+        
+        // Get other suppliers' prices (all valid prices except the current one)
+        $currentPriceId = $article->current_price?->id;
+        $otherSupplierPrices = $allValidPrices->reject(function ($price) use ($currentPriceId) {
+            return $price->id === $currentPriceId;
+        });
         
         return view('articles.show', compact('article', 'suppliers', 'otherSupplierPrices'));
     }
@@ -157,8 +164,9 @@ class ArticleController extends Controller
         }
         
         // Deactivate the current price if it exists and is different
+        // Use now() as datetime to ensure it's still valid for today
         if ($article->current_price && $article->current_price->id !== $newCurrentPrice->id) {
-            $article->current_price->update(['valid_to' => now()->toDateString()]);
+            $article->current_price->update(['valid_to' => now()]);
         }
         
         // Activate the new price
