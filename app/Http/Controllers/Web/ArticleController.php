@@ -83,7 +83,6 @@ class ArticleController extends Controller
         $suppliers = Supplier::orderBy('name')->get();
         
         // Get all valid prices for this article (valid_to >= now() OR valid_to is null)
-        // and group by supplier to get the latest price for each
         $allValidPrices = PriceHistory::where('article_id', $article->id)
             ->where('valid_from', '<=', now())
             ->where(function($query) {
@@ -92,20 +91,25 @@ class ArticleController extends Controller
             })
             ->with('supplier')
             ->orderBy('valid_from', 'desc')
-            ->get()
-            ->groupBy('supplier_id')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        // Group by supplier to get the latest price for each
+        $pricesBySupplier = $allValidPrices->groupBy('supplier_id')
             ->map(function ($group) {
-                return $group->first(); // Get latest price for each supplier
+                return $group->first();
             })
             ->values();
         
+        // Determine current price (the most recent valid price overall)
+        $currentPrice = $allValidPrices->sortByDesc('valid_from')->sortByDesc('created_at')->first();
+        
         // Get other suppliers' prices (all valid prices except the current one)
-        $currentPriceId = $article->current_price?->id;
-        $otherSupplierPrices = $allValidPrices->reject(function ($price) use ($currentPriceId) {
-            return $price->id === $currentPriceId;
+        $otherSupplierPrices = $pricesBySupplier->reject(function ($price) use ($currentPrice) {
+            return $price->id === ($currentPrice?->id ?? null);
         });
         
-        return view('articles.show', compact('article', 'suppliers', 'otherSupplierPrices'));
+        return view('articles.show', compact('article', 'suppliers', 'otherSupplierPrices', 'currentPrice'));
     }
 
     public function addPrice(Request $request, Article $article): RedirectResponse

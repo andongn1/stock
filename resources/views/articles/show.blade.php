@@ -149,7 +149,7 @@
     </div>
 
     <!-- Current Price Section -->
-    @if($article->current_price)
+    @if($currentPrice)
     <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-green-800 dark:text-green-300 mb-4 border-b border-green-200 dark:border-green-700 pb-4">
             Prix actuel
@@ -165,7 +165,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                     </svg>
                     <span class="text-green-800 dark:text-green-300 font-medium">
-                        {{ $article->current_price->supplier->name }}
+                        {{ $currentPrice->supplier->name }}
                     </span>
                     <span class="text-xs bg-green-100 dark:bg-green-800/50 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">
                         Actif
@@ -175,14 +175,14 @@
             
             <div>
                 <label class="block text-sm font-medium text-green-700 dark:text-green-400 mb-1">
-                    Prix ({{ $article->current_price->price_type_label }})
+                    Prix ({{ $currentPrice->price_type_label }})
                 </label>
                 <div class="flex items-center space-x-2">
                     <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                     <span class="text-green-800 dark:text-green-300 font-bold text-xl">
-                        {{ $article->current_price->price }} {{ $article->current_price->currency }}
+                        {{ $currentPrice->price }} {{ $currentPrice->currency }}
                     </span>
                 </div>
             </div>
@@ -196,7 +196,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                     <span class="text-green-800 dark:text-green-300 font-medium">
-                        {{ number_format($article->current_price->unit_price, 2) }} {{ $article->current_price->currency }} / {{ $article->unit?->name ?? 'unite' }}
+                        {{ number_format($currentPrice->unit_price, 2) }} {{ $currentPrice->currency }} / {{ $article->unit?->name ?? 'unite' }}
                     </span>
                 </div>
             </div>
@@ -210,7 +210,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                     <span class="text-green-800 dark:text-green-300 font-medium">
-                        {{ number_format($article->current_price->packaging_price, 2) }} {{ $article->current_price->currency }} / {{ $article->packaging?->name ?? 'conditionnement' }}
+                        {{ number_format($currentPrice->packaging_price, 2) }} {{ $currentPrice->currency }} / {{ $article->packaging?->name ?? 'conditionnement' }}
                     </span>
                 </div>
             </div>
@@ -220,9 +220,9 @@
             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            Valide depuis le {{ $article->current_price->valid_from->format('d/m/Y') }}
-            @if($article->current_price->valid_to)
-            jusqu'au {{ $article->current_price->valid_to->format('d/m/Y') }}
+            Valide depuis le {{ $currentPrice->valid_from->format('d/m/Y') }}
+            @if($currentPrice->valid_to)
+            jusqu'au {{ $currentPrice->valid_to->format('d/m/Y') }}
             @endif
         </div>
         
@@ -234,7 +234,6 @@
             </h3>
             <div class="space-y-3">
                 @foreach($otherSupplierPrices as $otherPrice)
-                @if($article->current_price && $otherPrice->id !== $article->current_price->id)
                 <div class="flex items-center justify-between p-3 bg-white dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors">
                     <div class="flex-1">
                         <div class="font-medium text-green-800 dark:text-green-300">
@@ -261,7 +260,6 @@
                         <span>Activer</span>
                     </button>
                 </div>
-                @endif
                 @endforeach
             </div>
         </div>
