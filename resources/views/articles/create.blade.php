@@ -6,10 +6,19 @@
 <div x-data="{ 
     subFamilies: @json($subFamilles->groupBy('family_id')),
     filteredSubFamilies: [],
-    selectedFamily: ''
+    selectedFamily: '',
+    selectedSubFamily: ''
 }" x-init="
-    updateSubFamilies();
-    $watch('selectedFamily', () => updateSubFamilies());
+    // Initialize filtered sub families
+    if (selectedFamily) {
+        filteredSubFamilies = subFamilies[selectedFamily] || [];
+    }
+    
+    $watch('selectedFamily', () => {
+        filteredSubFamilies = subFamilies[selectedFamily] || [];
+        // Reset sub-family when family changes
+        selectedSubFamily = '';
+    });
 " class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow p-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Nouvel Article</h1>
@@ -74,7 +83,7 @@
                     >
                         <option value="">Selectionnez une famille</option>
                         @foreach($families as $family)
-                        <option value="{{ $family->id }}" {{ old('family_id') == $family->id ? 'selected' : '' }}>
+                        <option value="{{ $family->id }}" :selected="selectedFamily == '{{ $family->id }}'">
                             {{ $family->name }}
                         </option>
                         @endforeach
@@ -89,23 +98,16 @@
                         Sous-Famille <span class="text-red-500">*</span>
                     </label>
                     <select 
+                        x-model="selectedSubFamily"
                         name="sub_family_id"
                         id="sub_family_id"
                         required
-                        x-model="$wire.sub_family_id"
                         class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="">Selectionnez une sous-famille</option>
                         <template x-for="subFamily in filteredSubFamilies">
-                            <option :value="subFamily.id" x-text="subFamily.name"></option>
+                            <option :value="subFamily.id" :selected="selectedSubFamily == subFamily.id" x-text="subFamily.name"></option>
                         </template>
-                        @foreach($subFamilles as $subFamily)
-                        @if(old('family_id') == $subFamily->family_id)
-                        <option value="{{ $subFamily->id }}" {{ old('sub_family_id') == $subFamily->id ? 'selected' : '' }}>
-                            {{ $subFamily->name }}
-                        </option>
-                        @endif
-                        @endforeach
                     </select>
                     @error('sub_family_id')
                     <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
