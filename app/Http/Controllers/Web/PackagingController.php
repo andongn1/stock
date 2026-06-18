@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\Packaging;
+use App\Models\Unit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -11,13 +12,14 @@ class PackagingController extends Controller
 {
     public function index(): View
     {
-        $packagings = Packaging::withCount(['articles'])->latest()->get();
+        $packagings = Packaging::with(['unit'])->withCount(['articles'])->latest()->get();
         return view('packagings.index', compact('packagings'));
     }
 
     public function create(): View
     {
-        return view('packagings.create');
+        $units = Unit::orderBy('name')->get();
+        return view('packagings.create', compact('units'));
     }
 
     public function store(\App\Http\Requests\StorePackagingRequest $request): RedirectResponse
@@ -29,7 +31,8 @@ class PackagingController extends Controller
 
     public function edit(Packaging $packaging): View
     {
-        return view('packagings.edit', compact('packaging'));
+        $units = Unit::orderBy('name')->get();
+        return view('packagings.edit', compact('packaging', 'units'));
     }
 
     public function update(\App\Http\Requests\UpdatePackagingRequest $request, Packaging $packaging): RedirectResponse

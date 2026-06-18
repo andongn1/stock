@@ -15,6 +15,8 @@ class UpdatePackagingRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255|unique:packagings,name,'.$this->packaging->id,
+            'unit_id' => 'nullable|exists:units,id',
+            'unit_quantity' => 'nullable|numeric|min:0',
         ];
     }
 }

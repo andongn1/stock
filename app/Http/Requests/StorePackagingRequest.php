@@ -15,6 +15,8 @@ class StorePackagingRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255|unique:packagings,name',
+            'unit_id' => 'nullable|exists:units,id',
+            'unit_quantity' => 'nullable|numeric|min:0',
         ];
     }
 
@@ -23,6 +25,9 @@ class StorePackagingRequest extends FormRequest
         return [
             'name.required' => 'Le nom du conditionnement est obligatoire.',
             'name.unique' => 'Ce conditionnement existe deja.',
+            'unit_id.exists' => 'L\'unite selectionnee n\'existe pas.',
+            'unit_quantity.numeric' => 'La quantite doit etre un nombre.',
+            'unit_quantity.min' => 'La quantite ne peut pas etre negative.',
         ];
     }
 }

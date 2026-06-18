@@ -39,14 +39,24 @@ class DatabaseSeeder extends Seeder
 
         // Create Units
         $units = ['Piece', 'Kilogramme', 'Gramme', 'Litre', 'Millilitre', 'Metre', 'Centimetre'];
+        $unitMap = [];
         foreach ($units as $unit) {
-            Unit::create(['name' => $unit]);
+            $created = Unit::create(['name' => $unit]);
+            $unitMap[$unit] = $created->id;
         }
 
-        // Create Packagings
-        $packagings = ['Sac', 'Boite', 'Carton', 'Bouteille', 'Paquet', 'Barquette', 'Palette'];
+        // Create Packagings with units and quantities
+        $packagings = [
+            ['name' => 'Sac', 'unit_id' => $unitMap['Kilogramme'], 'unit_quantity' => 25],
+            ['name' => 'Boite', 'unit_id' => $unitMap['Piece'], 'unit_quantity' => 12],
+            ['name' => 'Carton', 'unit_id' => $unitMap['Piece'], 'unit_quantity' => 24],
+            ['name' => 'Bouteille', 'unit_id' => $unitMap['Litre'], 'unit_quantity' => 1.5],
+            ['name' => 'Paquet', 'unit_id' => $unitMap['Kilogramme'], 'unit_quantity' => 5],
+            ['name' => 'Barquette', 'unit_id' => $unitMap['Gramme'], 'unit_quantity' => 500],
+            ['name' => 'Palette', 'unit_id' => $unitMap['Piece'], 'unit_quantity' => 50],
+        ];
         foreach ($packagings as $packaging) {
-            Packaging::create(['name' => $packaging]);
+            Packaging::create($packaging);
         }
 
         // Create VAT Rates

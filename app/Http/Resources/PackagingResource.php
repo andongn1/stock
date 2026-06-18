@@ -17,6 +17,12 @@ class PackagingResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'unit_id' => $this->unit_id,
+            'unit' => $this->whenLoaded('unit'),
+            'unit_quantity' => $this->unit_quantity,
+            'formatted_unit' => $this->whenLoaded('unit', function () {
+                return $this->unit_quantity . ' ' . $this->unit?->name;
+            }),
             'articles_count' => $this->whenCounted('articles'),
             'created_at' => $this->created_at->toDateTimeString(),
             'updated_at' => $this->updated_at->toDateTimeString(),
