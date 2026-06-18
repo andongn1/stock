@@ -337,6 +337,19 @@ Route::middleware('auth:sanctum')->group(function () {
     - Problème: Les champs "Valide depuis" et "Valide jusqu'a" ne devraient pas etre visibles
     - Solution: Champs deja caches avec `valid_from` automatiquement set a la date du jour
 
+### **Nouvelle Fonctionnalite: Prix par Unite ou par Conditionnement**
+
+14. **Price Type Feature**
+    - Problème: Besoin de distinguer les prix fournisseurs par unite ou par conditionnement
+    - Solution:
+      - Creation de l'enum `PriceType` avec valeurs: per_unit, per_packaging
+      - Ajout du champ `price_type` a la table `price_histories`
+      - Ajout des accessors `unit_price` et `packaging_price` dans PriceHistory pour calculer automatiquement les deux prix
+      - Mise a jour du formulaire d'ajout de prix avec un dropdown pour selectionner le type
+      - Mise a jour des vues pour afficher les deux prix (par unite et par conditionnement)
+      - Exemple: Fournisseur A: 2,58€/kg → affiche 2,58€/kg et 25,80€/sac (si sac=10kg). Fournisseur B: 25€/sac → affiche 2,50€/kg et 25€/sac
+    - Resultat: Chaque prix fournisseur peut etre saisi par unite ou par conditionnement, et les deux valeurs sont calculees et affichees automatiquement
+
 ---
 
 ## 📊 **Statistiques du Projet**
@@ -507,7 +520,7 @@ Pour toute question ou probleme, consulter:
 ---
 
 **Derniere mise a jour:** 18 juin 2026  
-**Version:** 1.1.0  
+**Version:** 1.2.0  
 **Auteur:** Mistral Vibe (avec co-auteur)  
 **Repository:** ssh://git@laboiteauxlettres.com:5196/mnt/srv/git/stock.git  
-**Commits:** 2
+**Commits:** 4
