@@ -220,6 +220,18 @@
                         <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
                         @endforeach
                     </select>
+                    <div class="mt-2">
+                        <a 
+                            href="{{ route('suppliers.create') }}"
+                            class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center space-x-1"
+                            target="_blank"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            <span>Le fournisseur n'existe pas ? Creez-le</span>
+                        </a>
+                    </div>
                     @error('supplier_id')
                     <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                     @enderror
