@@ -7,11 +7,15 @@
 
 <div x-data="{ 
     subFamilies: @json($subFamilles->groupBy('family_id')),
-    selectedFamily: '{{ old("family_id", $article->family_id) }}'
+    filteredSubFamilies: [],
+    selectedFamily: '{{ old("family_id", $article->family_id) }}',
+    selectedSubFamily: '{{ old("sub_family_id", $article->sub_family_id) }}'
 }" x-init="
+    // Initialize filtered sub families
+    filteredSubFamilies = subFamilies[selectedFamily] || [];
+    
     $watch('selectedFamily', () => {
-        // Update sub families filter
-        updateSubFamilies();
+        filteredSubFamilies = subFamilies[selectedFamily] || [];
     });
 " class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow p-6">
     <div class="flex justify-between items-center mb-6">
@@ -78,7 +82,7 @@
                     >
                         <option value="">Selectionnez une famille</option>
                         @foreach($families as $family)
-                        <option value="{{ $family->id }}" {{ old('family_id', $article->family_id) == $family->id ? 'selected' : '' }}>
+                        <option value="{{ $family->id }}" :selected="selectedFamily == '{{ $family->id }}'">
                             {{ $family->name }}
                         </option>
                         @endforeach
@@ -93,17 +97,16 @@
                         Sous-Famille <span class="text-red-500">*</span>
                     </label>
                     <select 
+                        x-model="selectedSubFamily"
                         name="sub_family_id"
                         id="sub_family_id"
                         required
                         class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="">Selectionnez une sous-famille</option>
-                        @foreach($subFamilles->where('family_id', old('family_id', $article->family_id)) as $subFamily)
-                        <option value="{{ $subFamily->id }}" {{ old('sub_family_id', $article->sub_family_id) == $subFamily->id ? 'selected' : '' }}>
-                            {{ $subFamily->name }}
-                        </option>
-                        @endforeach
+                        <template x-for="subFamily in filteredSubFamilies">
+                            <option :value="subFamily.id" :selected="selectedSubFamily == subFamily.id" x-text="subFamily.name"></option>
+                        </template>
                     </select>
                     @error('sub_family_id')
                     <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -225,33 +228,4 @@
         </div>
     </form>
 </div>
-
-<script>
-    function updateSubFamilies() {
-        const familyId = document.getElementById('family_id').value;
-        const subFamilySelect = document.getElementById('sub_family_id');
-        
-        // Clear existing options
-        subFamilySelect.innerHTML = '<option value="">Selectionnez une sous-famille</option>';
-        
-        if (familyId) {
-            // Get sub-families for selected family
-            const subFamilles = @json($subFamilles->groupBy('family_id'));
-            if (subFamilles[familyId]) {
-                subFamilles[familyId].forEach(subFamily => {
-                    const option = document.createElement('option');
-                    option.value = subFamily.id;
-                    option.textContent = subFamily.name;
-                    subFamilySelect.appendChild(option);
-                });
-            }
-        }
-    }
-    
-    // Initialize
-    document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('family_id').addEventListener('change', updateSubFamilies);
-        updateSubFamilies();
-    });
-</script>
 @endsection
