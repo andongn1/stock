@@ -109,10 +109,13 @@
                         Fournisseur
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Prix
+                        Prix (Type)
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Devise
+                        Prix a l'unite
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Prix par conditionnement
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Valide depuis
@@ -122,9 +125,6 @@
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Statut
-                    </th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Actions
                     </th>
                 </tr>
             </thead>
@@ -145,10 +145,13 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600 dark:text-green-400">
-                        {{ $history->price }}
+                        {{ $history->price }} {{ $history->currency }} ({{ $history->price_type_label }})
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {{ $history->currency }}
+                        {{ number_format($history->unit_price, 2) }} {{ $history->currency }} / {{ $article->unit?->name ?? 'unite' }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {{ number_format($history->packaging_price, 2) }} {{ $history->currency }} / {{ $article->packaging?->name ?? 'conditionnement' }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {{ $history->valid_from->format('d/m/Y') }}
@@ -174,23 +177,6 @@
                                 Actif
                             @endif
                         </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center">
-                        <div class="flex justify-center space-x-1">
-                            <!-- View details -->
-                            <button 
-                                type="button"
-                                x-data=""
-                                x-on:click="$dispatch('open-modal', { name: 'price-detail-{{ $history->id }}' })"
-                                class="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full"
-                                title="Details"
-                            >
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                </svg>
-                            </button>
-                        </div>
                     </td>
                 </tr>
                 @empty

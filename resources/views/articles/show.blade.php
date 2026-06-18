@@ -143,7 +143,7 @@
             Prix actuel
         </h2>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
                 <label class="block text-sm font-medium text-green-700 dark:text-green-400 mb-1">
                     Fournisseur
@@ -160,7 +160,7 @@
             
             <div>
                 <label class="block text-sm font-medium text-green-700 dark:text-green-400 mb-1">
-                    Prix
+                    Prix ({{ $article->current_price->price_type_label }})
                 </label>
                 <div class="flex items-center space-x-2">
                     <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -174,20 +174,41 @@
             
             <div>
                 <label class="block text-sm font-medium text-green-700 dark:text-green-400 mb-1">
-                    Valide depuis
+                    Prix a l'unite
                 </label>
                 <div class="flex items-center space-x-2">
                     <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    <span class="text-green-800 dark:text-green-300">
-                        {{ $article->current_price->valid_from->format('d/m/Y') }}
-                        @if($article->current_price->valid_to)
-                        au {{ $article->current_price->valid_to->format('d/m/Y') }}
-                        @endif
+                    <span class="text-green-800 dark:text-green-300 font-medium">
+                        {{ number_format($article->current_price->unit_price, 2) }} {{ $article->current_price->currency }} / {{ $article->unit?->name ?? 'unite' }}
                     </span>
                 </div>
             </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-green-700 dark:text-green-400 mb-1">
+                    Prix par conditionnement
+                </label>
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="text-green-800 dark:text-green-300 font-medium">
+                        {{ number_format($article->current_price->packaging_price, 2) }} {{ $article->current_price->currency }} / {{ $article->packaging?->name ?? 'conditionnement' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4 text-sm text-green-600 dark:text-green-400">
+            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Valide depuis le {{ $article->current_price->valid_from->format('d/m/Y') }}
+            @if($article->current_price->valid_to)
+            jusqu'au {{ $article->current_price->valid_to->format('d/m/Y') }}
+            @endif
         </div>
     </div>
     @endif
@@ -195,7 +216,7 @@
     <!-- Actions -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Ajouter un prix -->
-        <div class="bg-blue-50 dark:bg-blue-900/30 rounded-lg shadow p-6">
+        <div id="add-price" class="bg-blue-50 dark:bg-blue-900/30 rounded-lg shadow p-6">
             <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-4 flex items-center space-x-2">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -237,7 +258,7 @@
                     @enderror
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label for="price" class="block text-sm font-medium text-blue-700 dark:text-blue-400 mb-1">
                             Prix <span class="text-red-500">*</span>
@@ -278,7 +299,37 @@
                         <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
+                    
+                    <div>
+                        <label for="price_type" class="block text-sm font-medium text-blue-700 dark:text-blue-400 mb-1">
+                            Type de prix <span class="text-red-500">*</span>
+                        </label>
+                        <select 
+                            name="price_type"
+                            id="price_type"
+                            required
+                            class="w-full p-3 border border-blue-300 dark:border-blue-700 rounded-lg bg-white dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            <option value="">Selectionnez un type</option>
+                            <option value="per_unit" {{ old('price_type') === 'per_unit' ? 'selected' : '' }}>Par unite</option>
+                            <option value="per_packaging" {{ old('price_type') === 'per_packaging' ? 'selected' : '' }}>Par conditionnement</option>
+                        </select>
+                        @error('price_type')
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
+                
+                <!-- Info sur les prix -->
+                @if($article->packaging_unit_quantity && $article->unit)
+                <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-sm text-blue-700 dark:text-blue-300">
+                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Conditionnement: {{ $article->packaging_unit_quantity }} {{ $article->unit->name }}. 
+                    Selectionnez "Par unite" pour un prix a l'unite (ex: 2,58€/kg) ou "Par conditionnement" pour un prix global (ex: 25€/sac).
+                </div>
+                @endif
                 
                 <!-- Date du jour est automatiquement enregistree -->
                 <input type="hidden" name="valid_from" value="{{ now()->toDateString() }}">
@@ -327,7 +378,13 @@
                                 {{ $priceHistory->supplier->name }}
                             </div>
                             <div class="text-sm text-purple-600 dark:text-purple-400">
-                                {{ $priceHistory->price }} {{ $priceHistory->currency }}
+                                {{ $priceHistory->price }} {{ $priceHistory->currency }} ({{ $priceHistory->price_type_label }})
+                            </div>
+                            <div class="text-xs text-purple-500 dark:text-purple-500 mt-1">
+                                <span class="font-medium">Unite:</span> {{ number_format($priceHistory->unit_price, 2) }} € / {{ $article->unit?->name ?? 'unité' }}
+                                @if($article->packaging_unit_quantity && $article->packaging)
+                                | <span class="font-medium">Conditionnement:</span> {{ number_format($priceHistory->packaging_price, 2) }} € / {{ $article->packaging->name }}
+                                @endif
                             </div>
                             <div class="text-xs text-purple-500 dark:text-purple-500 mt-1">
                                 {{ $priceHistory->valid_from->format('d/m/Y') }}

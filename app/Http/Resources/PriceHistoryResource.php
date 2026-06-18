@@ -20,6 +20,10 @@ class PriceHistoryResource extends JsonResource
             'supplier_id' => $this->supplier_id,
             'price' => $this->price,
             'currency' => $this->currency,
+            'price_type' => $this->price_type?->value ?? $this->price_type,
+            'price_type_label' => $this->price_type_label,
+            'unit_price' => $this->unit_price,
+            'packaging_price' => $this->packaging_price,
             'valid_from' => $this->valid_from->toDateString(),
             'valid_to' => $this->valid_to?->toDateString(),
             'article' => $this->whenLoaded('article', function () {
@@ -27,6 +31,9 @@ class PriceHistoryResource extends JsonResource
                     'id' => $this->article->id,
                     'name' => $this->article->name,
                     'brand' => $this->article->brand,
+                    'packaging_unit_quantity' => $this->article->packaging_unit_quantity,
+                    'unit' => $this->article->unit?->only('id', 'name'),
+                    'packaging' => $this->article->packaging?->only('id', 'name'),
                 ];
             }),
             'supplier' => $this->whenLoaded('supplier', function () {

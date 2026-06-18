@@ -18,6 +18,7 @@ class StorePriceHistoryRequest extends FormRequest
             'supplier_id' => 'required|exists:suppliers,id',
             'price' => 'required|numeric|min:0',
             'currency' => 'required|string|size:3',
+            'price_type' => 'required|string|in:per_unit,per_packaging',
             'valid_from' => 'required|date',
             'valid_to' => 'nullable|date|after_or_equal:valid_from',
         ];
@@ -31,6 +32,8 @@ class StorePriceHistoryRequest extends FormRequest
             'price.required' => 'Le prix est obligatoire.',
             'price.min' => 'Le prix ne peut pas etre negatif.',
             'currency.required' => 'La devise est obligatoire.',
+            'price_type.required' => 'Le type de prix est obligatoire.',
+            'price_type.in' => 'Le type de prix doit etre soit "Par unite" soit "Par conditionnement".',
             'valid_from.required' => 'La date de debut est obligatoire.',
             'valid_to.after_or_equal' => 'La date de fin doit etre posterieure ou egale a la date de debut.',
         ];

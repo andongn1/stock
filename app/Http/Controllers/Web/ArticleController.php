@@ -91,9 +91,10 @@ class ArticleController extends Controller
             'supplier_id' => 'required|exists:suppliers,id',
             'price' => 'required|numeric|min:0',
             'currency' => 'required|string|size:3',
+            'price_type' => 'required|string|in:per_unit,per_packaging',
         ]);
         
-        // Deactivate previous price if exists
+        // Deactivate previous price if exists for this supplier
         PriceHistory::where('article_id', $article->id)
             ->whereNull('valid_to')
             ->where('supplier_id', $validated['supplier_id'])
@@ -105,6 +106,7 @@ class ArticleController extends Controller
             'supplier_id' => $validated['supplier_id'],
             'price' => $validated['price'],
             'currency' => $validated['currency'],
+            'price_type' => $validated['price_type'],
             'valid_from' => now()->toDateString(),
             'valid_to' => null,
         ]);
