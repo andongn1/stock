@@ -45,6 +45,10 @@ class ArticleResource extends JsonResource
                 return [
                     'id' => $this->packaging->id,
                     'name' => $this->packaging->name,
+                    'unit_id' => $this->packaging->unit_id,
+                    'unit' => $this->packaging->unit?->only('id', 'name'),
+                    'unit_quantity' => $this->packaging->unit_quantity,
+                    'formatted_unit' => $this->packaging->unit_quantity . ' ' . ($this->packaging->unit?->name ?? ''),
                 ];
             }),
             'vat' => $this->whenLoaded('vat', function () {

@@ -3,13 +3,39 @@
 @section('title', 'Nouvel Article')
 
 @section('content')
+@php
+$packagingsWithUnits = App\Models\Packaging::with('unit')->get()->map(function($p) {
+    return [
+        'id' => $p->id,
+        'name' => $p->name,
+        'unit_id' => $p->unit_id,
+        'unit_name' => $p->unit?->name,
+        'unit_quantity' => $p->unit_quantity,
+        'display' => $p->name . ($p->unit_quantity && $p->unit ? ' (' . $p->unit_quantity . ' ' . $p->unit->name . ')' : '')
+    ];
+});
+@endphp
+
 <div x-data="{ 
     subFamilies: @json($subFamilles->groupBy('family_id')),
     filteredSubFamilies: [],
-    selectedFamily: ''
+    selectedFamily: '',
+    selectedPackaging: null,
+    packagings: @json($packagingsWithUnits),
+    getPackagingInfo(id) {
+        const pkg = this.packagings.find(p => p.id == id);
+        return pkg || null;
+    },
+    updateUnitFromPackaging() {
+        const pkg = this.getPackagingInfo(this.selectedPackaging);
+        if (pkg && pkg.unit_id) {
+            document.getElementById('unit_id').value = pkg.unit_id;
+        }
+    }
 }" x-init="
     updateSubFamilies();
     $watch('selectedFamily', () => updateSubFamilies());
+    $watch('selectedPackaging', () => updateUnitFromPackaging());
 " class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow p-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Nouvel Article</h1>
@@ -142,18 +168,29 @@
                         Conditionnement <span class="text-red-500">*</span>
                     </label>
                     <select 
+                        x-model="selectedPackaging"
                         name="packaging_id"
                         id="packaging_id"
                         required
                         class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="">Selectionnez un conditionnement</option>
-                        @foreach($packagings as $packaging)
-                        <option value="{{ $packaging->id }}" {{ old('packaging_id') == $packaging->id ? 'selected' : '' }}>
-                            {{ $packaging->name }}
-                        </option>
-                        @endforeach
+                        <template x-for="pkg in packagings">
+                            <option :value="pkg.id" x-text="pkg.display"></option>
+                        </template>
                     </select>
+                    <div x-show="selectedPackaging" x-transition class="mt-2 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                        <template x-if="getPackagingInfo(selectedPackaging)">
+                            <p class="text-sm text-blue-700 dark:text-blue-300">
+                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <strong>Unite du conditionnement :</strong> 
+                                <span x-text="getPackagingInfo(selectedPackaging).unit_quantity || 0"></span> 
+                                <span x-text="getPackagingInfo(selectedPackaging).unit_name || ''"></span>
+                            </p>
+                        </template>
+                    </div>
                     @error('packaging_id')
                     <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                     @enderror
