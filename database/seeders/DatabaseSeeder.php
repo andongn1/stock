@@ -45,18 +45,10 @@ class DatabaseSeeder extends Seeder
             $unitMap[$unit] = $created->id;
         }
 
-        // Create Packagings with units and quantities
-        $packagings = [
-            ['name' => 'Sac', 'unit_id' => $unitMap['Kilogramme'], 'unit_quantity' => 25],
-            ['name' => 'Boite', 'unit_id' => $unitMap['Piece'], 'unit_quantity' => 12],
-            ['name' => 'Carton', 'unit_id' => $unitMap['Piece'], 'unit_quantity' => 24],
-            ['name' => 'Bouteille', 'unit_id' => $unitMap['Litre'], 'unit_quantity' => 1.5],
-            ['name' => 'Paquet', 'unit_id' => $unitMap['Kilogramme'], 'unit_quantity' => 5],
-            ['name' => 'Barquette', 'unit_id' => $unitMap['Gramme'], 'unit_quantity' => 500],
-            ['name' => 'Palette', 'unit_id' => $unitMap['Piece'], 'unit_quantity' => 50],
-        ];
+        // Create Packagings (simple names only - unit and quantity are now on articles)
+        $packagings = ['Sac', 'Boite', 'Carton', 'Bouteille', 'Paquet', 'Barquette', 'Palette'];
         foreach ($packagings as $packaging) {
-            Packaging::create($packaging);
+            Packaging::create(['name' => $packaging]);
         }
 
         // Create VAT Rates
@@ -136,12 +128,14 @@ class DatabaseSeeder extends Seeder
                 'sub_family_id' => $subFamilyIds[array_rand($subFamilyIds)],
                 'unit_id' => $unitIds[array_rand($unitIds)],
                 'packaging_id' => $packagingIds[array_rand($packagingIds)],
+                'packaging_unit_quantity' => [1, 5, 10, 20, 25, 50, 100][array_rand([0, 1, 2, 3, 4, 5, 6])],
                 'vat_id' => $vatIds[array_rand($vatIds)],
             ]);
 
-            // Create price history for each article
+            // Create price history for each article with random price type
             $numPrices = rand(1, 3);
             $validFrom = now()->subDays(rand(30, 365));
+            $priceTypes = ['per_unit', 'per_packaging'];
             
             for ($j = 0; $j < $numPrices; $j++) {
                 PriceHistory::create([
@@ -149,6 +143,7 @@ class DatabaseSeeder extends Seeder
                     'supplier_id' => $supplierIds[array_rand($supplierIds)],
                     'price' => number_format(rand(10, 1000) + rand(0, 99) / 100, 2, '.', ''),
                     'currency' => 'EUR',
+                    'price_type' => $priceTypes[array_rand($priceTypes)],
                     'valid_from' => $validFrom->format('Y-m-d'),
                     'valid_to' => $j < $numPrices - 1 ? $validFrom->copy()->addDays(rand(30, 180))->format('Y-m-d') : null,
                 ]);
