@@ -150,21 +150,27 @@ class ArticleController extends Controller
             'price_history_id' => 'required|exists:price_histories,id',
         ]);
         
-        $newCurrentPrice = PriceHistory::findOrFail($validated['price_history_id']);
+        $priceHistory = PriceHistory::findOrFail($validated['price_history_id']);
         
         // Verify this price belongs to the article
-        if ($newCurrentPrice->article_id !== $article->id) {
+        if ($priceHistory->article_id !== $article->id) {
             return redirect()->route('articles.show', $article)
                 ->with('error', 'Le prix selectionne n\'appartient pas a cet article.');
         }
         
-        // Update the selected price to make it the most recent by setting valid_from to today
-        // This ensures it will be the current price
-        $newCurrentPrice->update([
+        // Create a new price history with today's date for this supplier
+        // This ensures it becomes the most recent and thus the current price
+        $newPrice = PriceHistory::create([
+            'article_id' => $article->id,
+            'supplier_id' => $priceHistory->supplier_id,
+            'price' => $priceHistory->price,
+            'currency' => $priceHistory->currency,
+            'price_type' => $priceHistory->price_type,
             'valid_from' => now()->toDateString(),
+            'valid_to' => null,
         ]);
         
         return redirect()->route('articles.show', $article)
-            ->with('success', 'Fournisseur change avec succes ! Le prix de ' . $newCurrentPrice->supplier->name . ' est maintenant le prix actuel.');
+            ->with('success', 'Fournisseur active avec succes ! Le prix de ' . $priceHistory->supplier->name . ' est maintenant le prix actuel.');
     }
 }
