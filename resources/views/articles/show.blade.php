@@ -447,6 +447,33 @@
         
         // Group all prices by supplier
         $supplierPrices = $article->priceHistories->groupBy('supplier_id')->map->first();
+        
+        // Find the supplier with the lowest ratio (best margin)
+        $bestSupplierId = null;
+        $lowestRatio = PHP_FLOAT_MAX;
+        foreach ($supplierPrices as $priceHistory) {
+            if ($priceHistory->price_type === App\Enums\PriceType::PER_UNIT) {
+                $purchasePricePerUnit = $priceHistory->price;
+            } else {
+                $purchasePricePerUnit = $priceHistory->price / ($article->packaging_unit_quantity > 0 ? $article->packaging_unit_quantity : 1);
+            }
+            
+            if ($sellingSaleType === 'per_unit') {
+                $totalPurchasePrice = $purchasePricePerUnit * $sellingQuantity;
+            } else {
+                if ($priceHistory->price_type === App\Enums\PriceType::PER_UNIT) {
+                    $totalPurchasePrice = $purchasePricePerUnit * ($article->packaging_unit_quantity > 0 ? $article->packaging_unit_quantity : 1);
+                } else {
+                    $totalPurchasePrice = $priceHistory->price;
+                }
+            }
+            
+            $ratio = ($totalPurchasePrice * $vatMultiplier) / $sellingPriceTtc;
+            if ($ratio < $lowestRatio) {
+                $lowestRatio = $ratio;
+                $bestSupplierId = $priceHistory->supplier_id;
+            }
+        }
         @endphp
         
         @if($supplierPrices->count() > 0)
@@ -483,8 +510,11 @@
             <div class="p-3 bg-white dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
                 <div class="flex justify-between items-start">
                     <div class="flex-1">
-                        <div class="font-medium text-purple-800 dark:text-purple-300">
+                        <div class="font-medium text-purple-800 dark:text-purple-300 flex items-center space-x-2">
                             {{ $priceHistory->supplier->name }}
+                            @if($priceHistory->supplier_id === $bestSupplierId)
+                            <span class="text-yellow-500 text-xl">⭐</span>
+                            @endif
                         </div>
                         <div class="text-sm text-purple-600 dark:text-purple-400">
                             Prix d'achat: {{ number_format($totalPurchasePrice, 2) }} {{ $priceHistory->currency }}
