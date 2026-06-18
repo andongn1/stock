@@ -105,7 +105,7 @@ class ArticleController extends Controller
             return $price->id === ($currentPrice?->id ?? null);
         });
         
-        return view('articles.show', compact('article', 'suppliers', 'otherSupplierPrices', 'currentPrice'));
+        return view('articles.show', compact('article', 'suppliers', 'otherSupplierPrices', 'currentPrice', 'pricesBySupplier'));
     }
 
     public function addPrice(Request $request, Article $article): RedirectResponse
