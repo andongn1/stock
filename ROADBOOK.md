@@ -15,6 +15,7 @@ Application Laravel 12 complete pour la gestion d'articles, familles, fournisseu
 - Gestion CRUD complete pour 8 entites
 - Tableau dynamique des articles avec Livewire
 - Historique des prix par article/fournisseur
+- Gestion des prix de vente par article avec calcul de ratio
 
 ---
 
@@ -37,7 +38,7 @@ npm install && npm run dev
 
 ### **Phase 2: Structure de la Base de Donnees**
 
-#### **Modeles (9)**
+#### **Modeles (10)**
 | Modele | Description | Relations |
 |--------|-------------|-----------|
 | User | Utilisateurs avec roles | hasMany(Article), etc. |
@@ -46,20 +47,23 @@ npm install && npm run dev
 | Unit | Unites de mesure | hasMany(Article) |
 | Packaging | Conditionnements | hasMany(Article) |
 | Vat | Taux de TVA | hasMany(Article) |
-| Article | Articles principaux | belongsTo(Family, SubFamily, Unit, Packaging, Vat) |
+| Article | Articles principaux | belongsTo(Family, SubFamily, Unit, Packaging, Vat), hasMany(PriceHistory), hasOne(SellingPrice) |
 | Supplier | Fournisseurs | hasMany(PriceHistory) |
 | PriceHistory | Historique des prix | belongsTo(Article, Supplier) |
+| SellingPrice | Prix de vente | belongsTo(Article) |
 
-#### **Migrations (15)**
+#### **Migrations (16)**
 - Tables de base (users, families, sub_families, units, packagings, vats, suppliers, articles, price_histories)
 - Champ `role` pour les utilisateurs
 - Tables Sanctum pour les tokens d'API
 - Champ `packaging_unit_quantity` dans articles
 - Champ `price_type` dans price_histories
+- Table selling_prices pour les prix de vente
 
-#### **Enums (2)**
+#### **Enums (3)**
 - `UserRole.php`: admin, user
 - `PriceType.php`: per_unit, per_packaging
+- `SaleType.php`: per_unit, per_packaging (pour les prix de vente)
 
 ---
 
@@ -438,24 +442,132 @@ public function getPriceTypeLabelAttribute(): string
 
 ---
 
+### **Fonctionnalite 5: Prix de Vente par Article avec Ratio**
+**Contexte:** Besoin de gerer un prix de vente TTC par article, avec la possibilite de vendre par unite ou par conditionnement, et de calculer le ratio de vente par fournisseur.
+
+**Implementation:**
+
+**1. Migration et Modele SellingPrice:**
+```php
+// Migration: 2026_06_18_230358_create_selling_prices_table.php
+Schema::create('selling_prices', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('article_id')->constrained()->cascadeOnDelete();
+    $table->decimal('price_ttc', 10, 2);
+    $table->string('sale_type', 20)->default('per_unit'); // per_unit ou per_packaging
+    $table->decimal('quantity', 10, 4)->default(1); // visible uniquement si per_unit
+    $table->string('currency', 3)->default('EUR');
+    $table->timestamps();
+});
+
+// Modele SellingPrice
+class SellingPrice extends Model
+{
+    protected $fillable = ['article_id', 'price_ttc', 'sale_type', 'quantity', 'currency'];
+    protected $casts = ['price_ttc' => 'decimal:2', 'sale_type' => SaleType::class, 'quantity' => 'decimal:4'];
+    
+    public function article(): BelongsTo { return $this->belongsTo(Article::class); }
+    public function getSaleTypeLabelAttribute(): string { /* ... */ }
+    public function getFormattedPriceAttribute(): string { /* ... */ }
+}
+```
+
+**2. Enum SaleType:**
+```php
+namespace App\Enums;
+enum SaleType: string { case PER_UNIT = 'per_unit'; case PER_PACKAGING = 'per_packaging'; }
+```
+
+**3. Article Model - Nouvelle Relation:**
+```php
+public function sellingPrice(): HasOne { return $this->hasOne(SellingPrice::class); }
+public function getCurrentSellingPriceAttribute(): ?SellingPrice { return $this->sellingPrice()->latest()->first(); }
+```
+
+**4. ArticleController - Methode updateSellingPrice:**
+```php
+public function updateSellingPrice(UpdateSellingPriceRequest $request, Article $article): RedirectResponse
+{
+    $validated = $request->validated();
+    if (!isset($validated['quantity']) || $validated['quantity'] === null) {
+        $validated['quantity'] = ($validated['sale_type'] === 'per_unit') ? 1 : 1;
+    }
+    
+    $sellingPrice = $article->sellingPrice()->first();
+    if ($sellingPrice) {
+        $sellingPrice->update($validated);
+    } else {
+        $article->sellingPrice()->create($validated);
+    }
+    
+    return redirect()->route('articles.show', $article)->with('success', 'Prix de vente mis a jour !');
+}
+```
+
+**5. Vue articles/show.blade.php - Section Prix de Vente:**
+- Formulaire avec Prix TTC, Type de vente (per_unit/per_packaging), Quantite (cachee si per_packaging)
+- Affichage du prix de vente actuel
+- Calcul automatique du ratio par fournisseur
+
+**6. Calcul du Ratio de Vente:**
+```php
+// Formules:
+// - Si vente par unite: Ratio = (prix_achat_unite * quantite_vendue * TVA) / prix_vente_ttc
+// - Si vente par conditionnement: Ratio = (prix_achat_conditionnement * TVA) / prix_vente_ttc
+// Marge = (1 - ratio) * 100
+
+// Affichage avec coloration:
+- Vert si marge >= 20%
+- Orange si marge >= 10%
+- Rouge si marge < 10%
+```
+
+**7. Route:**
+```php
+Route::post('articles/{article}/update-selling-price', [ArticleController::class, 'updateSellingPrice'])->name('articles.update-selling-price');
+```
+
+**Exemples:**
+1. Article: Pavé de Rumsteak, Prix d'achat = 19€/kg (per_unit), TVA = 10%, Prix de vente = 25€/kg, Quantite = 1
+   - Ratio = (19 * 1 * 1.10) / 25 = 83.6% => Marge = 16.4%
+   - Affichage: 83.6% (orange)
+
+2. Article: Farine, Prix d'achat = 0.50€/kg (per_unit), TVA = 10%, Prix de vente = 10€/sac, Quantite = 5kg, Type = per_unit
+   - Prix achat total = 0.50 * 5 = 2.50€
+   - Ratio = (2.50 * 1.10) / 10 = 27.5% => Marge = 72.5%
+   - Affichage: 27.5% (vert)
+
+**Avantages:**
+- Calcul automatique du ratio de vente par fournisseur
+- Visualisation rapide de la rentabilite
+- Flexibilite pour vendre par unite ou par conditionnement
+- Integration complete avec le systeme de prix d'achat existant
+
+**Migrations:**
+- 2026_06_18_230358_create_selling_prices_table.php
+
+---
+
+---
+
 ## 📊 **Statistiques du Projet**
 
 | Metrique | Valeur |
 |----------|--------|
-| **Total Fichiers** | 200+ |
-| **Lignes de Code** | 17,494+ |
-| **Fichiers PHP** | 177 |
-| **Modeles** | 9 |
-| **Enums** | 2 |
+| **Total Fichiers** | 203+ |
+| **Lignes de Code** | 19,000+ |
+| **Fichiers PHP** | 180 |
+| **Modeles** | 10 |
+| **Enums** | 3 |
 | **Controllers API** | 8 |
 | **Controllers Web** | 27 |
 | **API Resources** | 8 |
-| **Request Classes** | 18 |
+| **Request Classes** | 20 |
 | **Middleware** | 1 |
-| **Migrations** | 15 |
+| **Migrations** | 16 |
 | **Vues Blade** | 56 |
 | **Composants Livewire** | 1 |
-| **Routes** | 90+ |
+| **Routes** | 91+ |
 | **Commits** | 15 |
 
 ---
@@ -503,6 +615,7 @@ mercuriale-app/
 ├── app/
 │   ├── Enums/
 │   │   ├── PriceType.php
+│   │   ├── SaleType.php
 │   │   └── UserRole.php
 │   ├── Http/
 │   │   ├── Controllers/
@@ -513,11 +626,12 @@ mercuriale-app/
 │   │   │   └── AdminMiddleware.php
 │   │   ├── Requests/ (18 request classes)
 │   │   └── Resources/ (8 API resources)
+│   │   └── Requests/ (20 request classes)
 │   ├── Livewire/
 │   │   └── ArticleTable.php
-│   └── Models/ (9 models)
+│   └── Models/ (10 models)
 ├── database/
-│   ├── migrations/ (15 migrations)
+│   ├── migrations/ (16 migrations)
 │   └── seeders/
 │       └── DatabaseSeeder.php
 ├── resources/
@@ -561,6 +675,8 @@ mercuriale-app/
 - ✅ Validation des donnees
 - ✅ Historique des prix automatique
 - ✅ Calcul automatique des prix par unite et par conditionnement
+- ✅ Gestion des prix de vente par article (SellingPrice)
+- ✅ Calcul automatique du ratio de vente (prix d'achat * TVA / prix de vente TTC)
 - ✅ Seeders pour les donnees de test
 
 ### **Frontend**
@@ -571,6 +687,8 @@ mercuriale-app/
 - ✅ Dark mode support
 - ✅ Tableaux de donnees avec pagination
 - ✅ Formulaires avec validation visuelle
+- ✅ Section prix de vente avec toggle quantite conditionnelle
+- ✅ Affichage du ratio de vente par fournisseur avec coloration
 
 ### **Securite**
 - ✅ Protection des routes admin
@@ -613,8 +731,8 @@ Pour toute question ou probleme, consulter:
 
 ---
 
-**Derniere mise a jour:** 18 juin 2026  
-**Version:** 1.5.0  
+**Derniere mise a jour:** 19 juin 2026  
+**Version:** 1.6.0  
 **Auteur:** Mistral Vibe (avec co-auteur)  
 **Repository:** ssh://git@laboiteauxlettres.com:5196/mnt/srv/git/stock.git  
 **Commits:** 15

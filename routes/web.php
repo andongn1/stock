@@ -52,6 +52,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('articles/{article}/add-price', [ArticleController::class, 'addPrice'])->name('articles.add-price');
     Route::get('articles/{article}/price-histories', [ArticleController::class, 'priceHistories'])->name('articles.price-histories');
     Route::post('articles/{article}/set-current-supplier', [ArticleController::class, 'setCurrentSupplier'])->name('articles.set-current-supplier');
+    Route::post('articles/{article}/update-selling-price', [ArticleController::class, 'updateSellingPrice'])->name('articles.update-selling-price');
 
     // Admin only routes
     Route::middleware(['admin'])->group(function () {

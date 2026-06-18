@@ -7,6 +7,7 @@ use App\Models\Article;
 use App\Models\Family;
 use App\Models\Packaging;
 use App\Models\PriceHistory;
+use App\Models\SellingPrice;
 use App\Models\SubFamily;
 use App\Models\Supplier;
 use App\Models\Unit;
@@ -79,7 +80,7 @@ class ArticleController extends Controller
 
     public function show(Article $article): View
     {
-        $article->load(['family', 'subFamily', 'unit', 'packaging', 'vat', 'priceHistories.supplier']);
+        $article->load(['family', 'subFamily', 'unit', 'packaging', 'vat', 'priceHistories.supplier', 'sellingPrice']);
         $suppliers = Supplier::orderBy('name')->get();
         
         // Get ALL price histories for this article, ordered by date (newest first)
@@ -172,5 +173,27 @@ class ArticleController extends Controller
         
         return redirect()->route('articles.show', $article)
             ->with('success', 'Fournisseur active avec succes ! Le prix de ' . $priceHistory->supplier->name . ' est maintenant le prix actuel.');
+    }
+
+    public function updateSellingPrice(\App\Http\Requests\UpdateSellingPriceRequest $request, Article $article): RedirectResponse
+    {
+        $validated = $request->validated();
+        
+        // If quantity is not provided, set it based on sale_type
+        if (!isset($validated['quantity']) || $validated['quantity'] === null) {
+            $validated['quantity'] = ($validated['sale_type'] === 'per_unit') ? 1 : 1;
+        }
+        
+        // If selling price exists, update it. Otherwise, create a new one.
+        $sellingPrice = $article->sellingPrice()->first();
+        
+        if ($sellingPrice) {
+            $sellingPrice->update($validated);
+        } else {
+            $article->sellingPrice()->create($validated);
+        }
+        
+        return redirect()->route('articles.show', $article)
+            ->with('success', 'Prix de vente mis a jour avec succes !');
     }
 }

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Article extends Model
 {
@@ -71,6 +72,14 @@ class Article extends Model
     }
 
     /**
+     * Get the selling price for this article.
+     */
+    public function sellingPrice(): HasOne
+    {
+        return $this->hasOne(SellingPrice::class);
+    }
+
+    /**
      * Accessor for current_price attribute.
      * Returns the most recent price for this article (by valid_from date).
      */
@@ -80,6 +89,14 @@ class Article extends Model
             ->orderBy('valid_from', 'desc')
             ->orderBy('id', 'desc')
             ->first();
+    }
+
+    /**
+     * Accessor for current_selling_price attribute.
+     */
+    public function getCurrentSellingPriceAttribute(): ?SellingPrice
+    {
+        return $this->sellingPrice()->latest()->first();
     }
     
     /**
@@ -93,3 +110,4 @@ class Article extends Model
         return '';
     }
 }
+

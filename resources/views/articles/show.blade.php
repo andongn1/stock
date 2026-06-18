@@ -12,6 +12,7 @@
     price: '',
     currency: 'EUR',
     validFrom: new Date().toISOString().split('T')[0],
+    sellingSaleType: '{{ old('sale_type', $article->current_selling_price?->sale_type->value ?? 'per_unit') }}',
     confirmSupplierChange(priceHistoryId, supplierName) {
         this.selectedPriceHistoryId = priceHistoryId;
         this.selectedSupplierName = supplierName;
@@ -21,6 +22,9 @@
         this.showConfirmSupplierChange = false;
         this.selectedPriceHistoryId = null;
         this.selectedSupplierName = '';
+    },
+    updateQuantityVisibility() {
+        // Alpine.js will automatically handle the x-show based on the model value
     }
 }" class="max-w-4xl mx-auto space-y-6">
     <!-- Header -->
@@ -260,6 +264,266 @@
                 @endforeach
             </div>
         </div>
+        @endif
+    </div>
+    @endif
+
+    <!-- Selling Price Section -->
+    <div class="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/30 dark:to-amber-900/30 rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-orange-800 dark:text-orange-300 mb-4 border-b border-orange-200 dark:border-orange-700 pb-4">
+            Prix de vente
+        </h2>
+        
+        <form action="{{ route('articles.update-selling-price', $article) }}" method="POST" class="space-y-4">
+            @csrf
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-orange-700 dark:text-orange-400 mb-1">
+                        Prix TTC <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-orange-500 dark:text-orange-400">€</span>
+                        <input 
+                            type="number" 
+                            name="price_ttc" 
+                            id="selling_price_ttc"
+                            required
+                            step="0.01"
+                            min="0"
+                            value="{{ old('price_ttc', $article->current_selling_price?->price_ttc ?? 0) }}"
+                            class="w-full p-3 pl-8 border border-orange-300 dark:border-orange-700 rounded-lg bg-white dark:bg-orange-900/50 text-orange-800 dark:text-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                            placeholder="0.00"
+                        >
+                    </div>
+                    @error('price_ttc')
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-orange-700 dark:text-orange-400 mb-1">
+                        Type de vente <span class="text-red-500">*</span>
+                    </label>
+                    <select 
+                        name="sale_type"
+                        id="selling_sale_type"
+                        required
+                        x-model="sellingSaleType"
+                        @change="updateQuantityVisibility"
+                        class="w-full p-3 border border-orange-300 dark:border-orange-700 rounded-lg bg-white dark:bg-orange-900/50 text-orange-800 dark:text-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    >
+                        <option value="">Selectionnez un type</option>
+                        <option value="per_unit" {{ old('sale_type', $article->current_selling_price?->sale_type->value ?? 'per_unit') === 'per_unit' ? 'selected' : '' }}>Par unite</option>
+                        <option value="per_packaging" {{ old('sale_type', $article->current_selling_price?->sale_type->value ?? 'per_packaging') === 'per_packaging' ? 'selected' : '' }}>Par conditionnement</option>
+                    </select>
+                    @error('sale_type')
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+                
+                <div x-show="sellingSaleType === 'per_unit'" x-transition>
+                    <label class="block text-sm font-medium text-orange-700 dark:text-orange-400 mb-1">
+                        Quantite <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="number" 
+                            name="quantity"
+                            id="selling_quantity"
+                            step="0.0001"
+                            min="0"
+                            value="{{ old('quantity', $article->current_selling_price?->quantity ?? 1) }}"
+                            class="w-full p-3 border border-orange-300 dark:border-orange-700 rounded-lg bg-white dark:bg-orange-900/50 text-orange-800 dark:text-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                            placeholder="1.00"
+                        >
+                    </div>
+                    @error('quantity')
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-orange-700 dark:text-orange-400 mb-1">
+                        Devise <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        name="currency"
+                        id="selling_currency"
+                        required
+                        value="{{ old('currency', $article->current_selling_price?->currency ?? 'EUR') }}"
+                        maxlength="3"
+                        class="w-full p-3 border border-orange-300 dark:border-orange-700 rounded-lg bg-white dark:bg-orange-900/50 text-orange-800 dark:text-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                        placeholder="EUR"
+                    >
+                    @error('currency')
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+            
+            <div class="p-3 bg-orange-50 dark:bg-orange-900/30 rounded-lg text-sm text-orange-700 dark:text-orange-300">
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                @if($article->packaging_unit_quantity && $article->unit)
+                Conditionnement: {{ $article->packaging_unit_quantity }} {{ $article->unit->name }}.
+                @endif
+                Selectionnez "Par unite" pour un prix a l'unite (ex: 5€/kg) ou "Par conditionnement" pour un prix global (ex: 50€/sac).
+            </div>
+            
+            <button 
+                type="submit"
+                class="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors font-medium flex items-center space-x-2"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                <span>Mettre a jour le prix de vente</span>
+            </button>
+        </form>
+        
+        <!-- Selling Price Info -->
+        @if($article->current_selling_price)
+        <div class="mt-6 pt-4 border-t border-orange-200 dark:border-orange-700">
+            <h3 class="text-sm font-medium text-orange-700 dark:text-orange-400 mb-3">
+                Prix de vente actuel
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-orange-700 dark:text-orange-400 mb-1">
+                        Prix TTC
+                    </label>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-orange-800 dark:text-orange-300 font-bold text-xl">
+                            {{ number_format($article->current_selling_price->price_ttc, 2) }} {{ $article->current_selling_price->currency }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-orange-700 dark:text-orange-400 mb-1">
+                        Type
+                    </label>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-orange-800 dark:text-orange-300 font-medium">
+                            {{ $article->current_selling_price->sale_type_label }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-orange-700 dark:text-orange-400 mb-1">
+                        Quantite
+                    </label>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-orange-800 dark:text-orange-300 font-medium">
+                            {{ $article->current_selling_price->quantity }} {{ $article->unit?->name ?? 'unite' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+    </div>
+
+    <!-- Selling Ratio Section -->
+    @if($currentPrice && $article->current_selling_price)
+    <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-purple-800 dark:text-purple-300 mb-4 border-b border-purple-200 dark:border-purple-700 pb-4">
+            Ratio de vente par fournisseur
+        </h2>
+        
+        @php
+        // Calculate VAT rate
+        $vatRate = $article->vat?->rate ?? 0;
+        $vatMultiplier = 1 + ($vatRate / 100);
+        
+        // Get selling price info
+        $sellingPrice = $article->current_selling_price;
+        $sellingPriceTtc = $sellingPrice->price_ttc;
+        $sellingSaleType = $sellingPrice->sale_type->value ?? 'per_unit';
+        $sellingQuantity = $sellingSaleType === 'per_unit' ? $sellingPrice->quantity : 1;
+        
+        // Group all prices by supplier
+        $supplierPrices = $article->priceHistories->groupBy('supplier_id')->map->first();
+        @endphp
+        
+        @if($supplierPrices->count() > 0)
+        <div class="space-y-3">
+            @foreach($supplierPrices as $priceHistory)
+            @php
+            // Calculate purchase price based on type
+            if ($priceHistory->price_type === App\Enums\PriceType::PER_UNIT) {
+                $purchasePricePerUnit = $priceHistory->price;
+            } else {
+                // Per packaging - need to divide by packaging_unit_quantity to get per unit
+                $purchasePricePerUnit = $priceHistory->price / ($article->packaging_unit_quantity > 0 ? $article->packaging_unit_quantity : 1);
+            }
+            
+            // Calculate purchase price for the selling quantity
+            if ($sellingSaleType === 'per_unit') {
+                $totalPurchasePrice = $purchasePricePerUnit * $sellingQuantity;
+            } else {
+                // Per packaging - quantity is 1, so we need to get the packaging price
+                if ($priceHistory->price_type === App\Enums\PriceType::PER_UNIT) {
+                    $totalPurchasePrice = $purchasePricePerUnit * ($article->packaging_unit_quantity > 0 ? $article->packaging_unit_quantity : 1);
+                } else {
+                    $totalPurchasePrice = $priceHistory->price;
+                }
+            }
+            
+            // Calculate ratio: (purchase_price * VAT) / selling_price_ttc
+            $ratio = ($totalPurchasePrice * $vatMultiplier) / $sellingPriceTtc;
+            
+            // Calculate margin percentage
+            $marginPercentage = $sellingPriceTtc > 0 ? (1 - $ratio) * 100 : 0;
+            @endphp
+            
+            <div class="p-3 bg-white dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <div class="font-medium text-purple-800 dark:text-purple-300">
+                            {{ $priceHistory->supplier->name }}
+                        </div>
+                        <div class="text-sm text-purple-600 dark:text-purple-400">
+                            Prix d'achat: {{ number_format($totalPurchasePrice, 2) }} {{ $priceHistory->currency }}
+                            @if($sellingSaleType === 'per_unit')
+                                ({{ number_format($purchasePricePerUnit, 4) }} €/{{ $article->unit?->name ?? 'unite' }} × {{ $sellingQuantity }})
+                            @else
+                                (par conditionnement)
+                            @endif
+                        </div>
+                        <div class="text-sm text-purple-600 dark:text-purple-400">
+                            Prix de vente: {{ number_format($sellingPriceTtc, 2) }} {{ $sellingPrice->currency }}
+                            @if($sellingSaleType === 'per_unit')
+                                ({{ $sellingQuantity }} {{ $article->unit?->name ?? 'unite' }})
+                            @endif
+                        </div>
+                    </div>
+                    <div class="text-right ml-4">
+                        <div class="text-lg font-bold 
+                            @if($marginPercentage >= 20) text-green-600
+                            @elseif($marginPercentage >= 10) text-orange-600
+                            @else text-red-600 @endif"
+                        >
+                            {{ number_format($ratio * 100, 2) }}%
+                        </div>
+                        <div class="text-xs text-purple-500 dark:text-purple-500">
+                            Ratio achat/vente
+                        </div>
+                        <div class="text-xs text-purple-500 dark:text-purple-500 mt-1">
+                            Marge: {{ number_format($marginPercentage, 2) }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        @else
+        <p class="text-center text-purple-500 dark:text-purple-400 text-sm">
+            Aucun prix fournisseur disponible pour calculer le ratio.
+        </p>
         @endif
     </div>
     @endif
