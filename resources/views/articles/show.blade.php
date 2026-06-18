@@ -154,9 +154,24 @@
 
     <!-- Current Price Section -->
     @if($currentPrice)
+    @php
+    // Find the cheapest supplier
+    $cheapestSupplierId = null;
+    $cheapestPrice = PHP_FLOAT_MAX;
+    foreach ($pricesBySupplier as $price) {
+        $priceValue = $price->price_type === App\Enums\PriceType::PER_UNIT ? 
+            $price->price : 
+            ($price->article && $price->article->packaging_unit_quantity > 0 ? 
+                $price->price / $price->article->packaging_unit_quantity : $price->price);
+        if ($priceValue < $cheapestPrice) {
+            $cheapestPrice = $priceValue;
+            $cheapestSupplierId = $price->supplier_id;
+        }
+    }
+    @endphp
     <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-green-800 dark:text-green-300 mb-4 border-b border-green-200 dark:border-green-700 pb-4">
-            Prix actuel
+            Prix d'achat
         </h2>
         
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -171,6 +186,9 @@
                     <span class="text-green-800 dark:text-green-300 font-medium">
                         {{ $currentPrice->supplier->name }}
                     </span>
+                    @if($currentPrice->supplier_id == $cheapestSupplierId)
+                    <span class="text-yellow-500 text-xl">⭐</span>
+                    @endif
                     <span class="text-xs bg-green-100 dark:bg-green-800/50 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">
                         Actif
                     </span>
