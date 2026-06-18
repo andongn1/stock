@@ -43,9 +43,9 @@ class ArticleController extends Controller
 
     public function store(\App\Http\Requests\StoreArticleRequest $request): RedirectResponse
     {
-        Article::create($request->validated());
+        $article = Article::create($request->validated());
         
-        return redirect()->route('articles.index')
+        return redirect()->route('articles.show', $article)
             ->with('success', 'Article cree avec succes !');
     }
 
@@ -66,7 +66,7 @@ class ArticleController extends Controller
     {
         $article->update($request->validated());
         
-        return redirect()->route('articles.index')
+        return redirect()->route('articles.show', $article)
             ->with('success', 'Article mis a jour avec succes !');
     }
 
