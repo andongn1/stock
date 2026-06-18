@@ -19,7 +19,9 @@ class SubFamilyController extends Controller
             ->latest()
             ->get();
         
-        return view('sub-familles.index', compact('subFamilles'));
+        $families = Family::orderBy('name')->get();
+        
+        return view('sub-familles.index', compact('subFamilles', 'families'));
     }
 
     /**
