@@ -44,13 +44,13 @@
                             Role
                         </label>
                         <span class="px-2 py-1 rounded-full text-xs font-medium 
-                            @if($user->role === 'admin')
+                            @if($user->role->value === 'admin')
                                 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300
                             @else
                                 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300
                             @endif
                         ">
-                            {{ ucfirst($user->role) }}
+                            {{ ucfirst($user->role->value) }}
                         </span>
                     </div>
                 </div>

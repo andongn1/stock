@@ -105,7 +105,7 @@
                 >
                     <option value="" disabled>Selectionnez un role</option>
                     @foreach($roles as $role)
-                    <option value="{{ $role }}" {{ old('role', $user->role) == $role ? 'selected' : '' }}>
+                    <option value="{{ $role }}" {{ old('role', $user->role?->value) == $role ? 'selected' : '' }}>
                         {{ ucfirst($role) }}
                     </option>
                     @endforeach
@@ -118,7 +118,7 @@
             <!-- Current User Info -->
             <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                 <p class="text-sm text-gray-600 dark:text-gray-400">
-                    <strong>Utilisateur actuel :</strong> {{ $user->email }} ({{ ucfirst($user->role) }})<br>
+                    <strong>Utilisateur actuel :</strong> {{ $user->email }} ({{ ucfirst($user->role->value) }})<br>
                     <strong>Date de creation :</strong> {{ $user->created_at->format('d/m/Y H:i') }}
                 </p>
             </div>
