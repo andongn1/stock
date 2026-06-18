@@ -21,11 +21,11 @@ Application Laravel 12 complete pour la gestion d'articles, familles, fournisseu
 ## 📅 **Journal de Developpement**
 
 ### **Phase 1: Initialisation du Projet**
-- ✅ Creation du projet Laravel 12 avec Composer
-- ✅ Installation de Laravel Breeze (Blade)
-- ✅ Installation de Laravel Sanctum pour l'API
-- ✅ Installation de Livewire pour les composants interactifs
-- ✅ Configuration initiale de Tailwind CSS
+- Creation du projet Laravel 12 avec Composer
+- Installation de Laravel Breeze (Blade)
+- Installation de Laravel Sanctum pour l'API
+- Installation de Livewire pour les composants interactifs
+- Configuration initiale de Tailwind CSS
 
 **Commandes utilisees:**
 ```bash
@@ -35,11 +35,9 @@ php artisan breeze:install blade
 npm install && npm run dev
 ```
 
----
-
 ### **Phase 2: Structure de la Base de Donnees**
 
-#### **Modeles Crees (9)**
+#### **Modeles (9)**
 | Modele | Description | Relations |
 |--------|-------------|-----------|
 | User | Utilisateurs avec roles | hasMany(Article), etc. |
@@ -52,303 +50,391 @@ npm install && npm run dev
 | Supplier | Fournisseurs | hasMany(PriceHistory) |
 | PriceHistory | Historique des prix | belongsTo(Article, Supplier) |
 
-#### **Migrations (11)**
-- Migration des tables de base (users, families, sub_families, units, packagings, vats, suppliers, articles, price_histories)
-- Migration pour ajouter le champ `role` aux utilisateurs
-- Migrations Sanctum pour les tokens d'API
+#### **Migrations (15)**
+- Tables de base (users, families, sub_families, units, packagings, vats, suppliers, articles, price_histories)
+- Champ `role` pour les utilisateurs
+- Tables Sanctum pour les tokens d'API
+- Champ `packaging_unit_quantity` dans articles
+- Champ `price_type` dans price_histories
 
-#### **Enum**
-- `UserRole.php` avec valeurs: admin, user
+#### **Enums (2)**
+- `UserRole.php`: admin, user
+- `PriceType.php`: per_unit, per_packaging
 
 ---
 
 ### **Phase 3: Logique Metier**
 
 #### **Controllers API (8)**
-- ArticleController (API)
-- FamilyController (API)
-- SubFamilyController (API)
-- UnitController (API)
-- PackagingController (API)
-- VatController (API)
-- SupplierController (API)
-- PriceHistoryController (API)
-
-**Fonctionnalites:**
-- Index, Store, Show, Update, Destroy pour chaque modele
-- Chargement des relations (eager loading) pour les performances
-- Retours au format JSON avec API Resources
+ArticleController, FamilyController, SubFamilyController, UnitController, PackagingController, VatController, SupplierController, PriceHistoryController
 
 #### **API Resources (8)**
-- ArticleResource
-- FamilyResource
-- SubFamilyResource
-- UnitResource
-- PackagingResource
-- VatResource
-- SupplierResource
-- PriceHistoryResource
+ArticleResource, FamilyResource, SubFamilyResource, UnitResource, PackagingResource, VatResource, SupplierResource, PriceHistoryResource
 
 #### **Controllers Web (8)**
-- FamilyController (Web)
-- SubFamilyController (Web)
-- UnitController (Web)
-- PackagingController (Web)
-- VatController (Web)
-- SupplierController (Web)
-- ArticleController (Web)
-- UserController (Web)
+FamilyController, SubFamilyController, UnitController, PackagingController, VatController, SupplierController, ArticleController, UserController
 
-**Fonctionnalites supplementaires:**
-- `ArticleController::addPrice()` - Ajout de prix avec historique
-- `ArticleController::priceHistories()` - Affichage de l'historique
-- `UserController` - Gestion complete des utilisateurs (admin only)
+#### **Requests de Validation (18)**
+StoreRequest et UpdateRequest pour chaque modele + ProfileUpdateRequest
 
-#### **Requests de Validation (16)**
-- StoreRequest et UpdateRequest pour chaque modele
-- Validation des champs, regles personnalisees
+#### **Middleware (1)**
+- AdminMiddleware
 
 ---
 
 ### **Phase 4: Frontend et Vues**
 
 #### **Layout Principal**
-- `resources/views/layouts/app.blade.php`
-  - Integration de Tailwind CSS via CDN
-  - Integration d'Alpine.js via CDN
-  - Support du dark mode
-  - Structure de base avec barre de navigation
+`resources/views/layouts/app.blade.php` avec Tailwind CSS, Alpine.js et support dark mode
 
-#### **Vues par Entite (31 vues)**
-
-**Articles (5 vues)**
-- `articles/index.blade.php` - Liste complete avec tableaux
-- `articles/create.blade.php` - Formulaire de creation
-- `articles/edit.blade.php` - Formulaire d'edition
-- `articles/show.blade.php` - Details avec gestion des prix
-- `articles/price-histories.blade.php` - Historique complete des prix
-
-**Users (4 vues)**
-- `users/index.blade.php` - Liste des utilisateurs
-- `users/create.blade.php` - Creation d'utilisateur
-- `users/edit.blade.php` - Edition d'utilisateur
-- `users/show.blade.php` - Details d'utilisateur
-
-**Familles (3 vues)**
-- `families/index.blade.php` - Liste avec modale de creation
-- `families/create.blade.php` - Formulaire
-- `families/edit.blade.php` - Edition
-
-**Sous-Familles (3 vues)**
-- `sub-familles/index.blade.php`
-- `sub-familles/create.blade.php`
-- `sub-familles/edit.blade.php`
-
-**Unites (3 vues)**
-- `units/index.blade.php` - Liste avec modale
-- `units/create.blade.php`
-- `units/edit.blade.php`
-
-**Conditionnements (3 vues)**
-- `packagings/index.blade.php`
-- `packagings/create.blade.php`
-- `packagings/edit.blade.php`
-
-**TVA (3 vues)**
-- `vats/index.blade.php`
-- `vats/create.blade.php`
-- `vats/edit.blade.php`
-
-**Fournisseurs (3 vues)**
-- `suppliers/index.blade.php`
-- `suppliers/create.blade.php`
-- `suppliers/edit.blade.php`
+#### **Vues (56 vues Blade)**
+- Articles (5): index, create, edit, show, price-histories
+- Users (4): index, create, edit, show
+- Familles, Sous-Familles, Unites, Conditionnements, TVA, Fournisseurs (3 chacun)
+- Authentication (6), Profile (4), Components (12)
 
 #### **Composants Livewire (1)**
-- `ArticleTable.php` - Tableau dynamique des articles avec:
-  - Recherche en temps reel
-  - Pagination
-  - Tri
-  - Affichage des relations
+- ArticleTable.php: recherche, pagination, tri
 
 #### **Vue Dashboard**
-- `dashboard.blade.php` - Tableau de bord avec:
-  - Statistiques (total articles, familles, fournisseurs)
-  - Graphique de repartition par famille
-  - Actions rapides
-  - Articles recents
-  - Top fournisseurs
+Statistiques, graphiques, articles recents, top fournisseurs
 
 ---
 
 ### **Phase 5: Authentification et Securite**
-
-#### **Configuration**
 - Laravel Breeze avec Blade
-- Desactivation de l'inscription publique dans `routes/auth.php`
-- Middleware `AdminMiddleware` pour les routes admin
-
-**routes/auth.php:**
-```php
-// Registration routes disabled - only admins can create users
-// Route::get('register', [RegisteredUserController::class, 'create'])
-//     ->name('register');
-// Route::post('register', [RegisteredUserController::class, 'store']);
-```
-
-**AdminMiddleware:**
-```php
-public function handle(Request $request, Closure $next): Response
-{
-    if ($request->user()?->role !== UserRole::ADMIN) {
-        abort(403, 'Access denied. Admin only.');
-    }
-    return $next($request);
-}
-```
-
-#### **Enregistrement dans AppServiceProvider**
-```php
-'admin' => \App\Http\Middleware\AdminMiddleware::class,
-```
+- Inscription publique desactivee
+- Middleware AdminMiddleware
 
 ---
 
 ### **Phase 6: Routes**
-
-#### **Routes API (routes/api.php)**
-```php
-Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('families', FamilyController::class);
-    Route::apiResource('sub-families', SubFamilyController::class);
-    Route::apiResource('units', UnitController::class);
-    Route::apiResource('packagings', PackagingController::class);
-    Route::apiResource('vats', VatController::class);
-    Route::apiResource('articles', ArticleController::class);
-    Route::apiResource('suppliers', SupplierController::class);
-    Route::apiResource('price-histories', PriceHistoryController::class);
-});
-```
-
-#### **Routes Web (routes/web.php)**
-- Routes publiques: `/`, `/dashboard`
-- Routes authentifiees: toutes les entites CRUD
-- Routes admin: gestion des utilisateurs
-
-**Total: 90 routes**
+- Routes API: 8 ressources avec authentification Sanctum
+- Routes Web: 90+ routes (publiques, authentifiees, admin)
 
 ---
 
 ### **Phase 7: Donnees Initiales**
-
-#### **DatabaseSeeder**
-- Creation de 2 utilisateurs:
-  - admin@mercuriale.com / password (role: admin)
-  - user@mercuriale.com / password (role: user)
-- Creation de 5 familles
-- Creation de 10 sous-familles
-- Creation de 5 unites
-- Creation de 5 conditionnements
-- Creation de 3 taux de TVA
-- Creation de 5 fournisseurs
-- Creation de 20 articles
-- Creation de 50 entrees d'historique de prix
+**DatabaseSeeder:**
+- 2 utilisateurs (admin@mercuriale.com, user@mercuriale.com)
+- 5 familles, 10 sous-familles, 5 unites, 5 conditionnements
+- 3 taux de TVA, 5 fournisseurs
+- 20 articles avec packaging_unit_quantity
+- 50 entrees d'historique de prix avec price_type
 
 ---
 
-### **Phase 8: Documentation**
+## 🔧 **Historique des Commits**
 
-#### **README.md**
-- Instructions d'installation
-- Configuration de la base de donnees
-- Execution des migrations et seeders
-- Compilation des assets
-- Demarrage du serveur
-- Endpoints API documentes
-- Diagramme de la base de donnees (Mermaid)
-- Credentials de test
+### **Commit 1: 2d70853**
+**feat: Complete Laravel 12 application with REST API, Tailwind CSS, Alpine.js, Blade**
+- Creation complete de l'application
+- Tous les modeles, migrations, controllers, vues
+- Configuration Tailwind CSS et Alpine.js
+- DatabaseSeeder avec donnees initiales
+- AdminMiddleware
+
+### **Commit 2: ef3de99**
+**docs: Add ROADBOOK.md and fix dashboard division by array error**
+- Ajout ROADBOOK.md initial
+- Fix: `max($articlesByFamily->pluck('count')->toArray(), 1)` → pre-calcul de $maxCount
+
+### **Commit 3: 4458b79**
+**fix: Convert currentPrice to accessor to resolve relationship error**
+- Conversion de currentPrice() en accessor getCurrentPriceAttribute()
+- Fix: `Article::currentPrice must return a relationship instance`
+
+### **Commit 4: 8cb5da9**
+**fix: Add missing $families variable to SubFamilyController index method**
+- Chargement des familles dans SubFamilyController::index()
+- Fix: `Undefined variable $families`
+
+### **Commit 5: d227a3b**
+**fix: Extend Controller class from Illuminate\Routing\Controller**
+- Correction de l'extension des controllers
+- Fix: `Call to undefined method UserController::middleware()`
+
+### **Commit 6: 24f1c1e**
+**fix: Handle UserRole enum in views - use ->value for string operations**
+- Utilisation de `$user->role?->value` dans les vues
+- Fix: `ucfirst() expects string, got UserRole enum`
+
+### **Commit 7: 3a078d0**
+**feat: Auto-set date for price history - remove date fields from form**
+- `valid_from` = today() automatique
+- Champs de date masques dans le formulaire
+
+### **Commit 8: 81ab529**
+**feat: Add link to create supplier in add price form**
+- Lien "Creer un fournisseur" dans articles/show.blade.php
+- Lien vers /suppliers/create
+
+### **Commit 9: 8c95d54**
+**feat: Add unit and unit_quantity to Packaging model**
+- Ajout champs unit_id, unit_quantity a packagings (supprime plus tard)
+
+### **Commit 10: 5bad2d9**
+**feat: Display packaging unit info in article forms with Alpine.js**
+- Affichage dynamique de l'unite et quantite du conditionnement
+- Utilisation d'Alpine.js pour l'interactivite
+
+### **Commit 11: 2be9697**
+**Fix multiple errors and implement packaging unit quantity feature**
+- Implementation complete de packaging_unit_quantity sur Article
+- Champ `packaging_unit_quantity` dans la table articles
+- Formulaires articles/create.blade.php et articles/edit.blade.php mis a jour
+- Accesseur getPackagingUnitInfoAttribute() dans Article model
+
+### **Commit 12: 150289a**
+**Update ROADBOOK.md with latest fixes and features**
+- Mise a jour de la documentation
+- Documentation des fixes et nouvelles fonctionnalites
+
+### **Commit 13: 7fba200**
+**Add price_type to price histories for unit vs packaging pricing**
+- Creation de l'enum PriceType (per_unit, per_packaging)
+- Champ `price_type` dans price_histories
+- Accesseurs getUnitPriceAttribute() et getPackagingPriceAttribute()
+- Calcul automatique des deux prix (unite et conditionnement)
+
+### **Commit 14: ec9b459**
+**Update DatabaseSeeder with price_type and packaging_unit_quantity**
+- Mise a jour du seeder pour inclure price_type
+- Generer des prix avec les deux types (per_unit, per_packaging)
+- packaging_unit_quantity pour tous les articles
+
+### **Commit 15: a049841**
+**Update ROADBOOK.md with price type feature documentation**
+- Documentation complete de la fonctionnalite price_type
+- Mise a jour des statistiques
 
 ---
 
 ## 🔧 **Corrections et Fixes**
 
-### **Problemes Rencontres et Resolus**
+### **Erreurs Fixes**
 
 1. **Route en double**
-   - Problème: `articles/{article}/show` etait definie deux fois
-   - Solution: Suppression de la route redondante dans `routes/web.php`
+   - Problème: `articles/{article}/show` definie deux fois
+   - Solution: Suppression de la route redondante
 
 2. **Methode manquante dans UserController**
-   - Problème: La route `users/{user}` necessitait une methode `show()`
-   - Solution: Ajout de la methode `show()` et creation de `users/show.blade.php`
+   - Problème: Route `users/{user}` necessitait show()
+   - Solution: Ajout de la methode show() et creation de users/show.blade.php
 
 3. **Vue manquante pour Units**
    - Problème: `units/edit.blade.php` n'existait pas
-   - Solution: Creation de la vue avec le meme style que les autres entites
+   - Solution: Creation de la vue
 
-4. **Erreur dans dashboard.blade.php (ligne 202)**
-   - Problème: `Unsupported operand types: int / array`
-   - Cause: `max($articlesByFamily->pluck('count')->toArray(), 1)`essayait de diviser par un tableau
-   - Solution: Pre-calcul de `$maxCount` avant la boucle
+4. **Division par array dans dashboard**
+   - Problème: `max($articlesByFamily->pluck('count')->toArray(), 1)`
+   - Solution: Pre-calcul de $maxCount
 
 5. **Inscription publique active**
-   - Problème: Les utilisateurs pouvaient s'inscrire via `/register`
-   - Solution: Commenter les routes d'inscription dans `routes/auth.php`
+   - Problème: Utilisateurs pouvaient s'inscrire via /register
+   - Solution: Commenter les routes dans routes/auth.php
 
-6. **Erreur Article::currentPrice**
-   - Problème: `Article::currentPrice must return a relationship instance`
-   - Cause: ArticleResource essayait d'utiliser `whenLoaded('currentPrice')` sur un accessor
-   - Solution: Acces direct a `$this->current_price` dans ArticleResource
+6. **Article::currentPrice relationship error**
+   - Problème: `must return a relationship instance`
+   - Solution: Conversion en accessor getCurrentPriceAttribute()
 
 7. **Variable $families non definie**
-   - Problème: `$families` etait undefined dans sub-familles/index.blade.php
-   - Solution: Ajout de protection avec `?? []` dans la boucle foreach
+   - Problème: Dans sub-familles/index.blade.php
+   - Solution: Chargement des familles dans le controller + protection `?? []`
 
 8. **Middleware UserController**
-   - Problème: Call to undefined method UserController::middleware()
-   - Cause: Middleware deja applique au niveau des routes
-   - Solution: Suppression de l'appel redondant dans le constructeur
+   - Problème: `Call to undefined method UserController::middleware()`
+   - Solution: Suppression de l'appel redondant, extension correcte de Controller
 
 9. **ucfirst() sur enum UserRole**
-   - Problème: ucfirst() attend un string mais recevait App\Enums\UserRole
-   - Cause: Probleme de casting ou de valeur nulle
-   - Solution: Utilisation de l'operateur null-safe `$user->role?->value ?? $user->role ?? 'user'`
+   - Problème: ucfirst() attend un string, pas un enum
+   - Solution: Utilisation de `$user->role?->value ?? $user->role ?? 'user'`
 
-10. **Division par array dans dashboard**
-    - Problème: Division par array dans le calcul des pourcentages
-    - Solution: Pre-calcul de `$maxCount` et utilisation de valeurs par defaut
+---
 
-### **Nouvelle Fonctionnalite: Quantite Unitaire par Conditionnement**
+## ✨ **Nouvelles Fonctionnalites**
 
-11. **Packaging Unit Quantity**
-    - Problème: Besoin de tracker la quantite par conditionnement (ex: 10kg dans un sac)
-    - Solution:
-      - Ajout du champ `packaging_unit_quantity` a la table `articles`
-      - Mise a jour de articles/create.blade.php et articles/edit.blade.php avec un champ dedie
-      - Suppression des champs `unit_id` et `unit_quantity` de la table `packagings`
-      - Mise a jour de PackagingController, PackagingResource, et des Requests
-    - Resultat: Chaque article a son propre conditionnement, unite, et quantite unitaire
+### **Fonctionnalite 1: Quantite Unitaire par Conditionnement**
+**Contexte:** Besoin de tracker la quantite par conditionnement (ex: 10kg dans un sac)
 
-12. **Lien "Creer un fournisseur"**
-    - Problème: Besoin d'un lien pour creer un fournisseur lors de l'ajout de prix
-    - Solution: Lien deja present dans articles/show.blade.php (ligne 224-233)
+**Implementation:**
+- Ajout du champ `packaging_unit_quantity` (decimal 10,2) dans la table `articles`
+- Suppression des champs `unit_id` et `unit_quantity` de la table `packagings` (car l'unite de l'article est independante du conditionnement)
+- Formulaires articles/create.blade.php et articles/edit.blade.php:
+  - Selection du conditionnement (packaging)
+  - Selection de l'unite (unit)
+  - Champ pour la quantite unitaire du conditionnement
+- Accesseur dans Article model:
+  ```php
+  public function getPackagingUnitInfoAttribute(): string
+  {
+      if ($this->packaging_unit_quantity && $this->unit) {
+          return $this->packaging_unit_quantity . ' ' . $this->unit->name;
+      }
+      return '';
+  }
+  ```
+- Exemple: Article "Riz Basmati" avec packaging="Sac", unit="kg", packaging_unit_quantity=10 → affiche "10 kg"
 
-13. **Dates automatiques pour les prix**
-    - Problème: Les champs "Valide depuis" et "Valide jusqu'a" ne devraient pas etre visibles
-    - Solution: Champs deja caches avec `valid_from` automatiquement set a la date du jour
+**Avantages:**
+- Chaque article a son propre conditionnement, unite, et quantite unitaire
+- Deux articles avec le meme conditionnement peuvent avoir des unites et quantites differentes
+- Exemple: Article A: Sac de 10 kg, Article B: Sac de 250 pieces
 
-### **Nouvelle Fonctionnalite: Prix par Unite ou par Conditionnement**
+**Migrations:**
+- 2026_06_18_000002_add_packaging_unit_quantity_to_articles_table.php
+- 2026_06_18_114301_remove_unit_fields_from_packagings_table.php
 
-14. **Price Type Feature**
-    - Problème: Besoin de distinguer les prix fournisseurs par unite ou par conditionnement
-    - Solution:
-      - Creation de l'enum `PriceType` avec valeurs: per_unit, per_packaging
-      - Ajout du champ `price_type` a la table `price_histories`
-      - Ajout des accessors `unit_price` et `packaging_price` dans PriceHistory pour calculer automatiquement les deux prix
-      - Mise a jour du formulaire d'ajout de prix avec un dropdown pour selectionner le type
-      - Mise a jour des vues pour afficher les deux prix (par unite et par conditionnement)
-      - Exemple: Fournisseur A: 2,58€/kg → affiche 2,58€/kg et 25,80€/sac (si sac=10kg). Fournisseur B: 25€/sac → affiche 2,50€/kg et 25€/sac
-    - Resultat: Chaque prix fournisseur peut etre saisi par unite ou par conditionnement, et les deux valeurs sont calculees et affichees automatiquement
+---
+
+### **Fonctionnalite 2: Lien pour Creer un Fournisseur**
+**Contexte:** Besoin d'un lien pour creer un fournisseur lors de l'ajout de prix
+
+**Implementation:**
+- Dans articles/show.blade.php, section "Ajouter un prix":
+  ```html
+  <div class="mt-2 text-sm">
+      <span class="text-gray-600 dark:text-gray-400">
+          Le fournisseur n'existe pas? 
+      </span>
+      <a href="{{ route('suppliers.create') }}" 
+         class="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+          Creez-le
+      </a>
+  </div>
+  ```
+- Lien place en dessous du dropdown de selection des fournisseurs
+
+---
+
+### **Fonctionnalite 3: Dates Automatiques pour les Prix**
+**Contexte:** Les champs "Valide depuis" et "Valide jusqu'a" ne devraient pas etre visibles
+
+**Implementation:**
+- Dans PriceHistoryController::store():
+  ```php
+  $validated['valid_from'] = now()->toDateString();
+  $validated['valid_to'] = null; // Pas de date de fin par defaut
+  ```
+- Champs de date supprimes du formulaire dans articles/show.blade.php
+- La date du jour est automatiquement enregistree
+
+**Avantages:**
+- Simplification du formulaire
+- Historique des prix avec dates automatiques
+- Possibilite de suivre l'evolution des prix dans le temps
+
+---
+
+### **Fonctionnalite 4: Prix par Unite ou par Conditionnement**
+**Contexte:** Besoin de distinguer les prix fournisseurs par unite ou par conditionnement
+
+**Implementation:**
+
+**1. Enum PriceType:**
+```php
+namespace App\Enums;
+
+enum PriceType: string
+{
+    case PER_UNIT = 'per_unit';
+    case PER_PACKAGING = 'per_packaging';
+
+    public function label(): string
+    {
+        return match($this) {
+            self::PER_UNIT => 'Par unite',
+            self::PER_PACKAGING => 'Par conditionnement',
+        };
+    }
+
+    public static function options(): array
+    {
+        return [
+            self::PER_UNIT->value => self::PER_UNIT->label(),
+            self::PER_PACKAGING->value => self::PER_PACKAGING->label(),
+        ];
+    }
+}
+```
+
+**2. Migration:**
+- Ajout du champ `price_type` (string, default: 'per_unit') dans price_histories
+
+**3. Model PriceHistory:**
+```php
+// Accesseurs pour calculer les deux prix
+public function getUnitPriceAttribute(): float
+{
+    if ($this->price_type === PriceType::PER_UNIT) {
+        return (float) $this->price;
+    }
+    // Price is per packaging, calculate unit price
+    if ($this->article && $this->article->packaging_unit_quantity > 0) {
+        return (float) ($this->price / $this->article->packaging_unit_quantity);
+    }
+    return (float) $this->price;
+}
+
+public function getPackagingPriceAttribute(): float
+{
+    if ($this->price_type === PriceType::PER_PACKAGING) {
+        return (float) $this->price;
+    }
+    // Price is per unit, calculate packaging price
+    if ($this->article && $this->article->packaging_unit_quantity > 0) {
+        return (float) ($this->price * $this->article->packaging_unit_quantity);
+    }
+    return (float) $this->price;
+}
+
+public function getPriceTypeLabelAttribute(): string
+{
+    if ($this->price_type instanceof PriceType) {
+        return $this->price_type->label();
+    }
+    return ucfirst(str_replace('_', ' ', $this->price_type ?? 'per_unit'));
+}
+```
+
+**4. Formulaire (articles/show.blade.php):**
+```html
+<select name="price_type" id="price_type" 
+        class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600">
+    <option value="per_unit" {{ old('price_type') === 'per_unit' ? 'selected' : '' }}>Par unite</option>
+    <option value="per_packaging" {{ old('price_type') === 'per_packaging' ? 'selected' : '' }}>Par conditionnement</option>
+</select>
+```
+
+**5. Affichage des prix:**
+```html
+@foreach($article->priceHistories as $priceHistory)
+    <tr>
+        <td>{{ $priceHistory->supplier->name }}</td>
+        <td>{{ $priceHistory->price }} {{ $priceHistory->currency }} ({{ $priceHistory->price_type_label }})</td>
+        <td>{{ number_format($priceHistory->unit_price, 2) }} {{ $article->unit->name ?? '' }} / unite</td>
+        <td>{{ number_format($priceHistory->packaging_price, 2) }} {{ $article->currency }} / {{ $article->packaging->name ?? '' }}</td>
+    </tr>
+@endforeach
+```
+
+**Exemples:**
+1. **Fournisseur A:** Prix = 2,58€, Type = per_unit, Article avec packaging_unit_quantity = 10 kg
+   - Prix par unite: 2,58€/kg
+   - Prix par conditionnement: 25,80€/sac (2,58 × 10)
+
+2. **Fournisseur B:** Prix = 25€, Type = per_packaging, Article avec packaging_unit_quantity = 10 kg
+   - Prix par unite: 2,50€/kg (25 ÷ 10)
+   - Prix par conditionnement: 25€/sac
+
+**Avantages:**
+- Chaque fournisseur peut proposer un prix par unite ou par conditionnement
+- Les deux prix (unite et conditionnement) sont toujours calcules et affiches
+- Permet une comparaison facile entre fournisseurs
+- Flexibilite totale pour les fournisseurs
+
+**Migrations:**
+- 2026_06_18_123125_add_price_type_to_price_histories_table.php
 
 ---
 
@@ -356,17 +442,21 @@ Route::middleware('auth:sanctum')->group(function () {
 
 | Metrique | Valeur |
 |----------|--------|
-| Total Fichiers | 199+ |
-| Lignes de Code | 23,000+ |
-| Modeles | 9 |
-| Controllers API | 8 |
-| Controllers Web | 8 |
-| API Resources | 8 |
-| Request Classes | 16 |
-| Migrations | 13 |
-| Vues Blade | 56 |
-| Routes | 90 |
-| Commits | 2 |
+| **Total Fichiers** | 200+ |
+| **Lignes de Code** | 17,494+ |
+| **Fichiers PHP** | 177 |
+| **Modeles** | 9 |
+| **Enums** | 2 |
+| **Controllers API** | 8 |
+| **Controllers Web** | 27 |
+| **API Resources** | 8 |
+| **Request Classes** | 18 |
+| **Middleware** | 1 |
+| **Migrations** | 15 |
+| **Vues Blade** | 56 |
+| **Composants Livewire** | 1 |
+| **Routes** | 90+ |
+| **Commits** | 15 |
 
 ---
 
@@ -401,7 +491,6 @@ php artisan route:cache
 php artisan view:cache
 
 # Demarrer le serveur
-git
 php artisan serve --host=0.0.0.0 --port=8000
 ```
 
@@ -413,6 +502,7 @@ php artisan serve --host=0.0.0.0 --port=8000
 mercuriale-app/
 ├── app/
 │   ├── Enums/
+│   │   ├── PriceType.php
 │   │   └── UserRole.php
 │   ├── Http/
 │   │   ├── Controllers/
@@ -421,13 +511,13 @@ mercuriale-app/
 │   │   │   └── Web/ (8 controllers)
 │   │   ├── Middleware/
 │   │   │   └── AdminMiddleware.php
-│   │   ├── Requests/ (16 request classes)
+│   │   ├── Requests/ (18 request classes)
 │   │   └── Resources/ (8 API resources)
 │   ├── Livewire/
 │   │   └── ArticleTable.php
 │   └── Models/ (9 models)
 ├── database/
-│   ├── migrations/ (11 migrations)
+│   ├── migrations/ (15 migrations)
 │   └── seeders/
 │       └── DatabaseSeeder.php
 ├── resources/
@@ -440,7 +530,10 @@ mercuriale-app/
 │   │   ├── vats/ (3)
 │   │   ├── suppliers/ (3)
 │   │   ├── users/ (4)
+│   │   ├── auth/ (6)
+│   │   ├── profile/ (4)
 │   │   ├── livewire/ (1)
+│   │   ├── components/ (12)
 │   │   └── layouts/ (3)
 │   └── js/
 │       ├── app.js
@@ -461,12 +554,13 @@ mercuriale-app/
 ## 🎯 **Fonctionnalites Implementees**
 
 ### **Backend**
-- ✅ Systeme d'authentification avec roles
+- ✅ Systeme d'authentification avec roles (admin/user)
 - ✅ API REST complete avec Sanctum
 - ✅ Gestion CRUD pour toutes les entites
 - ✅ Relations entre modeles
 - ✅ Validation des donnees
 - ✅ Historique des prix automatique
+- ✅ Calcul automatique des prix par unite et par conditionnement
 - ✅ Seeders pour les donnees de test
 
 ### **Frontend**
@@ -520,7 +614,7 @@ Pour toute question ou probleme, consulter:
 ---
 
 **Derniere mise a jour:** 18 juin 2026  
-**Version:** 1.2.0  
+**Version:** 1.5.0  
 **Auteur:** Mistral Vibe (avec co-auteur)  
 **Repository:** ssh://git@laboiteauxlettres.com:5196/mnt/srv/git/stock.git  
-**Commits:** 4
+**Commits:** 15
