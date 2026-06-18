@@ -218,12 +218,9 @@
         
         <div class="mt-4 text-sm text-green-600 dark:text-green-400">
             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
             </svg>
-            Valide depuis le {{ $currentPrice->valid_from->format('d/m/Y') }}
-            @if($currentPrice->valid_to)
-            jusqu'au {{ $currentPrice->valid_to->format('d/m/Y') }}
-            @endif
+            Enregistre le {{ $currentPrice->valid_from->format('d/m/Y') }}
         </div>
         
         <!-- Other Suppliers Section -->
@@ -247,7 +244,7 @@
                             @endif
                         </div>
                         <div class="text-xs text-green-500 dark:text-green-500">
-                            Valide depuis le {{ $otherPrice->valid_from->format('d/m/Y') }}
+                            Enregistre le {{ $otherPrice->valid_from->format('d/m/Y') }}
                         </div>
                     </div>
                     <button 
@@ -393,7 +390,7 @@
                     <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
-                    La date du jour sera automatiquement enregistree comme date de debut
+                    La date du jour sera automatiquement enregistree
                 </div>
                 
                 <button 
@@ -441,12 +438,7 @@
                                 @endif
                             </div>
                             <div class="text-xs text-purple-500 dark:text-purple-500 mt-1">
-                                {{ $priceHistory->valid_from->format('d/m/Y') }}
-                                @if($priceHistory->valid_to)
-                                - {{ $priceHistory->valid_to->format('d/m/Y') }}
-                                @else
-                                - Aujourd'hui
-                                @endif
+                                Enregistre le {{ $priceHistory->valid_from->format('d/m/Y') }}
                             </div>
                         </div>
                         <span class="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-800/50 text-purple-700 dark:text-purple-400 rounded-full">

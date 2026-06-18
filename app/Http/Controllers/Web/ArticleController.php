@@ -82,29 +82,24 @@ class ArticleController extends Controller
         $article->load(['family', 'subFamily', 'unit', 'packaging', 'vat', 'priceHistories.supplier']);
         $suppliers = Supplier::orderBy('name')->get();
         
-        // Get all valid prices for this article (valid_to >= now() OR valid_to is null)
-        $allValidPrices = PriceHistory::where('article_id', $article->id)
-            ->where('valid_from', '<=', now())
-            ->where(function($query) {
-                $query->where('valid_to', '>=', now())
-                      ->orWhereNull('valid_to');
-            })
+        // Get ALL price histories for this article, ordered by date (newest first)
+        $allPrices = PriceHistory::where('article_id', $article->id)
             ->with('supplier')
             ->orderBy('valid_from', 'desc')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
         
         // Group by supplier to get the latest price for each
-        $pricesBySupplier = $allValidPrices->groupBy('supplier_id')
+        $pricesBySupplier = $allPrices->groupBy('supplier_id')
             ->map(function ($group) {
                 return $group->first();
             })
             ->values();
         
-        // Determine current price (the most recent valid price overall)
-        $currentPrice = $allValidPrices->sortByDesc('valid_from')->sortByDesc('created_at')->first();
+        // The current price is the most recent overall
+        $currentPrice = $allPrices->first();
         
-        // Get other suppliers' prices (all valid prices except the current one)
+        // Get other suppliers' prices (all prices except the current one's supplier)
         $otherSupplierPrices = $pricesBySupplier->reject(function ($price) use ($currentPrice) {
             return $price->id === ($currentPrice?->id ?? null);
         });
@@ -121,13 +116,8 @@ class ArticleController extends Controller
             'price_type' => 'required|string|in:per_unit,per_packaging',
         ]);
         
-        // Deactivate previous price if exists for this supplier
-        PriceHistory::where('article_id', $article->id)
-            ->whereNull('valid_to')
-            ->where('supplier_id', $validated['supplier_id'])
-            ->update(['valid_to' => now()]);
-        
-        // Create new price history with automatic date
+        // Create new price history with today's date
+        // No need to deactivate previous prices - the most recent one will be the current
         $priceHistory = PriceHistory::create([
             'article_id' => $article->id,
             'supplier_id' => $validated['supplier_id'],
@@ -147,7 +137,8 @@ class ArticleController extends Controller
         $article->load(['family', 'subFamily', 'unit', 'packaging', 'vat']);
         $priceHistories = PriceHistory::where('article_id', $article->id)
             ->with(['supplier'])
-            ->latest()
+            ->orderBy('valid_from', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
         
         return view('articles.price-histories', compact('article', 'priceHistories'));
@@ -167,16 +158,13 @@ class ArticleController extends Controller
                 ->with('error', 'Le prix selectionne n\'appartient pas a cet article.');
         }
         
-        // Update the selected price to make it the most recent
-        // by setting valid_from to now() and valid_to to null
-        // This ensures it will be returned by the current_price accessor
-        // which orders by valid_from desc, then created_at desc
+        // Update the selected price to make it the most recent by setting valid_from to today
+        // This ensures it will be the current price
         $newCurrentPrice->update([
-            'valid_from' => now(),
-            'valid_to' => null
+            'valid_from' => now()->toDateString(),
         ]);
         
         return redirect()->route('articles.show', $article)
-            ->with('success', 'Fournisseur change avec succes ! Le prix de ' . $newCurrentPrice->supplier->name . ' est maintenant actif.');
+            ->with('success', 'Fournisseur change avec succes ! Le prix de ' . $newCurrentPrice->supplier->name . ' est maintenant le prix actuel.');
     }
 }

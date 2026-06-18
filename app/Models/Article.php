@@ -72,17 +72,13 @@ class Article extends Model
 
     /**
      * Accessor for current_price attribute.
-     * Returns the current valid price for this article.
+     * Returns the most recent price for this article (by valid_from date).
      */
     public function getCurrentPriceAttribute(): ?PriceHistory
     {
         return $this->priceHistories()
-            ->where('valid_from', '<=', now())
-            ->where(function ($query) {
-                $query->where('valid_to', '>=', now())
-                      ->orWhereNull('valid_to');
-            })
             ->orderBy('valid_from', 'desc')
+            ->orderBy('id', 'desc')
             ->first();
     }
     

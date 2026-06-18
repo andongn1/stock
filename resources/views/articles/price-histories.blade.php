@@ -45,7 +45,7 @@
         
         <!-- Current Price -->
         @php
-            $currentPrice = $priceHistories->whereNull('valid_to')->first();
+            $currentPrice = $priceHistories->sortByDesc('valid_from')->sortByDesc('id')->first();
             $suppliersCount = $priceHistories->pluck('supplier_id')->unique()->count();
         @endphp
         
@@ -54,7 +54,7 @@
                 {{ $currentPrice ? $currentPrice->price . ' ' . $currentPrice->currency : 'N/A' }}
             </div>
             <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Prix actuel
+                Prix le plus recent
             </div>
         </div>
         
@@ -118,13 +118,7 @@
                         Prix par conditionnement
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Valide depuis
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Valide jusqu'au
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Statut
+                        Date
                     </th>
                 </tr>
             </thead>
@@ -155,28 +149,6 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {{ $history->valid_from->format('d/m/Y') }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        @if($history->valid_to)
-                            {{ $history->valid_to->format('d/m/Y') }}
-                        @else
-                            <span class="text-green-600 dark:text-green-400 font-medium">Aujourd'hui</span>
-                        @endif
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 py-1 rounded-full text-xs font-medium 
-                            @if($history->valid_to)
-                                bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400
-                            @else
-                                bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300
-                            @endif
-                        ">
-                            @if($history->valid_to)
-                                Expire
-                            @else
-                                Actif
-                            @endif
-                        </span>
                     </td>
                 </tr>
                 @empty
