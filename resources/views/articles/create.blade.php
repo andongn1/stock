@@ -18,7 +18,7 @@
             });
         }
     }
-}" class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+}" class="max-w-4xl mx-auto bg-white dark:bg-slate-800 rounded-lg shadow p-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Nouvel Article</h1>
         <a href="{{ route('articles.index') }}" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors">
@@ -32,7 +32,7 @@
             <!-- Informations de base -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                         Nom de l'Article <span class="text-red-500">*</span>
                     </label>
                     <input 
@@ -41,7 +41,7 @@
                         id="name"
                         required
                         value="{{ old('name') }}"
-                        class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        class="w-full p-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Entrez le nom de l'article"
                     >
                     @error('name')
@@ -50,7 +50,7 @@
                 </div>
                 
                 <div>
-                    <label for="brand" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label for="brand" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                         Marque
                     </label>
                     <input 
@@ -58,7 +58,7 @@
                         name="brand" 
                         id="brand"
                         value="{{ old('brand') }}"
-                        class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        class="w-full p-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Entrez la marque"
                     >
                     @error('brand')
@@ -70,7 +70,7 @@
             <!-- Classifications -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="family_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label for="family_id" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                         Famille <span class="text-red-500">*</span>
                     </label>
                     <select 
@@ -78,7 +78,7 @@
                         id="family_id"
                         required
                         @change="updateSubFamilies()"
-                        class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        class="w-full p-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="">Selectionnez une famille</option>
                         @foreach($families as $family)
@@ -93,14 +93,14 @@
                 </div>
                 
                 <div>
-                    <label for="sub_family_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label for="sub_family_id" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                         Sous-Famille <span class="text-red-500">*</span>
                     </label>
                     <select 
                         name="sub_family_id"
                         id="sub_family_id"
                         required
-                        class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        class="w-full p-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="">Selectionnez une sous-famille</option>
                         @foreach($subFamilles->where('family_id', old('family_id')) as $subFamily)
@@ -118,14 +118,14 @@
             <!-- Unités et Conditionnements -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                    <label for="unit_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label for="unit_id" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                         Unite <span class="text-red-500">*</span>
                     </label>
                     <select 
                         name="unit_id"
                         id="unit_id"
                         required
-                        class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        class="w-full p-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="">Selectionnez une unite</option>
                         @foreach($units as $unit)
@@ -140,14 +140,14 @@
                 </div>
                 
                 <div>
-                    <label for="packaging_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label for="packaging_id" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                         Conditionnement <span class="text-red-500">*</span>
                     </label>
                     <select 
                         name="packaging_id"
                         id="packaging_id"
                         required
-                        class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        class="w-full p-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="">Selectionnez un conditionnement</option>
                         @foreach($packagings as $packaging)
@@ -162,7 +162,7 @@
                 </div>
                 
                 <div>
-                    <label for="packaging_unit_quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label for="packaging_unit_quantity" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                         Quantite par conditionnement
                     </label>
                     <div class="relative">
@@ -173,7 +173,7 @@
                             value="{{ old('packaging_unit_quantity') }}"
                             step="0.01"
                             min="0"
-                            class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            class="w-full p-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Ex: 10"
                         >
                         @error('packaging_unit_quantity')
@@ -195,14 +195,14 @@
 
             <!-- TVA -->
             <div>
-                <label for="vat_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label for="vat_id" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                     TVA <span class="text-red-500">*</span>
                 </label>
                 <select 
                     name="vat_id"
                     id="vat_id"
                     required
-                    class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full p-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                     <option value="">Selectionnez une TVA</option>
                     @foreach($vats as $vat)
@@ -218,7 +218,7 @@
         </div>
         
         <div class="flex justify-end mt-8">
-            <a href="{{ route('articles.index') }}" class="px-6 py-2 text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors mr-3">
+            <a href="{{ route('articles.index') }}" class="px-6 py-2 text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors mr-3">
                 Annuler
             </a>
             <button 

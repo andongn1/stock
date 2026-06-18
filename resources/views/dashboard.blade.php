@@ -7,7 +7,7 @@
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <!-- Total Articles -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
             <div class="flex items-center space-x-4">
                 <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
                     <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -16,13 +16,13 @@
                 </div>
                 <div>
                     <p class="text-3xl font-bold text-gray-800 dark:text-white">{{ App\Models\Article::count() }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Articles</p>
+                    <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">Articles</p>
                 </div>
             </div>
         </div>
 
         <!-- Total Families -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
             <div class="flex items-center space-x-4">
                 <div class="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
                     <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -31,13 +31,13 @@
                 </div>
                 <div>
                     <p class="text-3xl font-bold text-gray-800 dark:text-white">{{ App\Models\Family::count() }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Familles</p>
+                    <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">Familles</p>
                 </div>
             </div>
         </div>
 
         <!-- Total Suppliers -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
             <div class="flex items-center space-x-4">
                 <div class="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-full">
                     <svg class="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,13 +46,13 @@
                 </div>
                 <div>
                     <p class="text-3xl font-bold text-gray-800 dark:text-white">{{ App\Models\Supplier::count() }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Fournisseurs</p>
+                    <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">Fournisseurs</p>
                 </div>
             </div>
         </div>
 
         <!-- Total Units -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
             <div class="flex items-center space-x-4">
                 <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-full">
                     <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,13 +61,13 @@
                 </div>
                 <div>
                     <p class="text-3xl font-bold text-gray-800 dark:text-white">{{ App\Models\Unit::count() }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Unites</p>
+                    <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">Unites</p>
                 </div>
             </div>
         </div>
 
         <!-- Total VATs -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
             <div class="flex items-center space-x-4">
                 <div class="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
                     <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,7 +76,7 @@
                 </div>
                 <div>
                     <p class="text-3xl font-bold text-gray-800 dark:text-white">{{ App\Models\Vat::count() }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Taux de TVA</p>
+                    <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">Taux de TVA</p>
                 </div>
             </div>
         </div>
@@ -94,36 +94,36 @@
             <div class="space-y-3">
                 <a 
                     href="{{ route('articles.create') }}"
-                    class="flex items-center space-x-3 p-3 bg-white dark:bg-gray-700/50 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                    class="flex items-center space-x-3 p-3 bg-white dark:bg-slate-700/50 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                 >
                     <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
-                    <span class="text-gray-700 dark:text-gray-300">Ajouter un nouvel article</span>
+                    <span class="text-gray-700 dark:text-slate-300">Ajouter un nouvel article</span>
                 </a>
                 <a 
                     href="{{ route('families.create') }}"
-                    class="flex items-center space-x-3 p-3 bg-white dark:bg-gray-700/50 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                    class="flex items-center space-x-3 p-3 bg-white dark:bg-slate-700/50 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                 >
                     <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z"></path>
                     </svg>
-                    <span class="text-gray-700 dark:text-gray-300">Ajouter une nouvelle famille</span>
+                    <span class="text-gray-700 dark:text-slate-300">Ajouter une nouvelle famille</span>
                 </a>
                 <a 
                     href="{{ route('suppliers.create') }}"
-                    class="flex items-center space-x-3 p-3 bg-white dark:bg-gray-700/50 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                    class="flex items-center space-x-3 p-3 bg-white dark:bg-slate-700/50 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                 >
                     <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                     </svg>
-                    <span class="text-gray-700 dark:text-gray-300">Ajouter un nouveau fournisseur</span>
+                    <span class="text-gray-700 dark:text-slate-300">Ajouter un nouveau fournisseur</span>
                 </a>
             </div>
         </div>
 
         <!-- Recent Articles -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center justify-between">
                 <span class="flex items-center space-x-2">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -148,22 +148,22 @@
                 @foreach($recentArticles as $article)
                 <a 
                     href="{{ route('articles.show', $article) }}"
-                    class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                    class="flex justify-between items-center p-3 bg-gray-50 dark:bg-slate-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                 >
                     <div class="flex-1">
                         <div class="font-medium text-gray-800 dark:text-white">{{ $article->name }}</div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                        <div class="text-sm text-gray-500 dark:text-slate-400">
                             {{ $article->family?->name ?? 'Non defini' }} &raquo; {{ $article->subFamily?->name ?? 'Non defini' }}
                         </div>
                     </div>
-                    <span class="text-xs px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-full">
+                    <span class="text-xs px-2 py-1 bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-slate-300 rounded-full">
                         {{ $article->created_at->format('d/m/Y') }}
                     </span>
                 </a>
                 @endforeach
             </div>
             @else
-            <p class="text-center text-gray-500 dark:text-gray-400 text-sm py-4">
+            <p class="text-center text-gray-500 dark:text-slate-400 text-sm py-4">
                 Aucun article recent trouve.
             </p>
             @endif
@@ -171,12 +171,12 @@
     </div>
 
     <!-- Charts Section -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+    <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Statistiques des articles</h3>
         
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div>
-                <h4 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                <h4 class="text-sm font-medium text-gray-600 dark:text-slate-400 mb-2">
                     Articles par Famille
                 </h4>
                 <div class="space-y-2">
@@ -194,16 +194,16 @@
                     <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-2">
                             <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
-                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ $item->family->name }}</span>
+                            <span class="text-sm text-gray-700 dark:text-slate-300">{{ $item->family->name }}</span>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <div class="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div class="w-20 bg-gray-200 dark:bg-slate-700 rounded-full h-2">
                                 <div 
                                     class="bg-blue-500 h-2 rounded-full" 
                                     style="width: {{ (($item->count ?: 0) / $maxCount) * 100 }}%"
                                 ></div>
                             </div>
-                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ $item->count ?? 0 }}</span>
+                            <span class="text-sm text-gray-600 dark:text-slate-400">{{ $item->count ?? 0 }}</span>
                         </div>
                     </div>
                     @endif
@@ -212,7 +212,7 @@
             </div>
             
             <div>
-                <h4 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                <h4 class="text-sm font-medium text-gray-600 dark:text-slate-400 mb-2">
                     Articles avec/sans prix
                 </h4>
                 <div class="space-y-2">
@@ -224,32 +224,32 @@
                     <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-2">
                             <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-                            <span class="text-sm text-gray-700 dark:text-gray-300">Avec prix</span>
+                            <span class="text-sm text-gray-700 dark:text-slate-300">Avec prix</span>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <div class="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div class="w-20 bg-gray-200 dark:bg-slate-700 rounded-full h-2">
                                 <div 
                                     class="bg-green-500 h-2 rounded-full" 
                                     style="width: {{ $articlesWithPrices > 0 ? ($articlesWithPrices / max($articlesWithPrices + $articlesWithoutPrices, 1)) * 100 : 0 }}%"
                                 ></div>
                             </div>
-                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ $articlesWithPrices }}</span>
+                            <span class="text-sm text-gray-600 dark:text-slate-400">{{ $articlesWithPrices }}</span>
                         </div>
                     </div>
                     
                     <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-2">
                             <span class="w-3 h-3 bg-gray-500 rounded-full"></span>
-                            <span class="text-sm text-gray-700 dark:text-gray-300">Sans prix</span>
+                            <span class="text-sm text-gray-700 dark:text-slate-300">Sans prix</span>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <div class="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div class="w-20 bg-gray-200 dark:bg-slate-700 rounded-full h-2">
                                 <div 
                                     class="bg-gray-500 h-2 rounded-full" 
                                     style="width: {{ $articlesWithoutPrices > 0 ? ($articlesWithoutPrices / max($articlesWithPrices + $articlesWithoutPrices, 1)) * 100 : 0 }}%"
                                 ></div>
                             </div>
-                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ $articlesWithoutPrices }}</span>
+                            <span class="text-sm text-gray-600 dark:text-slate-400">{{ $articlesWithoutPrices }}</span>
                         </div>
                     </div>
                 </div>

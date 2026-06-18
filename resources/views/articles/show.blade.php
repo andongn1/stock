@@ -32,7 +32,7 @@
         <h1 class="text-2xl font-bold text-gray-800 dark:text-white">
             {{ $article->name }} 
             @if($article->brand)
-            <span class="text-gray-500 dark:text-gray-400">- {{ $article->brand }}</span>
+            <span class="text-gray-500 dark:text-slate-400">- {{ $article->brand }}</span>
             @endif
         </h1>
         
@@ -56,15 +56,15 @@
     </div>
 
     <!-- Article Details Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-4">
+    <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-slate-700 pb-4">
             Informations de base
         </h2>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    <label class="block text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">
                         Famille
                     </label>
                     <div class="flex items-center space-x-2">
@@ -78,7 +78,7 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    <label class="block text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">
                         Sous-Famille
                     </label>
                     <div class="flex items-center space-x-2">
@@ -92,7 +92,7 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    <label class="block text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">
                         Unite
                     </label>
                     <div class="flex items-center space-x-2">
@@ -108,7 +108,7 @@
             
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    <label class="block text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">
                         Conditionnement
                     </label>
                     <div class="flex items-center space-x-2">
@@ -122,7 +122,7 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    <label class="block text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">
                         TVA
                     </label>
                     <div class="flex items-center space-x-2">
@@ -136,7 +136,7 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    <label class="block text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">
                         Date de creation
                     </label>
                     <div class="flex items-center space-x-2">
@@ -798,7 +798,7 @@
                 class="fixed inset-0 transition-opacity"
                 @click="cancelSupplierChange()"
             >
-                <div class="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
+                <div class="absolute inset-0 bg-gray-500 dark:bg-slate-900 opacity-75"></div>
             </div>
             
             <!-- Modal content -->
@@ -809,7 +809,7 @@
                 x-transition:leave="transition ease-in duration-150"
                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full"
+                class="inline-block align-bottom bg-white dark:bg-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full"
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="modal-headline"
@@ -838,7 +838,7 @@
                     </div>
                 </div>
                 
-                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <div class="bg-gray-50 dark:bg-slate-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                     <form method="POST" action="{{ route('articles.set-current-supplier', $article) }}" class="w-full sm:w-auto">
                         @csrf
                         <input type="hidden" name="price_history_id" x-model="selectedPriceHistoryId">
@@ -852,7 +852,7 @@
                     <button 
                         type="button"
                         @click="cancelSupplierChange()"
-                        class="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-800 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-800"
+                        class="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto px-4 py-2 bg-gray-200 dark:bg-slate-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-800 dark:text-slate-200 text-sm font-medium rounded-lg transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-800"
                     >
                         Annuler
                     </button>
