@@ -167,14 +167,14 @@ class ArticleController extends Controller
                 ->with('error', 'Le prix selectionne n\'appartient pas a cet article.');
         }
         
-        // Deactivate the current price if it exists and is different
-        // Use now() as datetime to ensure it's still valid for today
-        if ($article->current_price && $article->current_price->id !== $newCurrentPrice->id) {
-            $article->current_price->update(['valid_to' => now()]);
-        }
-        
-        // Activate the new price
-        $newCurrentPrice->update(['valid_to' => null]);
+        // Update the selected price to make it the most recent
+        // by setting valid_from to now() and valid_to to null
+        // This ensures it will be returned by the current_price accessor
+        // which orders by valid_from desc, then created_at desc
+        $newCurrentPrice->update([
+            'valid_from' => now(),
+            'valid_to' => null
+        ]);
         
         return redirect()->route('articles.show', $article)
             ->with('success', 'Fournisseur change avec succes ! Le prix de ' . $newCurrentPrice->supplier->name . ' est maintenant actif.');
