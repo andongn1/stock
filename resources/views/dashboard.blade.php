@@ -184,9 +184,9 @@
                     $articlesByFamily = App\Models\Article::with('family')
                         ->selectRaw('family_id, COUNT(*) as count')
                         ->groupBy('family_id')
-                        ->with('family')
                         ->get();
-                    $maxCount = max($articlesByFamily->pluck('count')->toArray() ?? [1]);
+                    $counts = $articlesByFamily->pluck('count')->toArray();
+                    $maxCount = max($counts) ?: 1;
                     @endphp
                     
                     @foreach($articlesByFamily as $item)
@@ -200,10 +200,10 @@
                             <div class="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                                 <div 
                                     class="bg-blue-500 h-2 rounded-full" 
-                                    style="width: {{ ($item->count / max($maxCount, 1)) * 100 }}%"
+                                    style="width: {{ (($item->count ?: 0) / $maxCount) * 100 }}%"
                                 ></div>
                             </div>
-                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ $item->count }}</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ $item->count ?? 0 }}</span>
                         </div>
                     </div>
                     @endif

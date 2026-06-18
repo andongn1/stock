@@ -18,6 +18,7 @@ class Article extends Model
         'sub_family_id',
         'unit_id',
         'packaging_id',
+        'packaging_unit_quantity',
         'vat_id',
     ];
 
@@ -83,5 +84,16 @@ class Article extends Model
             })
             ->orderBy('valid_from', 'desc')
             ->first();
+    }
+    
+    /**
+     * Get the formatted packaging unit info (e.g., "10 kg", "250 pieces").
+     */
+    public function getPackagingUnitInfoAttribute(): string
+    {
+        if ($this->packaging_unit_quantity && $this->unit) {
+            return $this->packaging_unit_quantity . ' ' . $this->unit->name;
+        }
+        return '';
     }
 }

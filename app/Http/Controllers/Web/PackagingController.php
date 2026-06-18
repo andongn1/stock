@@ -12,14 +12,13 @@ class PackagingController extends Controller
 {
     public function index(): View
     {
-        $packagings = Packaging::with(['unit'])->withCount(['articles'])->latest()->get();
+        $packagings = Packaging::withCount(['articles'])->latest()->get();
         return view('packagings.index', compact('packagings'));
     }
 
     public function create(): View
     {
-        $units = Unit::orderBy('name')->get();
-        return view('packagings.create', compact('units'));
+        return view('packagings.create');
     }
 
     public function store(\App\Http\Requests\StorePackagingRequest $request): RedirectResponse
@@ -31,8 +30,7 @@ class PackagingController extends Controller
 
     public function edit(Packaging $packaging): View
     {
-        $units = Unit::orderBy('name')->get();
-        return view('packagings.edit', compact('packaging', 'units'));
+        return view('packagings.edit', compact('packaging'));
     }
 
     public function update(\App\Http\Requests\UpdatePackagingRequest $request, Packaging $packaging): RedirectResponse

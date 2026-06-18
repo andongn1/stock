@@ -22,6 +22,7 @@ class ArticleResource extends JsonResource
             'sub_family_id' => $this->sub_family_id,
             'unit_id' => $this->unit_id,
             'packaging_id' => $this->packaging_id,
+            'packaging_unit_quantity' => $this->packaging_unit_quantity,
             'vat_id' => $this->vat_id,
             'family' => $this->whenLoaded('family', function () {
                 return [
@@ -45,10 +46,6 @@ class ArticleResource extends JsonResource
                 return [
                     'id' => $this->packaging->id,
                     'name' => $this->packaging->name,
-                    'unit_id' => $this->packaging->unit_id,
-                    'unit' => $this->packaging->unit?->only('id', 'name'),
-                    'unit_quantity' => $this->packaging->unit_quantity,
-                    'formatted_unit' => $this->packaging->unit_quantity . ' ' . ($this->packaging->unit?->name ?? ''),
                 ];
             }),
             'vat' => $this->whenLoaded('vat', function () {
@@ -58,14 +55,12 @@ class ArticleResource extends JsonResource
                     'label' => $this->vat->label,
                 ];
             }),
-            'current_price' => $this->whenLoaded('currentPrice', function () {
-                return $this->currentPrice ? [
-                    'price' => $this->currentPrice->price,
-                    'currency' => $this->currentPrice->currency,
-                    'supplier' => $this->currentPrice->supplier->name,
-                    'valid_from' => $this->currentPrice->valid_from->toDateString(),
-                ] : null;
-            }),
+            'current_price' => $this->current_price ? [
+                'price' => $this->current_price->price,
+                'currency' => $this->current_price->currency,
+                'supplier' => $this->current_price->supplier->name,
+                'valid_from' => $this->current_price->valid_from->toDateString(),
+            ] : null,
             'price_histories_count' => $this->whenCounted('priceHistories'),
             'price_histories' => PriceHistoryResource::collection($this->whenLoaded('priceHistories')),
             'created_at' => $this->created_at->toDateTimeString(),

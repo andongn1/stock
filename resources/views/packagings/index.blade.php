@@ -3,9 +3,6 @@
 @section('title', 'Conditionnements')
 
 @section('content')
-@php
-$units = App\Models\Unit::orderBy('name')->get();
-@endphp
 <div x-data="{ open: false }" class="space-y-6">
     <!-- Header -->
     <div class="flex justify-between items-center">
@@ -54,45 +51,6 @@ $units = App\Models\Unit::orderBy('name')->get();
                         <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="unit_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Unite
-                            </label>
-                            <select 
-                                name="unit_id" 
-                                id="unit_id"
-                                class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
-                                <option value="">Selectionnez une unite</option>
-                                @foreach($units as $unit)
-                                <option value="{{ $unit->id }}">{{ $unit->name }}</option>
-                                @endforeach
-                            </select>
-                            @error('unit_id')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        
-                        <div>
-                            <label for="unit_quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Quantite unitaire
-                            </label>
-                            <input 
-                                type="number" 
-                                name="unit_quantity"
-                                id="unit_quantity"
-                                step="0.01"
-                                min="0"
-                                class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Ex: 10"
-                            >
-                            @error('unit_quantity')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
                 </div>
                 
                 <div class="flex justify-end space-x-3 mt-6">
@@ -126,9 +84,6 @@ $units = App\Models\Unit::orderBy('name')->get();
                         Nom
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Unite & Quantite
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Articles
                     </th>
                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -144,17 +99,6 @@ $units = App\Models\Unit::orderBy('name')->get();
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {{ $packaging->name }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        @if($packaging->unit_id && $packaging->unit_quantity)
-                        <span class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full">
-                            {{ $packaging->unit_quantity }} {{ $packaging->unit?->name ?? '' }}
-                        </span>
-                        @else
-                        <span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full">
-                            Non defini
-                        </span>
-                        @endif
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-full">
@@ -190,7 +134,7 @@ $units = App\Models\Unit::orderBy('name')->get();
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="4" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                    <td colspan="3" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                         Aucun conditionnement trouve. Creez-en un pour commencer.
                     </td>
                 </tr>

@@ -63,7 +63,7 @@
                             class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
                             <option value="">Selectionnez une famille</option>
-                            @foreach($families as $family)
+                            @foreach($families ?? [] as $family)
                             <option value="{{ $family->id }}">{{ $family->name }}</option>
                             @endforeach
                         </select>

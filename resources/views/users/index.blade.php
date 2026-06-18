@@ -71,13 +71,13 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-2 py-1 rounded-full text-xs font-medium 
-                            @if($user->role->value === 'admin')
+                            @if(($user->role?->value ?? $user->role ?? 'user') === 'admin')
                                 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300
                             @else
                                 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300
                             @endif
                         ">
-                            {{ ucfirst($user->role->value) }}
+                            {{ ucfirst($user->role?->value ?? $user->role ?? 'user') }}
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">

@@ -20,6 +20,7 @@ class StoreArticleRequest extends FormRequest
             'sub_family_id' => 'required|exists:sub_families,id',
             'unit_id' => 'required|exists:units,id',
             'packaging_id' => 'required|exists:packagings,id',
+            'packaging_unit_quantity' => 'nullable|numeric|min:0',
             'vat_id' => 'required|exists:vats,id',
         ];
     }
@@ -32,6 +33,8 @@ class StoreArticleRequest extends FormRequest
             'sub_family_id.required' => 'La sous-famille est obligatoire.',
             'unit_id.required' => 'L\'unite est obligatoire.',
             'packaging_id.required' => 'Le conditionnement est obligatoire.',
+            'packaging_unit_quantity.numeric' => 'La quantite unitaire doit etre un nombre.',
+            'packaging_unit_quantity.min' => 'La quantite ne peut pas etre negative.',
             'vat_id.required' => 'La TVA est obligatoire.',
         ];
     }

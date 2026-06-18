@@ -20,6 +20,7 @@ class UpdateArticleRequest extends FormRequest
             'sub_family_id' => 'required|exists:sub_families,id',
             'unit_id' => 'required|exists:units,id',
             'packaging_id' => 'required|exists:packagings,id',
+            'packaging_unit_quantity' => 'nullable|numeric|min:0',
             'vat_id' => 'required|exists:vats,id',
         ];
     }
