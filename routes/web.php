@@ -51,6 +51,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('articles', ArticleController::class);
     Route::post('articles/{article}/add-price', [ArticleController::class, 'addPrice'])->name('articles.add-price');
     Route::get('articles/{article}/price-histories', [ArticleController::class, 'priceHistories'])->name('articles.price-histories');
+    Route::post('articles/{article}/set-current-supplier', [ArticleController::class, 'setCurrentSupplier'])->name('articles.set-current-supplier');
 
     // Admin only routes
     Route::middleware(['admin'])->group(function () {

@@ -82,7 +82,23 @@ class ArticleController extends Controller
         $article->load(['family', 'subFamily', 'unit', 'packaging', 'vat', 'priceHistories.supplier']);
         $suppliers = Supplier::orderBy('name')->get();
         
-        return view('articles.show', compact('article', 'suppliers'));
+        // Get latest valid price for each supplier (other than the current one)
+        $otherSupplierPrices = PriceHistory::where('article_id', $article->id)
+            ->where('valid_from', '<=', now())
+            ->where(function($query) {
+                $query->where('valid_to', '>=', now())
+                      ->orWhereNull('valid_to');
+            })
+            ->with('supplier')
+            ->orderBy('valid_from', 'desc')
+            ->get()
+            ->groupBy('supplier_id')
+            ->map(function ($group) {
+                return $group->first(); // Get latest price for each supplier
+            })
+            ->values();
+        
+        return view('articles.show', compact('article', 'suppliers', 'otherSupplierPrices'));
     }
 
     public function addPrice(Request $request, Article $article): RedirectResponse
@@ -124,5 +140,31 @@ class ArticleController extends Controller
             ->get();
         
         return view('articles.price-histories', compact('article', 'priceHistories'));
+    }
+
+    public function setCurrentSupplier(Request $request, Article $article): RedirectResponse
+    {
+        $validated = $request->validate([
+            'price_history_id' => 'required|exists:price_histories,id',
+        ]);
+        
+        $newCurrentPrice = PriceHistory::findOrFail($validated['price_history_id']);
+        
+        // Verify this price belongs to the article
+        if ($newCurrentPrice->article_id !== $article->id) {
+            return redirect()->route('articles.show', $article)
+                ->with('error', 'Le prix selectionne n\'appartient pas a cet article.');
+        }
+        
+        // Deactivate the current price if it exists and is different
+        if ($article->current_price && $article->current_price->id !== $newCurrentPrice->id) {
+            $article->current_price->update(['valid_to' => now()->toDateString()]);
+        }
+        
+        // Activate the new price
+        $newCurrentPrice->update(['valid_to' => null]);
+        
+        return redirect()->route('articles.show', $article)
+            ->with('success', 'Fournisseur change avec succes ! Le prix de ' . $newCurrentPrice->supplier->name . ' est maintenant actif.');
     }
 }
