@@ -697,7 +697,7 @@
         </div>
 
         <!-- Historique des prix -->
-        <div class="bg-purple-50 dark:bg-purple-900/30 rounded-lg shadow p-6">
+        <div class="bg-purple-50 dark:bg-purple-900/30 rounded-lg shadow p-6 flex flex-col">
             <h3 class="text-lg font-semibold text-purple-800 dark:text-purple-300 mb-4 flex items-center justify-between">
                 <span class="flex items-center space-x-2">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -714,7 +714,7 @@
             </h3>
             
             @if($article->priceHistories->isNotEmpty())
-            <div class="space-y-3 max-h-48 overflow-y-auto">
+            <div class="space-y-3 flex-1 overflow-y-auto">
                 @foreach($article->priceHistories->sortByDesc('valid_from')->take(5) as $priceHistory)
                 <div class="p-3 bg-white dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
                     <div class="flex justify-between items-start">
