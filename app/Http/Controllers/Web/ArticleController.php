@@ -91,8 +91,6 @@ class ArticleController extends Controller
             'supplier_id' => 'required|exists:suppliers,id',
             'price' => 'required|numeric|min:0',
             'currency' => 'required|string|size:3',
-            'valid_from' => 'required|date',
-            'valid_to' => 'nullable|date|after_or_equal:valid_from',
         ]);
         
         // Deactivate previous price if exists
@@ -101,14 +99,14 @@ class ArticleController extends Controller
             ->where('supplier_id', $validated['supplier_id'])
             ->update(['valid_to' => now()]);
         
-        // Create new price history
+        // Create new price history with automatic date
         $priceHistory = PriceHistory::create([
             'article_id' => $article->id,
             'supplier_id' => $validated['supplier_id'],
             'price' => $validated['price'],
             'currency' => $validated['currency'],
-            'valid_from' => $validated['valid_from'],
-            'valid_to' => $validated['valid_to'],
+            'valid_from' => now()->toDateString(),
+            'valid_to' => null,
         ]);
         
         return redirect()->route('articles.show', $article)

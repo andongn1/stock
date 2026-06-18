@@ -268,37 +268,15 @@
                     </div>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="valid_from" class="block text-sm font-medium text-blue-700 dark:text-blue-400 mb-1">
-                            Valide depuis <span class="text-red-500">*</span>
-                        </label>
-                        <input 
-                            type="date" 
-                            name="valid_from"
-                            id="valid_from"
-                            required
-                            class="w-full p-3 border border-blue-300 dark:border-blue-700 rounded-lg bg-white dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                        @error('valid_from')
-                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    
-                    <div>
-                        <label for="valid_to" class="block text-sm font-medium text-blue-700 dark:text-blue-400 mb-1">
-                            Valide jusqu'au
-                        </label>
-                        <input 
-                            type="date" 
-                            name="valid_to"
-                            id="valid_to"
-                            class="w-full p-3 border border-blue-300 dark:border-blue-700 rounded-lg bg-white dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                        @error('valid_to')
-                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                        @enderror
-                    </div>
+                <!-- Date du jour est automatiquement enregistree -->
+                <input type="hidden" name="valid_from" value="{{ now()->toDateString() }}">
+                <input type="hidden" name="valid_to" value="">
+                
+                <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-sm text-blue-700 dark:text-blue-300">
+                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    La date du jour sera automatiquement enregistree comme date de debut
                 </div>
                 
                 <button 
