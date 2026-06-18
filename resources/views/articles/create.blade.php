@@ -4,7 +4,20 @@
 
 @section('content')
 <div x-data="{ 
-    subFamiliesByFamily: @json($subFamilles->groupBy('family_id'))
+    subFamiliesByFamily: @json($subFamilles->groupBy('family_id')),
+    updateSubFamilies() {
+        const subFamilySelect = document.getElementById('sub_family_id');
+        const familyId = document.getElementById('family_id').value;
+        subFamilySelect.innerHTML = '<option value="">Selectionnez une sous-famille</option>';
+        if (familyId && this.subFamiliesByFamily[familyId]) {
+            this.subFamiliesByFamily[familyId].forEach(subFamily => {
+                const option = document.createElement('option');
+                option.value = subFamily.id;
+                option.textContent = subFamily.name;
+                subFamilySelect.appendChild(option);
+            });
+        }
+    }
 }" class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow p-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Nouvel Article</h1>
@@ -64,19 +77,7 @@
                         name="family_id"
                         id="family_id"
                         required
-                        x-on:change="
-                            const subFamilySelect = document.getElementById('sub_family_id');
-                            const familyId = $event.target.value;
-                            subFamilySelect.innerHTML = '<option value="">Selectionnez une sous-famille</option>';
-                            if (familyId && subFamiliesByFamily[familyId]) {
-                                subFamiliesByFamily[familyId].forEach(subFamily => {
-                                    const option = document.createElement('option');
-                                    option.value = subFamily.id;
-                                    option.textContent = subFamily.name;
-                                    subFamilySelect.appendChild(option);
-                                });
-                            }
-                        "
+                        @change="updateSubFamilies()"
                         class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="">Selectionnez une famille</option>
