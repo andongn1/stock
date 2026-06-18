@@ -152,23 +152,26 @@
         </div>
     </div>
 
-    <!-- Current Price Section -->
-    @if($currentPrice)
     @php
-    // Find the cheapest supplier
+    // Find the cheapest supplier from all suppliers
     $cheapestSupplierId = null;
     $cheapestPrice = PHP_FLOAT_MAX;
-    foreach ($pricesBySupplier as $price) {
-        $priceValue = $price->price_type === App\Enums\PriceType::PER_UNIT ? 
-            $price->price : 
-            ($price->article && $price->article->packaging_unit_quantity > 0 ? 
-                $price->price / $price->article->packaging_unit_quantity : $price->price);
-        if ($priceValue < $cheapestPrice) {
-            $cheapestPrice = $priceValue;
-            $cheapestSupplierId = $price->supplier_id;
+    if (isset($pricesBySupplier) && $pricesBySupplier->count() > 0) {
+        foreach ($pricesBySupplier as $price) {
+            $priceValue = $price->price_type === App\Enums\PriceType::PER_UNIT ? 
+                $price->price : 
+                ($price->article && $price->article->packaging_unit_quantity > 0 ? 
+                    $price->price / $price->article->packaging_unit_quantity : $price->price);
+            if ($priceValue < $cheapestPrice) {
+                $cheapestPrice = $priceValue;
+                $cheapestSupplierId = $price->supplier_id;
+            }
         }
     }
     @endphp
+
+    <!-- Current Price Section -->
+    @if($currentPrice)
     <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-green-800 dark:text-green-300 mb-4 border-b border-green-200 dark:border-green-700 pb-4">
             Prix d'achat
@@ -255,8 +258,11 @@
                 @foreach($otherSupplierPrices as $otherPrice)
                 <div class="flex items-center justify-between p-3 bg-white dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors">
                     <div class="flex-1">
-                        <div class="font-medium text-green-800 dark:text-green-300">
+                        <div class="font-medium text-green-800 dark:text-green-300 flex items-center space-x-2">
                             {{ $otherPrice->supplier->name }}
+                            @if($otherPrice->supplier_id == $cheapestSupplierId)
+                            <span class="text-yellow-500 text-xl">⭐</span>
+                            @endif
                         </div>
                         <div class="text-sm text-green-600 dark:text-green-400">
                             {{ $otherPrice->price }} {{ $otherPrice->currency }} ({{ $otherPrice->price_type_label }}) 
