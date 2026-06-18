@@ -188,8 +188,8 @@
                         {{ $article->vat?->label ?? '-' }} ({{ $article->vat?->rate ?? '0' }}%)
                     </td>
                     <td class="px-4 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900 dark:text-white">
-                        @if($article->currentPrice)
-                        {{ $article->currentPrice->price }} {{ $article->currentPrice->currency }}
+                        @if($article->current_price)
+                        {{ $article->current_price->price }} {{ $article->current_price->currency }}
                         @else
                         -
                         @endif

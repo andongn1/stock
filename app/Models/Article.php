@@ -70,9 +70,10 @@ class Article extends Model
     }
 
     /**
-     * Get the current price for this article.
+     * Accessor for current_price attribute.
+     * Returns the current valid price for this article.
      */
-    public function currentPrice(): ?PriceHistory
+    public function getCurrentPriceAttribute(): ?PriceHistory
     {
         return $this->priceHistories()
             ->where('valid_from', '<=', now())
