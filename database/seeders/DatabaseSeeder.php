@@ -134,10 +134,25 @@ class DatabaseSeeder extends Seeder
 
             // Create price history for each article with random price type
             $numPrices = rand(1, 3);
-            $validFrom = now()->subDays(rand(30, 365));
             $priceTypes = ['per_unit', 'per_packaging'];
             
+            // Start with a date in the past
+            $validFrom = now()->subDays(rand(30, 365));
+            
             for ($j = 0; $j < $numPrices; $j++) {
+                // Ensure valid_from is not in the future
+                if ($validFrom->isAfter(now())) {
+                    $validFrom = now()->copy();
+                }
+                
+                // Set valid_to for all but the last price
+                $validTo = $j < $numPrices - 1 ? $validFrom->copy()->addDays(rand(30, 180)) : null;
+                
+                // Ensure valid_to is not in the future
+                if ($validTo && $validTo->isAfter(now())) {
+                    $validTo = now()->copy();
+                }
+                
                 PriceHistory::create([
                     'article_id' => $article->id,
                     'supplier_id' => $supplierIds[array_rand($supplierIds)],
@@ -145,9 +160,10 @@ class DatabaseSeeder extends Seeder
                     'currency' => 'EUR',
                     'price_type' => $priceTypes[array_rand($priceTypes)],
                     'valid_from' => $validFrom->format('Y-m-d'),
-                    'valid_to' => $j < $numPrices - 1 ? $validFrom->copy()->addDays(rand(30, 180))->format('Y-m-d') : null,
+                    'valid_to' => $validTo ? $validTo->format('Y-m-d') : null,
                 ]);
                 
+                // Move to next date period
                 $validFrom = $validFrom->copy()->addDays(rand(30, 180));
             }
         }
