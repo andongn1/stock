@@ -212,6 +212,13 @@ Statistiques, graphiques, articles recents, top fournisseurs
 - Documentation complete de la fonctionnalite price_type
 - Mise a jour des statistiques
 
+### **Commit 16: 93d8714**
+**Fix Firefox dark mode override with gray color palette**
+- Add `<meta name="color-scheme" content="light dark">` to prevent Firefox auto-dark-mode
+- Enable Tailwind class-based dark mode (`darkMode: 'class'`)
+- Move Alpine.js theme toggle from `<body>` to `<html>` element
+- Preserve original gray color palette (not slate)
+
 ---
 
 ## 🔧 **Corrections et Fixes**
@@ -568,7 +575,7 @@ Route::post('articles/{article}/update-selling-price', [ArticleController::class
 | **Vues Blade** | 56 |
 | **Composants Livewire** | 1 |
 | **Routes** | 91+ |
-| **Commits** | 15 |
+| **Commits** | 16 |
 
 ---
 
@@ -732,7 +739,7 @@ Pour toute question ou probleme, consulter:
 ---
 
 **Derniere mise a jour:** 19 juin 2026  
-**Version:** 1.6.0  
+**Version:** 1.6.1  
 **Auteur:** Mistral Vibe (avec co-auteur)  
 **Repository:** ssh://git@laboiteauxlettres.com:5196/mnt/srv/git/stock.git  
-**Commits:** 15
+**Commits:** 16
