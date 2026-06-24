@@ -31,8 +31,8 @@ class Inventory extends Model
     
     public function getMonetaryValueAttribute(): float
     {
-        if ($this->article && $this->article->current_price) {
-            return (float) ($this->total_quantity * $this->article->current_price->unit_price);
+        if ($this->article && $this->article->currentPrice) {
+            return (float) ($this->total_quantity * $this->article->currentPrice->unit_price);
         }
         return 0.0;
     }

@@ -159,6 +159,16 @@
                         Fournisseurs
                     </a>
                     
+                    <a 
+                        href="{{ route('inventories.index') }}" 
+                        class="sidebar-item flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-lg {{ request()->routeIs('inventories.*') ? 'active' : '' }}"
+                    >
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21-3.582-4-8-4s-8 1.79-8 4"></path>
+                        </svg>
+                        Inventaire
+                    </a>
+                    
                     @if(auth()->user() && auth()->user()->isAdmin())
                     <a 
                         href="{{ route('users.index') }}" 

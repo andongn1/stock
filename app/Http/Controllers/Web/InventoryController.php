@@ -13,6 +13,11 @@ class InventoryController extends Controller
 {
     public function index(Request $request): View
     {
+        return $this->search($request);
+    }
+    
+    public function search(Request $request): View
+    {
         $search = $request->input('search', '');
         
         $articles = [];
