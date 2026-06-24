@@ -78,6 +78,14 @@ class Article extends Model
     {
         return $this->hasOne(SellingPrice::class);
     }
+    
+    /**
+     * Get all inventories for this article.
+     */
+    public function inventories(): HasMany
+    {
+        return $this->hasMany(Inventory::class);
+    }
 
     /**
      * Accessor for current_price attribute.

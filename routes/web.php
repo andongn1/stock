@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Web\ArticleController;
 use App\Http\Controllers\Web\FamilyController;
+use App\Http\Controllers\Web\InventoryController;
 use App\Http\Controllers\Web\PackagingController;
 use App\Http\Controllers\Web\PriceHistoryController;
 use App\Http\Controllers\Web\SubFamilyController;
@@ -53,6 +54,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('articles/{article}/price-histories', [ArticleController::class, 'priceHistories'])->name('articles.price-histories');
     Route::post('articles/{article}/set-current-supplier', [ArticleController::class, 'setCurrentSupplier'])->name('articles.set-current-supplier');
     Route::post('articles/{article}/update-selling-price', [ArticleController::class, 'updateSellingPrice'])->name('articles.update-selling-price');
+
+    // Inventory
+    Route::get('/inventory', [InventoryController::class, 'index'])->name('inventories.index');
+    Route::get('/inventory/search', [InventoryController::class, 'search'])->name('inventories.search');
+    Route::get('/inventory/article/{article}', [InventoryController::class, 'create'])->name('inventories.create');
+    Route::post('/inventory/article/{article}', [InventoryController::class, 'store'])->name('inventories.store');
+    Route::get('/inventory/article/{article}/confirm-duplicate', [InventoryController::class, 'confirmDuplicate'])->name('inventories.confirm-duplicate');
+    Route::post('/inventory/article/{article}/process-duplicate', [InventoryController::class, 'processDuplicate'])->name('inventories.process-duplicate');
+    Route::delete('/inventory/{inventory}', [InventoryController::class, 'destroy'])->name('inventories.destroy');
 
     // Admin only routes
     Route::middleware(['admin'])->group(function () {
