@@ -88,6 +88,14 @@ class Article extends Model
     }
 
     /**
+     * Get all stock entries for this article.
+     */
+    public function entries(): HasMany
+    {
+        return $this->hasMany(Entry::class);
+    }
+
+    /**
      * Accessor for current_price attribute.
      * Returns the most recent price for this article (by valid_from date).
      */

@@ -1,0 +1,307 @@
+# PROMPT: Stock Entries (Entrées) Feature Implementation
+
+## 📋 PROJECT: Mercuriale - Laravel 12 Stock Management System
+
+## 🎯 PRIMARY OBJECTIVE
+
+Implement a **Stock Entries (Entrées)** feature that allows users to record when they receive deliveries of articles. This will enable the system to later calculate how many items were sold between inventory checks.
+
+---
+
+## 📝 REQUIREMENTS
+
+### Core Feature: Stock Entries
+
+1. **New Model: StockMovement or StockEntry**
+   - Should track stock movements (entries/receipts)
+   - Fields:
+     - `article_id` (foreign key to articles)
+     - `quantity` (decimal, number of packaging units received)
+     - `date` (date of the entry, automatically set to today)
+     - `type` (enum: 'entry' or 'inventory') - to distinguish from inventory records
+     - `notes` (optional text field)
+     - `created_at`, `updated_at`
+   
+   OR
+   
+   **Alternative Approach: Separate Table**
+   - Create a new `entries` table (similar to inventories table)
+   - Keep it simple and separate from inventories
+
+2. **New Controller: EntryController**
+   - Methods needed:
+     - `index()` - List all entries with search
+     - `search()` - Search for articles to add entry
+     - `create(Article $article)` - Show form for selected article
+     - `store(Request $request, Article $article)` - Save the entry
+     - `destroy(Entry $entry)` - Delete an entry
+
+3. **New Routes**
+   - `/entries` - List all entries
+   - `/entries/search` - Search articles
+   - `/entries/article/{article}` - Show entry form
+   - `/entries/article/{article}` (POST) - Store entry
+   - `/entries/{entry}` (DELETE) - Delete entry
+
+4. **New Views**
+   - `resources/views/entries/index.blade.php` - Main entries page
+     - Search input at the top
+     - "Rechercher Article" button
+     - Article suggestions with "Ajouter une entrée pour cet article" button
+     - Table showing all entries with:
+       - Date (title: "Entrées de stock du {date}")
+       - Article name
+       - Conditionnement
+       - Quantité par conditionnement
+       - Quantité reçue
+       - Valeur totale (quantité)
+       - Valeur totale (€)
+       - Actions (delete)
+   
+   - `resources/views/entries/create.blade.php` - Entry form
+     - Show article details (name, packaging, packaging_unit_quantity)
+     - Quantity input field (label: "Quantité reçue (en {packaging})")
+     - Help text: "Exemple: Si le conditionnement est 'Bouteille', entrez le nombre de bouteilles reçues (ex: 24)."
+     - Submit button: "Enregistrer l'entrée"
+     - Cancel button: back to entries index
+
+5. **Dashboard Integration**
+   - Add "Ajouter une entrée" button in "Actions rapides" section
+   - Should appear next to "Faire un inventaire"
+
+6. **Sidebar Navigation**
+   - Add "Entrées" link in sidebar
+   - Position: After "Inventaire"
+   - Icon: Similar to inventory but different (maybe a plus sign or delivery truck icon)
+
+---
+
+## 🔄 FUTURE FEATURE: Sales Calculation
+
+### Objective
+Be able to calculate how many articles were sold between inventory checks.
+
+### Formula
+```
+Sold = Last_Inventory + Sum(Entries_since_last_inventory) - Current_Inventory
+```
+
+### Example
+- Article: "Bordeaux 2025"
+- Conditionnement: "Bouteille"
+- Packaging unit quantity: 1 (1 bottle per bottle)
+
+Timeline:
+1. **May 24, 2026**: Inventory = 18 bottles
+2. **May 26, 2026**: Entry = +24 bottles received
+3. **May 28, 2026**: Inventory = 32 bottles
+
+Calculation:
+```
+Sold = 18 (May 24 inventory) + 24 (May 26 entry) - 32 (May 28 inventory)
+Sold = 10 bottles
+```
+
+### Implementation (Future)
+This calculation will be implemented in a later phase. For now, just focus on:
+1. Creating the Entries feature
+2. Storing the data properly
+3. Making it work similar to Inventory
+
+---
+
+## 🎨 UI/UX REQUIREMENTS
+
+### Design Consistency
+- Match the existing design patterns from the Inventory feature
+- Use same color scheme (Tailwind CSS classes)
+- Use same card styles, table styles, button styles
+- Use same Alpine.js patterns if needed
+- Support dark mode
+
+### User Flow
+1. User clicks "Ajouter une entrée" (dashboard or sidebar)
+2. User sees search page with:
+   - Search input field
+   - "Rechercher Article" button
+3. User types article name and clicks search
+4. System shows matching articles with:
+   - Article name and brand
+   - Packaging info
+   - "Ajouter une entrée pour cet article" button
+5. User clicks button for desired article
+6. User sees form with:
+   - Article details (read-only)
+   - Quantity input (number of packaging units)
+7. User enters quantity and clicks "Enregistrer l'entrée"
+8. System saves and redirects to entries list
+9. Entry appears in the table
+
+---
+
+## 🔧 TECHNICAL REQUIREMENTS
+
+### Database
+- Migration file: `2026_06_24_XXXXXX_create_entries_table.php`
+- Table name: `entries`
+- Fields:
+  ```php
+  $table->id();
+  $table->foreignId('article_id')->constrained()->cascadeOnDelete();
+  $table->decimal('quantity', 10, 4);
+  $table->dateTime('date');
+  $table->timestamps();
+  $table->index(['article_id', 'date']);
+  ```
+
+### Model: Entry
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Entry extends Model
+{
+    protected $fillable = ['article_id', 'quantity', 'date'];
+    
+    protected $casts = [
+        'quantity' => 'decimal:4',
+        'date' => 'datetime',
+    ];
+    
+    public function article(): BelongsTo
+    {
+        return $this->belongsTo(Article::class);
+    }
+    
+    public function getTotalQuantityAttribute(): float
+    {
+        if ($this->article && $this->article->packaging_unit_quantity) {
+            return (float) ($this->quantity * $this->article->packaging_unit_quantity);
+        }
+        return (float) $this->quantity;
+    }
+    
+    public function getMonetaryValueAttribute(): float
+    {
+        if ($this->article && $this->article->currentPrice) {
+            return (float) ($this->total_quantity * $this->article->currentPrice->unit_price);
+        }
+        return 0.0;
+    }
+}
+```
+
+### Relationships
+- Add to Article model:
+  ```php
+  public function entries(): HasMany
+  {
+      return $this->hasMany(Entry::class);
+  }
+  ```
+
+### Controller Structure
+```php
+namespace App\Http\Controllers\Web;
+
+use App\Http\Controllers\Controller;
+use App\Models\Article;
+use App\Models\Entry;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
+
+class EntryController extends Controller
+{
+    public function index(Request $request): View
+    {
+        // Get search term
+        // Find matching articles
+        // Get today's entries
+        // Return view
+    }
+    
+    public function search(Request $request): View
+    {
+        // Same as index but for route consistency
+    }
+    
+    public function create(Article $article): View
+    {
+        // Show form for specific article
+    }
+    
+    public function store(Request $request, Article $article): RedirectResponse
+    {
+        // Validate quantity
+        // Create entry with today's date
+        // Redirect back with success message
+    }
+    
+    public function destroy(Entry $entry): RedirectResponse
+    {
+        // Delete entry
+        // Redirect back with success message
+    }
+}
+```
+
+---
+
+## 📊 DELIVERABLES
+
+### Phase 1 (This Task)
+- [ ] Migration for entries table
+- [ ] Entry model with accessors
+- [ ] EntryController with all methods
+- [ ] Routes for entries
+- [ ] Views: index.blade.php, create.blade.php
+- [ ] Dashboard button: "Ajouter une entrée"
+- [ ] Sidebar navigation: "Entrées"
+- [ ] Test the feature works end-to-end
+
+### Phase 2 (Future)
+- [ ] Sales calculation feature
+- [ ] Report showing sold items between inventories
+- [ ] Dashboard widget showing recent sales
+- [ ] Alerts for low stock
+
+---
+
+## 🎯 ACCEPTANCE CRITERIA
+
+✅ User can access Entries feature from dashboard
+✅ User can access Entries feature from sidebar
+✅ User can search for articles by name
+✅ User can select an article and enter quantity received
+✅ Quantity is stored in packaging units (not base units)
+✅ Date is automatically set to today
+✅ Entries are displayed in a table with all required columns
+✅ User can delete entries
+✅ Design matches existing Inventory feature
+✅ Dark mode is supported
+✅ Feature works on mobile and desktop
+
+---
+
+## 📝 NOTES
+
+1. **Keep it simple**: The Entries feature should be a near-copy of the Inventory feature
+2. **Different purpose**: Inventory = snapshot of current stock, Entry = stock received
+3. **Future integration**: Both will be used together to calculate sales
+4. **No duplicate handling needed**: Unlike inventory, entries can be added multiple times for the same article on the same day (multiple deliveries)
+5. **Consider naming**: "Entrée" is French for "Entry" or "Receipt" - keep this terminology consistent in the UI
+
+---
+
+## 🚀 READY TO IMPLEMENT
+
+This prompt contains all the information needed to implement the Stock Entries feature. The feature should be implemented on the `stock-management` branch and follow the same patterns as the existing Inventory feature.
+
+---
+
+**Prompt created:** 2026-06-24
+**Priority:** High
+**Estimated effort:** 2-3 hours

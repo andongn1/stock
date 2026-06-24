@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Web\ArticleController;
+use App\Http\Controllers\Web\EntryController;
 use App\Http\Controllers\Web\FamilyController;
 use App\Http\Controllers\Web\InventoryController;
 use App\Http\Controllers\Web\PackagingController;
@@ -63,6 +64,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/inventory/article/{article}/confirm-duplicate', [InventoryController::class, 'confirmDuplicate'])->name('inventories.confirm-duplicate');
     Route::post('/inventory/article/{article}/process-duplicate', [InventoryController::class, 'processDuplicate'])->name('inventories.process-duplicate');
     Route::delete('/inventory/{inventory}', [InventoryController::class, 'destroy'])->name('inventories.destroy');
+
+    // Entries (Stock Entries)
+    Route::get('/entries', [EntryController::class, 'index'])->name('entries.index');
+    Route::get('/entries/search', [EntryController::class, 'search'])->name('entries.search');
+    Route::get('/entries/article/{article}', [EntryController::class, 'create'])->name('entries.create');
+    Route::post('/entries/article/{article}', [EntryController::class, 'store'])->name('entries.store');
+    Route::delete('/entries/{entry}', [EntryController::class, 'destroy'])->name('entries.destroy');
 
     // Admin only routes
     Route::middleware(['admin'])->group(function () {

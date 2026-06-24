@@ -128,6 +128,15 @@
                     </svg>
                     <span class="text-gray-700 dark:text-gray-300">Faire un inventaire</span>
                 </a>
+                <a 
+                    href="{{ route('entries.index') }}"
+                    class="flex items-center space-x-3 p-3 bg-white dark:bg-gray-700/50 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
+                >
+                    <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700 dark:text-gray-300">Ajouter une entrée</span>
+                </a>
             </div>
         </div>
 
