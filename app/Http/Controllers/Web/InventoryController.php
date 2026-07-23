@@ -19,22 +19,58 @@ class InventoryController extends Controller
     public function search(Request $request): View
     {
         $search = $request->input('search', '');
+        $familyId = $request->input('family_id', null);
         
-        $articles = [];
-        if (!empty($search)) {
-            $articles = Article::with(['packaging', 'unit'])
-                ->where('name', 'like', "%{$search}%")
-                ->orderBy('name')
-                ->limit(10)
-                ->get();
+        // Get articles from selected family (or all if no family selected)
+        $query = Article::with(['packaging', 'unit', 'family', 'priceHistories']);
+        
+        if ($familyId) {
+            $query->where('family_id', $familyId);
         }
         
+        if (!empty($search)) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+        
+        $articles = $query->orderBy('name')->get();
+        
+        // Get today's inventories
         $todayInventories = Inventory::with(['article.packaging', 'article.unit', 'article.priceHistories'])
             ->whereDate('date', today())
             ->orderBy('created_at', 'desc')
             ->get();
         
-        return view('inventories.index', compact('articles', 'search', 'todayInventories'));
+        // Get families for dropdown
+        $families = \App\Models\Family::orderBy('name')->get();
+        
+        // Get previous stock (last inventory before today) for each article
+        $previousStocks = [];
+        foreach ($articles as $article) {
+            $lastInventory = Inventory::where('article_id', $article->id)
+                ->whereDate('date', '<', today())
+                ->latest()
+                ->first();
+            $previousStocks[$article->id] = $lastInventory ? $lastInventory->quantity : 0;
+        }
+        
+        // Get today stock for each article
+        $todayStocks = [];
+        foreach ($articles as $article) {
+            $todayInventory = Inventory::where('article_id', $article->id)
+                ->whereDate('date', today())
+                ->first();
+            $todayStocks[$article->id] = $todayInventory ? $todayInventory->quantity : null;
+        }
+        
+        return view('inventories.index', compact(
+            'articles', 
+            'search', 
+            'todayInventories',
+            'families',
+            'familyId',
+            'previousStocks',
+            'todayStocks'
+        ));
     }
     
     public function create(Article $article): View
@@ -53,6 +89,8 @@ class InventoryController extends Controller
             'quantity' => 'required|numeric|min:0',
         ]);
         
+        $familyId = $request->input('family_id');
+        
         $existing = Inventory::where('article_id', $article->id)
             ->whereDate('date', today())
             ->first();
@@ -63,9 +101,15 @@ class InventoryController extends Controller
                 'quantity' => $validated['quantity'],
                 'existing_id' => $existing->id,
                 'existing_quantity' => $existing->quantity,
+                'family_id' => $familyId,
             ]);
             
-            return redirect()->route('inventories.confirm-duplicate', $article)
+            $redirectRoute = route('inventories.confirm-duplicate', $article);
+            if ($familyId) {
+                $redirectRoute .= '?family_id=' . $familyId;
+            }
+            
+            return redirect($redirectRoute)
                 ->with('warning', 'Cet article a déjà été inventorié aujourd\'hui !');
         }
         
@@ -74,7 +118,12 @@ class InventoryController extends Controller
             'date' => now(),
         ]);
         
-        return redirect()->route('inventories.index')
+        $redirectRoute = route('inventories.search');
+        if ($familyId) {
+            $redirectRoute .= '?family_id=' . $familyId;
+        }
+        
+        return redirect($redirectRoute)
             ->with('success', 'Inventaire enregistré avec succès !');
     }
     
@@ -99,6 +148,8 @@ class InventoryController extends Controller
             return redirect()->route('inventories.index');
         }
         
+        $familyId = $request->input('family_id', $pending['family_id'] ?? null);
+        
         $existing = Inventory::find($pending['existing_id']);
         $action = $request->input('action');
         
@@ -118,15 +169,26 @@ class InventoryController extends Controller
                 break;
         }
         
-        return redirect()->route('inventories.index')
+        $redirectRoute = route('inventories.search');
+        if ($familyId) {
+            $redirectRoute .= '?family_id=' . $familyId;
+        }
+        
+        return redirect($redirectRoute)
             ->with('success', 'Inventaire mis à jour !');
     }
     
     public function destroy(Inventory $inventory): RedirectResponse
     {
+        $familyId = $inventory->article?->family_id;
         $inventory->delete();
         
-        return redirect()->route('inventories.index')
+        $redirectRoute = route('inventories.search');
+        if ($familyId) {
+            $redirectRoute .= '?family_id=' . $familyId;
+        }
+        
+        return redirect($redirectRoute)
             ->with('success', 'Inventaire supprimé avec succès !');
     }
 }

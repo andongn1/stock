@@ -41,6 +41,7 @@
         <!-- Form -->
         <form method="POST" action="{{ route('inventories.store', $article) }}" class="space-y-6">
             @csrf
+            <input type="hidden" name="family_id" value="{{ request('family_id', '') }}">
             
             <div>
                 <label for="quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -76,7 +77,7 @@
                     Enregistrer l'inventaire
                 </button>
                 <a 
-                    href="{{ route('inventories.index') }}"
+                    href="{{ route('inventories.search') }}?family_id={{ request('family_id', '') }}"
                     class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium"
                 >
                     Annuler

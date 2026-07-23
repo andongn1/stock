@@ -3,21 +3,44 @@
 @section('title', 'Inventaire')
 
 @section('content')
-<div class="max-w-4xl mx-auto space-y-6">
+<div class="max-w-6xl mx-auto space-y-6">
     <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Inventaire des articles</h1>
     
-    <!-- Search Section -->
+    <!-- Family Selection -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <form method="GET" action="{{ route('inventories.search') }}" class="space-y-4">
-            <div class="flex gap-3">
-                <input 
-                    type="text" 
-                    name="search" 
-                    value="{{ request('search', '') }}"
-                    placeholder="Rechercher un article (nom)..."
-                    class="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+        <form method="POST" action="{{ route('inventories.search') }}" class="space-y-4">
+            @csrf
+            <div>
+                <label for="family_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Selectionner une famille
+                    <span class="text-red-500">*</span>
+                </label>
+                <select 
+                    id="family_id"
+                    name="family_id"
                     required
+                    class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
+                    <option value="">-- Selectionner une famille --</option>
+                    @foreach($families as $family)
+                        <option value="{{ $family->id }}" {{ (isset($familyId) && $familyId == $family->id) ? 'selected' : '' }}>
+                            {{ $family->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            
+            @if(isset($familyId) && $familyId)
+            <div class="flex gap-3">
+                <div class="flex-1 relative">
+                    <input 
+                        type="text" 
+                        name="search" 
+                        value="{{ request('search', '') }}"
+                        placeholder="Rechercher un article dans cette famille..."
+                        class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    >
+                </div>
                 <button 
                     type="submit"
                     class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium flex items-center space-x-2"
@@ -25,112 +48,90 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
-                    <span>Rechercher Article</span>
+                    <span>Rechercher</span>
                 </button>
+                @if(request('search'))
+                <a 
+                    href="{{ route('inventories.search') }}?family_id={{ $familyId }}"
+                    class="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium flex items-center space-x-2"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    <span>Effacer</span>
+                </a>
+                @endif
             </div>
+            @endif
         </form>
-        
-        <!-- Search Results -->
-        @if(!empty($search))
-        <div class="mt-6">
-            <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">
-                Resultats de recherche ({{ $articles->count() }})
-            </h3>
-            <div class="space-y-2 max-h-48 overflow-y-auto">
-                @forelse($articles as $article)
-                <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 flex justify-between items-center">
-                    <div>
-                        <span class="font-medium text-gray-800 dark:text-white">{{ $article->name }}</span>
-                        @if($article->brand)
-                        <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">- {{ $article->brand }}</span>
-                        @endif
-                        <div class="text-sm text-gray-600 dark:text-gray-400">
-                            {{ $article->packaging?->name ?? 'N/A' }} 
-                            @if($article->packaging_unit_quantity)
-                            ({{ $article->packaging_unit_quantity }} {{ $article->unit?->name ?? '' }})
-                            @endif
-                        </div>
-                    </div>
-                    <a 
-                        href="{{ route('inventories.create', $article) }}"
-                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors font-medium"
-                    >
-                        Inventorier cet article
-                    </a>
-                </div>
-                @empty
-                <div class="p-4 text-gray-500 dark:text-gray-400 text-center">
-                    Aucun article trouvé.
-                </div>
-                @endforelse
-            </div>
-        </div>
-        @endif
     </div>
     
-    <!-- Inventory Table -->
-    @if($todayInventories->isNotEmpty())
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-4">
-            Inventaire du {{ now()->format('d/m/Y') }}
-        </h3>
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead>
-                    <tr class="border-b border-gray-200 dark:border-gray-700">
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-300">Article</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-300">Conditionnement</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-300">Qté/Conditionnement</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-300">Qté Stockée</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-300">Valeur Totale (Quantité)</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-300">Valeur Totale (€)</th>
-                        <th class="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-300">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($todayInventories as $inventory)
-                    <tr class="border-b border-gray-100 dark:border-gray-700">
-                        <td class="py-3 px-4 text-gray-800 dark:text-white">
-                            {{ $inventory->article->name }}
-                        </td>
-                        <td class="py-3 px-4 text-gray-600 dark:text-gray-400">
-                            {{ $inventory->article->packaging?->name ?? 'N/A' }}
-                        </td>
-                        <td class="py-3 px-4 text-gray-600 dark:text-gray-400">
-                            {{ $inventory->article->packaging_unit_quantity }} {{ $inventory->article->unit?->name ?? '' }}
-                        </td>
-                        <td class="py-3 px-4 text-gray-800 dark:text-white">
-                            {{ $inventory->quantity }}
-                        </td>
-                        <td class="py-3 px-4 text-gray-800 dark:text-white">
-                            {{ number_format($inventory->total_quantity, 2) }} {{ $inventory->article->unit?->name ?? '' }}
-                        </td>
-                        <td class="py-3 px-4 text-gray-800 dark:text-white">
-                            {{ number_format($inventory->monetary_value, 2) }} €
-                        </td>
-                        <td class="py-3 px-4 text-right">
-                            <form method="POST" action="{{ route('inventories.destroy', $inventory) }}">
-                                @csrf
-                                @method('DELETE')
-                                <button 
-                                    type="submit"
-                                    onclick="return confirm('Etes-vous sûr de vouloir supprimer cet inventaire ?')"
-                                    class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium"
+    @if(isset($familyId) && $familyId && $articles->isNotEmpty())
+    <form method="POST" action="{{ route('inventories.search') }}">
+        @csrf
+        <input type="hidden" name="family_id" value="{{ $familyId }}">
+        <input type="hidden" name="search" value="{{ request('search', '') }}">
+        
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-gray-200 dark:border-gray-700">
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-300">Article</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-300">Conditionnement</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-300">Qté/Cond.</th>
+                            <th class="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-300">Stock Précédent</th>
+                            <th class="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-300">Stock Aujourd'hui</th>
+                            <th class="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-300">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($articles as $article)
+                        @php
+                            $hasTodayInventory = isset($todayStocks[$article->id]) && $todayStocks[$article->id] !== null;
+                            $previousStock = $previousStocks[$article->id] ?? 0;
+                            $todayStock = $todayStocks[$article->id] ?? null;
+                        @endphp
+                        <tr class="border-b border-gray-100 dark:border-gray-700 {{ $hasTodayInventory ? 'bg-green-50 dark:bg-green-900/20' : '' }}">
+                            <td class="py-3 px-4 text-gray-800 dark:text-white">
+                                {{ $article->name }}
+                                @if($article->brand)
+                                <br><span class="text-sm text-gray-500 dark:text-gray-400">{{ $article->brand }}</span>
+                                @endif
+                            </td>
+                            <td class="py-3 px-4 text-gray-600 dark:text-gray-400">
+                                {{ $article->packaging?->name ?? 'N/A' }}
+                            </td>
+                            <td class="py-3 px-4 text-gray-600 dark:text-gray-400">
+                                {{ $article->packaging_unit_quantity }} {{ $article->unit?->name ?? '' }}
+                            </td>
+                            <td class="py-3 px-4 text-right text-gray-800 dark:text-white">
+                                {{ $previousStock }}
+                            </td>
+                            <td class="py-3 px-4 text-right text-gray-800 dark:text-white">
+                                {{ $todayStock !== null ? $todayStock : '-' }}
+                            </td>
+                            <td class="py-3 px-4 text-right">
+                                <a 
+                                    href="{{ route('inventories.create', $article) }}?family_id={{ $familyId }}"
+                                    class="px-4 py-2 {{ $hasTodayInventory ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700' }} text-white text-sm rounded-lg transition-colors font-medium"
                                 >
-                                    <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                    </svg>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                                    {{ $hasTodayInventory ? 'Modifier inventaire' : 'Inventorier cet article' }}
+                                </a>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                {{ $articles->count() }} articles dans cette famille
+            </div>
         </div>
-        <div class="mt-4 text-sm text-gray-500 dark:text-gray-400">
-            Total: {{ $todayInventories->count() }} articles inventoriés aujourd'hui
-        </div>
+    </form>
+    @elseif(isset($familyId) && $familyId && $articles->isEmpty())
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center text-gray-500 dark:text-gray-400">
+        Aucun article trouvé dans cette famille.
     </div>
     @endif
 </div>

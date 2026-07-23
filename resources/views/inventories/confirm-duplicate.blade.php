@@ -40,6 +40,7 @@
             <form method="POST" action="{{ route('inventories.process-duplicate', $article) }}" class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                 @csrf
                 <input type="hidden" name="action" value="add">
+                <input type="hidden" name="family_id" value="{{ request('family_id', '') }}">
                 <div class="flex items-center justify-between">
                     <div>
                         <h4 class="font-medium text-gray-800 dark:text-white">Ajouter au stock existant</h4>
@@ -65,6 +66,7 @@
             <form method="POST" action="{{ route('inventories.process-duplicate', $article) }}" class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                 @csrf
                 <input type="hidden" name="action" value="replace">
+                <input type="hidden" name="family_id" value="{{ request('family_id', '') }}">
                 <div class="flex items-center justify-between">
                     <div>
                         <h4 class="font-medium text-gray-800 dark:text-white">Remplacer le stock existant</h4>
@@ -90,6 +92,7 @@
             <form method="POST" action="{{ route('inventories.process-duplicate', $article) }}" class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                 @csrf
                 <input type="hidden" name="action" value="cancel">
+                <input type="hidden" name="family_id" value="{{ request('family_id', '') }}">
                 <div class="flex items-center justify-between">
                     <div>
                         <h4 class="font-medium text-gray-800 dark:text-white">Annuler</h4>
