@@ -58,7 +58,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Inventory
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventories.index');
-    Route::post('/inventory', [InventoryController::class, 'search'])->name('inventories.search');
+    Route::match(['GET', 'POST'], '/inventory/search', [InventoryController::class, 'search'])->name('inventories.search');
     Route::get('/inventory/article/{article}', [InventoryController::class, 'create'])->name('inventories.create');
     Route::post('/inventory/article/{article}', [InventoryController::class, 'store'])->name('inventories.store');
     Route::get('/inventory/article/{article}/confirm-duplicate', [InventoryController::class, 'confirmDuplicate'])->name('inventories.confirm-duplicate');
