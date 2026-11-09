@@ -1,0 +1,32 @@
+{% extends 'layouts/guest.html.twig' %}
+
+{% block title %}Verifier Email{% endblock %}
+
+{% block content %}
+<div class="max-w-md w-full space-y-8">
+    <div class="text-center">
+        <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
+            Verifier votre adresse email
+        </h2>
+        
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+            Avant de continuer, pouvez-vous verifier votre email pour un lien de verification ?
+            Si vous n'avez pas recu l'email, nous pouvons vous en envoyer un autre.
+        </p>
+    </div>
+    
+    <div class="mt-8 flex flex-col sm:flex-row items-center justify-between">
+        <form method="POST" action="{{ path('verification.send') }}" class="w-full sm:w-auto">
+            <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Resend Verification Email
+            </button>
+        </form>
+        
+        <form method="POST" action="{{ path('logout') }}" class="mt-4 sm:mt-0 sm:ml-4">
+            <button type="submit" class="px-6 py-3 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                Logout
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

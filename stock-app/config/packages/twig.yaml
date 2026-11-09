@@ -1,0 +1,13 @@
+twig:
+    default_path: '%kernel.project_dir%/Templates'
+    form_themes: ['bootstrap_5_layout.html.twig']
+    date:
+        format: 'Y-m-d H:i:s'
+        interval_format: '%%d days'
+    number_format:
+        decimal: 2
+        decimal_point: '.'
+        thousands_separator: ','
+    autoescape: 'html'
+    strict_variables: '%kernel.debug%'
+    exception_controller: null

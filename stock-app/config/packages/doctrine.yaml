@@ -1,0 +1,21 @@
+doctrine:
+    dbal:
+        url: '%env(DATABASE_URL)%'
+        driver: 'pdo_sqlite'
+        server_version: '3.35.0'
+        types:
+            user_role: App\Enum\UserRoleType
+            price_type: App\Enum\PriceTypeType
+            sale_type: App\Enum\SaleTypeType
+    orm:
+        auto_generate_proxy_classes: true
+        enable_lazy_ghost_objects: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: true
+        mappings:
+            App:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/src/Entity'
+                prefix: 'App\Entity'
+                alias: App

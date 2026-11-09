@@ -1,0 +1,25 @@
+parameters:
+    app.locales: [fr, en]
+    
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+    
+    App\:
+        resource: '../src/*'
+        exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
+    
+    App\Controller\:
+        resource: '../src/Controller'
+        tags: ['controller.service_arguments']
+    
+    App\Command\:
+        resource: '../src/Command'
+        tags: ['console.command']
+    
+    App\Security\:
+        resource: '../src/Security'
+    
+    App\Data\:
+        resource: '../src/Data'

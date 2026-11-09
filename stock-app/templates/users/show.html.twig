@@ -1,0 +1,48 @@
+{% extends 'layouts/app.html.twig' %}
+
+{% block page_title %}Utilisateur - {{ user.name }}{% endblock %}
+
+{% block content %}
+<div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">{{ user.name }}</h1>
+        <a href="{{ path('users.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+            Retour
+        </a>
+    </div>
+    
+    <div class="space-y-6">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Email</label>
+            <p class="text-gray-900 dark:text-white">{{ user.email }}</p>
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Role</label>
+            <p class="text-gray-900 dark:text-white">
+                {% if user.role == 'admin' %}
+                <span class="px-2 py-1 text-sm font-medium text-white bg-red-500 rounded-full">Administrateur</span>
+                {% else %}
+                <span class="px-2 py-1 text-sm font-medium text-white bg-blue-500 rounded-full">Utilisateur</span>
+                {% endif %}
+            </p>
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Date de creation</label>
+            <p class="text-gray-500 dark:text-slate-400">{{ user.createdAt|date('d/m/Y H:i') }}</p>
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Derniere mise a jour</label>
+            <p class="text-gray-500 dark:text-slate-400">{{ user.updatedAt|date('d/m/Y H:i') }}</p>
+        </div>
+    </div>
+    
+    <div class="mt-6 flex justify-end space-x-4">
+        <a href="{{ path('users.edit', {'id': user.id}) }}" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+            Editer
+        </a>
+    </div>
+</div>
+{% endblock %}

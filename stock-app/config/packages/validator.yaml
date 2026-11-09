@@ -1,0 +1,4 @@
+framework:
+    validator:
+        enable_annotations: false
+        email_validation_mode: html5

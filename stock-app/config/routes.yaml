@@ -1,0 +1,7 @@
+# This file defines routes that don't have attribute routing in controllers yet
+# Most routes are defined using #[Route] attributes in controllers
+
+# Root redirect
+app_root:
+    path: /
+    controller: App\Controller\Web\DashboardController::root
