@@ -193,7 +193,7 @@ class AppFixtures extends Fixture
 
             // Create price history for each article with random price type
             $numPrices = rand(1, 3);
-            $priceTypes = [PriceType::PER_UNIT->value, PriceType::PER_PACKAGING->value];
+            $priceTypes = [PriceType::PER_UNIT, PriceType::PER_PACKAGING];
 
             // Start with a date in the past
             $validFrom = (clone $now)->sub(new \DateInterval('P' . rand(30, 365) . 'D'));
@@ -236,7 +236,7 @@ class AppFixtures extends Fixture
             $sellingPrice = new SellingPrice();
             $sellingPrice->setArticle($article);
             $sellingPrice->setPriceTtc(number_format(rand(15, 1500) + rand(0, 99) / 100, 2, '.', ''));
-            $saleTypes = [SaleType::PER_UNIT->value, SaleType::PER_PACKAGING->value];
+            $saleTypes = [SaleType::PER_UNIT, SaleType::PER_PACKAGING];
             $sellingPrice->setSaleType($saleTypes[array_rand($saleTypes)]);
             $sellingPrice->setQuantity(rand(1, 10));
             $sellingPrice->setCurrency('EUR');
