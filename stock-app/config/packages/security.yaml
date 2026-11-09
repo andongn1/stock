@@ -32,7 +32,10 @@ security:
             form_login:
                 login_path: login
                 check_path: login
+                username_parameter: email
+                password_parameter: password
                 enable_csrf: true
+                default_target_path: dashboard
             logout:
                 path: logout
                 target: login

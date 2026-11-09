@@ -54,4 +54,36 @@ class AuthControllerTest extends WebTestCase
 
         $this->assertResponseRedirects('/login');
     }
+
+    public function testUsersCanLoginWithValidCredentials(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/login');
+        $this->assertResponseIsSuccessful();
+
+        $form = $crawler->selectButton('Log in')->form([
+            'email' => 'admin@mercuriale.com',
+            'password' => 'password',
+        ]);
+        $client->submit($form);
+
+        $this->assertResponseRedirects('/dashboard');
+        $client->followRedirect();
+        $this->assertResponseIsSuccessful();
+    }
+
+    public function testUsersCannotLoginWithInvalidPassword(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/login');
+
+        $form = $crawler->selectButton('Log in')->form([
+            'email' => 'admin@mercuriale.com',
+            'password' => 'wrong-password',
+        ]);
+        $client->submit($form);
+
+        // Should redirect back to login
+        $this->assertResponseRedirects('/login');
+    }
 }
