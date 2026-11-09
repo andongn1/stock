@@ -58,21 +58,10 @@ class InventoryController extends AbstractController
 
         $articles = $queryBuilder->getQuery()->getResult();
 
-        $today = new \DateTime();
-        $todayString = $today->format('Y-m-d');
-
-        $todayInventories = $this->inventoryRepository->createQueryBuilder('i')
-            ->leftJoin('i.article', 'a')
-            ->leftJoin('a.packaging', 'p')
-            ->leftJoin('a.unit', 'u')
-            ->leftJoin('a.priceHistories', 'ph')
-            ->where('DATE(i.date) = :today')
-            ->setParameter('today', $todayString)
-            ->orderBy('i.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
-
+        $todayInventories = $this->getTodayInventories();
         $families = $this->familyRepository->findBy([], ['name' => 'ASC']);
+
+        [$todayStart, $tomorrowStart] = $this->getTodayRange();
 
         $previousStocks = [];
         $todayStocks = [];
@@ -80,9 +69,9 @@ class InventoryController extends AbstractController
         foreach ($articles as $article) {
             $lastInventory = $this->inventoryRepository->createQueryBuilder('i')
                 ->where('i.article = :article')
-                ->andWhere('DATE(i.date) < :today')
+                ->andWhere('i.date < :todayStart')
                 ->setParameter('article', $article)
-                ->setParameter('today', $todayString)
+                ->setParameter('todayStart', $todayStart)
                 ->orderBy('i.date', 'DESC')
                 ->setMaxResults(1)
                 ->getQuery()
@@ -91,9 +80,11 @@ class InventoryController extends AbstractController
 
             $todayInventory = $this->inventoryRepository->createQueryBuilder('i')
                 ->where('i.article = :article')
-                ->andWhere('DATE(i.date) = :today')
+                ->andWhere('i.date >= :todayStart')
+                ->andWhere('i.date < :tomorrowStart')
                 ->setParameter('article', $article)
-                ->setParameter('today', $todayString)
+                ->setParameter('todayStart', $todayStart)
+                ->setParameter('tomorrowStart', $tomorrowStart)
                 ->setMaxResults(1)
                 ->getQuery()
                 ->getOneOrNullResult();
@@ -114,24 +105,11 @@ class InventoryController extends AbstractController
     #[Route('/article/{id}', name: 'inventories.create', methods: ['GET'])]
     public function create(Article $article): Response
     {
-        $today = new \DateTime();
-        $todayString = $today->format('Y-m-d');
-
-        $todayInventories = $this->inventoryRepository->createQueryBuilder('i')
-            ->leftJoin('i.article', 'a')
-            ->leftJoin('a.packaging', 'p')
-            ->leftJoin('a.unit', 'u')
-            ->where('DATE(i.date) = :today')
-            ->setParameter('today', $todayString)
-            ->orderBy('i.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
-
         $form = $this->createForm(InventoryType::class, new Inventory());
 
         return $this->render('inventories/create.html.twig', [
             'article' => $article,
-            'todayInventories' => $todayInventories,
+            'todayInventories' => $this->getTodayInventories(),
             'form' => $form->createView(),
         ]);
     }
@@ -146,14 +124,15 @@ class InventoryController extends AbstractController
         $familyId = $request->query->get('family_id');
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $today = new \DateTime();
-            $todayString = $today->format('Y-m-d');
+            [$todayStart, $tomorrowStart] = $this->getTodayRange();
 
             $existing = $this->inventoryRepository->createQueryBuilder('i')
                 ->where('i.article = :article')
-                ->andWhere('DATE(i.date) = :today')
+                ->andWhere('i.date >= :todayStart')
+                ->andWhere('i.date < :tomorrowStart')
                 ->setParameter('article', $article)
-                ->setParameter('today', $todayString)
+                ->setParameter('todayStart', $todayStart)
+                ->setParameter('tomorrowStart', $tomorrowStart)
                 ->getQuery()
                 ->getOneOrNullResult();
 
@@ -191,19 +170,9 @@ class InventoryController extends AbstractController
             return $this->redirect($redirectRoute);
         }
 
-        $todayInventories = $this->inventoryRepository->createQueryBuilder('i')
-            ->leftJoin('i.article', 'a')
-            ->leftJoin('a.packaging', 'p')
-            ->leftJoin('a.unit', 'u')
-            ->where('DATE(i.date) = :today')
-            ->setParameter('today', (new \DateTime())->format('Y-m-d'))
-            ->orderBy('i.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
-
         return $this->render('inventories/create.html.twig', [
             'article' => $article,
-            'todayInventories' => $todayInventories,
+            'todayInventories' => $this->getTodayInventories(),
             'form' => $form->createView(),
         ]);
     }
@@ -277,7 +246,7 @@ class InventoryController extends AbstractController
     public function destroy(Inventory $inventory): RedirectResponse
     {
         $article = $inventory->getArticle();
-        $familyId = $article ? $article->getFamily() ? $article->getFamily()->getId() : null : null;
+        $familyId = $article && $article->getFamily() ? $article->getFamily()->getId() : null;
 
         $this->entityManager->remove($inventory);
         $this->entityManager->flush();
@@ -290,5 +259,30 @@ class InventoryController extends AbstractController
         $this->addFlash('success', 'Inventaire supprimé avec succès !');
 
         return $this->redirect($redirectRoute);
+    }
+
+    private function getTodayRange(): array
+    {
+        $todayStart = (new \DateTime())->setTime(0, 0, 0);
+        $tomorrowStart = (clone $todayStart)->modify('+1 day');
+        return [$todayStart, $tomorrowStart];
+    }
+
+    private function getTodayInventories(): array
+    {
+        [$todayStart, $tomorrowStart] = $this->getTodayRange();
+
+        return $this->inventoryRepository->createQueryBuilder('i')
+            ->leftJoin('i.article', 'a')
+            ->leftJoin('a.packaging', 'p')
+            ->leftJoin('a.unit', 'u')
+            ->leftJoin('a.priceHistories', 'ph')
+            ->where('i.date >= :todayStart')
+            ->andWhere('i.date < :tomorrowStart')
+            ->setParameter('todayStart', $todayStart)
+            ->setParameter('tomorrowStart', $tomorrowStart)
+            ->orderBy('i.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
     }
 }

@@ -47,19 +47,7 @@ class EntryController extends AbstractController
             $articles = $queryBuilder->getQuery()->getResult();
         }
 
-        $today = new \DateTime();
-        $todayString = $today->format('Y-m-d');
-
-        $todayEntries = $this->entryRepository->createQueryBuilder('e')
-            ->leftJoin('e.article', 'a')
-            ->leftJoin('a.packaging', 'p')
-            ->leftJoin('a.unit', 'u')
-            ->leftJoin('a.priceHistories', 'ph')
-            ->where('DATE(e.date) = :today')
-            ->setParameter('today', $todayString)
-            ->orderBy('e.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
+        $todayEntries = $this->getTodayEntries();
 
         return $this->render('entries/index.html.twig', [
             'articles' => $articles,
@@ -71,21 +59,11 @@ class EntryController extends AbstractController
     #[Route('/article/{id}', name: 'entries.create', methods: ['GET'])]
     public function create(Article $article): Response
     {
-        $todayEntries = $this->entryRepository->createQueryBuilder('e')
-            ->leftJoin('e.article', 'a')
-            ->leftJoin('a.packaging', 'p')
-            ->leftJoin('a.unit', 'u')
-            ->where('DATE(e.date) = :today')
-            ->setParameter('today', (new \DateTime())->format('Y-m-d'))
-            ->orderBy('e.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
-
         $form = $this->createForm(EntryType::class, new Entry());
 
         return $this->render('entries/create.html.twig', [
             'article' => $article,
-            'todayEntries' => $todayEntries,
+            'todayEntries' => $this->getTodayEntries(),
             'form' => $form->createView(),
         ]);
     }
@@ -108,19 +86,9 @@ class EntryController extends AbstractController
             return $this->redirectToRoute('entries.index');
         }
 
-        $todayEntries = $this->entryRepository->createQueryBuilder('e')
-            ->leftJoin('e.article', 'a')
-            ->leftJoin('a.packaging', 'p')
-            ->leftJoin('a.unit', 'u')
-            ->where('DATE(e.date) = :today')
-            ->setParameter('today', (new \DateTime())->format('Y-m-d'))
-            ->orderBy('e.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
-
         return $this->render('entries/create.html.twig', [
             'article' => $article,
-            'todayEntries' => $todayEntries,
+            'todayEntries' => $this->getTodayEntries(),
             'form' => $form->createView(),
         ]);
     }
@@ -134,5 +102,24 @@ class EntryController extends AbstractController
         $this->addFlash('success', 'Entrée de stock supprimée avec succès !');
 
         return $this->redirectToRoute('entries.index');
+    }
+
+    private function getTodayEntries(): array
+    {
+        $todayStart = (new \DateTime())->setTime(0, 0, 0);
+        $tomorrowStart = (clone $todayStart)->modify('+1 day');
+
+        return $this->entryRepository->createQueryBuilder('e')
+            ->leftJoin('e.article', 'a')
+            ->leftJoin('a.packaging', 'p')
+            ->leftJoin('a.unit', 'u')
+            ->leftJoin('a.priceHistories', 'ph')
+            ->where('e.date >= :todayStart')
+            ->andWhere('e.date < :tomorrowStart')
+            ->setParameter('todayStart', $todayStart)
+            ->setParameter('tomorrowStart', $tomorrowStart)
+            ->orderBy('e.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
     }
 }
