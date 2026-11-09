@@ -10,7 +10,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Unique;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity as Unique;
 
 class VatType extends AbstractType
 {
@@ -21,20 +21,14 @@ class VatType extends AbstractType
                 'label' => 'Taux',
                 'scale' => 2,
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Le taux de TVA est obligatoire.',
-                    ]),
+                    new NotBlank(message: 'Le taux de TVA est obligatoire.'),
                 ],
             ])
             ->add('label', TextType::class, [
                 'label' => 'Libelle',
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Le libelle est obligatoire.',
-                    ]),
-                    new Length([
-                        'max' => 255,
-                    ]),
+                    new NotBlank(message: 'Le libelle est obligatoire.'),
+                    new Length(max: 255),
                 ],
             ]);
     }

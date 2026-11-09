@@ -9,7 +9,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Unique;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity as Unique;
 
 class PackagingType extends AbstractType
 {
@@ -19,17 +19,9 @@ class PackagingType extends AbstractType
             ->add('name', TextType::class, [
                 'label' => 'Nom',
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Le nom du conditionnement est obligatoire.',
-                    ]),
-                    new Length([
-                        'max' => 255,
-                    ]),
-                    new Unique([
-                        'entityClass' => Packaging::class,
-                        'fields' => ['name'],
-                        'message' => 'Ce conditionnement existe deja.',
-                    ]),
+                    new NotBlank(message: 'Le nom du conditionnement est obligatoire.'),
+                    new Length(max: 255),
+                    new Unique(entityClass: Packaging::class, fields: ['name'], message: 'Ce conditionnement existe deja.'),
                 ],
             ]);
     }

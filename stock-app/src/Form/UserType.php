@@ -21,36 +21,24 @@ class UserType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $isEdit = $options['is_edit'] ?? false;
+        $attrClass = ['class' => 'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'];
 
         $builder
             ->add('name', TextType::class, [
                 'label' => 'Nom',
-                'attr' => ['class' => 'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'],
+                'attr' => $attrClass,
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Le nom est obligatoire.',
-                    ]),
-                    new Length([
-                        'max' => 255,
-                        'maxMessage' => 'Le nom ne peut pas dépasser {{ limit }} caractères.',
-                    ]),
+                    new NotBlank(message: 'Le nom est obligatoire.'),
+                    new Length(max: 255, maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères.'),
                 ],
             ])
             ->add('email', EmailType::class, [
                 'label' => 'Email',
-                'attr' => ['class' => 'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'],
+                'attr' => $attrClass,
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'L\'email est obligatoire.',
-                    ]),
-                    new Email([
-                        'mode' => 'html5',
-                        'message' => 'Veuillez entrer une adresse email valide.',
-                    ]),
-                    new Length([
-                        'max' => 255,
-                        'maxMessage' => 'L\'email ne peut pas dépasser {{ limit }} caractères.',
-                    ]),
+                    new NotBlank(message: 'L\'email est obligatoire.'),
+                    new Email(mode: 'html5', message: 'Veuillez entrer une adresse email valide.'),
+                    new Length(max: 255, maxMessage: 'L\'email ne peut pas dépasser {{ limit }} caractères.'),
                 ],
             ])
             ->add('role', ChoiceType::class, [
@@ -65,11 +53,9 @@ class UserType extends AbstractType
                 'choice_label' => function (?UserRole $role): string {
                     return $role?->label() ?? '';
                 },
-                'attr' => ['class' => 'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'],
+                'attr' => $attrClass,
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Le rôle est obligatoire.',
-                    ]),
+                    new NotBlank(message: 'Le rôle est obligatoire.'),
                 ],
             ]);
 
@@ -77,18 +63,13 @@ class UserType extends AbstractType
             $builder->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'invalid_message' => 'Les mots de passe doivent correspondre.',
-                'options' => ['attr' => ['class' => 'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6']],
+                'options' => ['attr' => $attrClass],
                 'required' => !$isEdit,
                 'first_options' => ['label' => 'Mot de passe'],
                 'second_options' => ['label' => 'Confirmer le mot de passe'],
                 'mapped' => false,
                 'constraints' => [
-                    new Length([
-                        'min' => 8,
-                        'minMessage' => 'Le mot de passe doit contenir au moins {{ limit }} caractères.',
-                        'max' => 255,
-                        'maxMessage' => 'Le mot de passe ne peut pas dépasser {{ limit }} caractères.',
-                    ]),
+                    new Length(min: 8, minMessage: 'Le mot de passe doit contenir au moins {{ limit }} caractères.', max: 255, maxMessage: 'Le mot de passe ne peut pas dépasser {{ limit }} caractères.'),
                 ],
             ]);
         }

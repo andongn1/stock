@@ -7,7 +7,7 @@
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             Gestion des Sous-Familles
         </h2>
-        <a href="{{ path('sub_families.create') }}" 
+        <a href="{{ path('sub-familles.create') }}" 
            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow transition-colors flex items-center space-x-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -47,11 +47,11 @@
                                             {{ subFamily.family.name }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <a href="{{ path('sub_families.edit', {'id': subFamily.id}) }}" 
+                                            <a href="{{ path('sub-familles.edit', {'id': subFamily.id}) }}" 
                                                class="text-green-600 hover:text-green-900 mr-2">
                                                 Editer
                                             </a>
-                                            <form action="{{ path('sub_families.destroy', {'id': subFamily.id}) }}" 
+                                            <form action="{{ path('sub-familles.destroy', {'id': subFamily.id}) }}" 
                                                   method="POST" class="inline-block">
                                                 <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ subFamily.id) }}">
                                                 <input type="hidden" name="_method" value="DELETE">

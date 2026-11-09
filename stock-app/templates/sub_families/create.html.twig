@@ -15,7 +15,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <form action="{{ path('sub_families.store') }}" method="POST">
+                    <form action="{{ path('sub-familles.store') }}" method="POST">
                         {{ form_row(form.name, {'label': 'Nom', 'attr': {'class': 'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500'}}) }}
                         {{ form_row(form.family, {'label': 'Famille', 'attr': {'class': 'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500'}}) }}
                         
@@ -23,7 +23,7 @@
                             <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow transition-colors">
                                 Créer la Sous-Famille
                             </button>
-                            <a href="{{ path('sub_families.index') }}" class="ml-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors">
+                            <a href="{{ path('sub-familles.index') }}" class="ml-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors">
                                 Annuler
                             </a>
                         </div>

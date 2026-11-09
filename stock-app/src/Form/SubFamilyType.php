@@ -20,13 +20,8 @@ class SubFamilyType extends AbstractType
             ->add('name', TextType::class, [
                 'label' => 'Nom',
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Le nom de la sous-famille est obligatoire.',
-                    ]),
-                    new Length([
-                        'max' => 255,
-                        'maxMessage' => 'Le nom ne peut pas depasser 255 caracteres.',
-                    ]),
+                    new NotBlank(message: 'Le nom de la sous-famille est obligatoire.'),
+                    new Length(max: 255, maxMessage: 'Le nom ne peut pas depasser 255 caracteres.'),
                 ],
             ])
             ->add('family', EntityType::class, [
@@ -35,9 +30,7 @@ class SubFamilyType extends AbstractType
                 'choice_label' => 'name',
                 'placeholder' => 'Selectionnez une famille',
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'La famille est obligatoire.',
-                    ]),
+                    new NotBlank(message: 'La famille est obligatoire.'),
                 ],
             ]);
     }

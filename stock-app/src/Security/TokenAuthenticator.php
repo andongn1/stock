@@ -24,8 +24,10 @@ class TokenAuthenticator extends AbstractAuthenticator
 
     public function supports(Request $request): ?bool
     {
-        // Only support API routes
-        return str_starts_with($request->getPathInfo(), '/api/');
+        // Only support API routes that have an Authorization header (Bearer token)
+        // This allows /api/login without Authorization to pass through to the controller
+        return str_starts_with($request->getPathInfo(), '/api/')
+            && $request->headers->get('Authorization') !== null;
     }
 
     public function authenticate(Request $request): Passport

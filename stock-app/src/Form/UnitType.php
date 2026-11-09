@@ -9,7 +9,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Unique;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity as Unique;
 
 class UnitType extends AbstractType
 {
@@ -19,17 +19,9 @@ class UnitType extends AbstractType
             ->add('name', TextType::class, [
                 'label' => 'Nom',
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Le nom de l\'unite est obligatoire.',
-                    ]),
-                    new Length([
-                        'max' => 255,
-                    ]),
-                    new Unique([
-                        'entityClass' => Unit::class,
-                        'fields' => ['name'],
-                        'message' => 'Cette unite existe deja.',
-                    ]),
+                    new NotBlank(message: 'Le nom de l\'unité est obligatoire.'),
+                    new Length(max: 255),
+                    new Unique(entityClass: Unit::class, fields: ['name'], message: 'Cette unité existe déjà.'),
                 ],
             ]);
     }

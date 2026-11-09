@@ -12,38 +12,38 @@
                 <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
                     <a href="{{ path('dashboard') }}" 
                        class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out
-                              {{ app.request.route == 'dashboard' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                              {{ app.request.attributes.get('_route') == 'dashboard' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                         Dashboard
                     </a>
                     <a href="{{ path('articles.index') }}" 
                        class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out
-                              {{ app.request.route == 'articles.index' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                              {{ app.request.attributes.get('_route') == 'articles.index' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                         Articles
                     </a>
                     <a href="{{ path('families.index') }}" 
                        class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out
-                              {{ app.request.route == 'families.index' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                              {{ app.request.attributes.get('_route') == 'families.index' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                         Families
                     </a>
                     <a href="{{ path('suppliers.index') }}" 
                        class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out
-                              {{ app.request.route == 'suppliers.index' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                              {{ app.request.attributes.get('_route') == 'suppliers.index' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                         Fournisseurs
                     </a>
                     <a href="{{ path('inventories.index') }}" 
                        class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out
-                              {{ app.request.route == 'inventories.index' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                              {{ app.request.attributes.get('_route') == 'inventories.index' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                         Inventaires
                     </a>
                     <a href="{{ path('entries.index') }}" 
                        class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out
-                              {{ app.request.route == 'entries.index' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                              {{ app.request.attributes.get('_route') == 'entries.index' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                         Entrées
                     </a>
                     {% if app.user and app.user.isAdmin() %}
                         <a href="{{ path('users.index') }}" 
                            class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out
-                                  {{ app.request.route == 'users.index' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                                  {{ app.request.attributes.get('_route') == 'users.index' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                             Utilisateurs
                         </a>
                     {% endif %}

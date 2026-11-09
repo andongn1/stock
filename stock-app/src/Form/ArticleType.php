@@ -20,20 +20,20 @@ class ArticleType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $attrClass = ['class' => 'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'];
+
         $builder
             ->add('name', TextType::class, [
                 'label' => 'Nom',
-                'attr' => ['class' => 'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'],
+                'attr' => $attrClass,
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Le nom de l\'article est obligatoire.',
-                    ]),
+                    new NotBlank(message: 'Le nom de l\'article est obligatoire.'),
                 ],
             ])
             ->add('brand', TextType::class, [
                 'label' => 'Marque',
                 'required' => false,
-                'attr' => ['class' => 'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'],
+                'attr' => $attrClass,
             ])
             ->add('family', EntityType::class, [
                 'label' => 'Famille',
@@ -41,11 +41,9 @@ class ArticleType extends AbstractType
                 'choice_label' => 'name',
                 'choice_value' => 'id',
                 'placeholder' => 'Sélectionnez une famille',
-                'attr' => ['class' => 'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'],
+                'attr' => $attrClass,
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'La famille est obligatoire.',
-                    ]),
+                    new NotBlank(message: 'La famille est obligatoire.'),
                 ],
             ])
             ->add('subFamily', EntityType::class, [
@@ -54,11 +52,9 @@ class ArticleType extends AbstractType
                 'choice_label' => 'name',
                 'choice_value' => 'id',
                 'placeholder' => 'Sélectionnez une sous-famille',
-                'attr' => ['class' => 'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'],
+                'attr' => $attrClass,
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'La sous-famille est obligatoire.',
-                    ]),
+                    new NotBlank(message: 'La sous-famille est obligatoire.'),
                 ],
             ])
             ->add('unit', EntityType::class, [
@@ -67,11 +63,9 @@ class ArticleType extends AbstractType
                 'choice_label' => 'name',
                 'choice_value' => 'id',
                 'placeholder' => 'Sélectionnez une unité',
-                'attr' => ['class' => 'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'],
+                'attr' => $attrClass,
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'L\'unité est obligatoire.',
-                    ]),
+                    new NotBlank(message: 'L\'unité est obligatoire.'),
                 ],
             ])
             ->add('packaging', EntityType::class, [
@@ -80,17 +74,15 @@ class ArticleType extends AbstractType
                 'choice_label' => 'name',
                 'choice_value' => 'id',
                 'placeholder' => 'Sélectionnez un conditionnement',
-                'attr' => ['class' => 'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'],
+                'attr' => $attrClass,
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Le conditionnement est obligatoire.',
-                    ]),
+                    new NotBlank(message: 'Le conditionnement est obligatoire.'),
                 ],
             ])
             ->add('packagingUnitQuantity', NumberType::class, [
                 'label' => 'Quantité unitaire',
                 'required' => false,
-                'attr' => ['class' => 'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'],
+                'attr' => $attrClass,
             ])
             ->add('vat', EntityType::class, [
                 'label' => 'TVA',
@@ -98,11 +90,9 @@ class ArticleType extends AbstractType
                 'choice_label' => 'label',
                 'choice_value' => 'id',
                 'placeholder' => 'Sélectionnez une TVA',
-                'attr' => ['class' => 'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'],
+                'attr' => $attrClass,
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'La TVA est obligatoire.',
-                    ]),
+                    new NotBlank(message: 'La TVA est obligatoire.'),
                 ],
             ]);
     }
