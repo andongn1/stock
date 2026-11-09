@@ -2,137 +2,168 @@
 
 namespace App\Controller\Api;
 
-use App\Controller\Controller;
-use App\Data\Article\CreateArticleDto;
-use App\Data\Article\UpdateArticleDto;
 use App\Entity\Article;
-use App\Entity\Family;
-use App\Entity\Packaging;
 use App\Entity\PriceHistory;
-use App\Entity\SubFamily;
-use App\Entity\Supplier;
-use App\Entity\Unit;
-use App\Entity\Vat;
+use App\Form\ArticleType;
+use App\Repository\ArticleRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/articles')]
-class ArticleController extends Controller
+#[IsGranted('ROLE_USER')]
+class ArticleController extends AbstractController
 {
     public function __construct(
-        private EntityManagerInterface $em,
-        private SerializerInterface $serializer,
-        private ValidatorInterface $validator
-    ) {}
+        private EntityManagerInterface $entityManager,
+        private ArticleRepository $articleRepository,
+        private SerializerInterface $serializer
+    ) {
+    }
 
     #[Route('', name: 'api.articles.index', methods: ['GET'])]
     public function index(): Response
     {
-        $articles = $this->em->getRepository(Article::class)->findBy([], ['createdAt' => 'DESC']);
-        
-        $data = array_map(function(Article $article) {
-            return $this->serializeArticle($article, true, false);
-        }, $articles);
+        $articles = $this->articleRepository->findBy([], ['id' => 'DESC']);
 
-        return $this->json($data);
+        $data = [];
+        foreach ($articles as $article) {
+            $data[] = $this->serializeArticle($article);
+        }
+
+        return new JsonResponse($data);
     }
 
     #[Route('', name: 'api.articles.store', methods: ['POST'])]
     public function store(Request $request): Response
     {
-        $dto = new CreateArticleDto();
-        $this->serializer->deserialize($request->getContent(), CreateArticleDto::class, 'json', [
-            'object_to_populate' => $dto,
-        ]);
-
-        $errors = $this->validator->validate($dto);
-        if (count($errors) > 0) {
-            return $this->json(['errors' => (string) $errors], 422);
-        }
-
         $article = new Article();
-        $article->setName($dto->name);
-        $article->setBrand($dto->brand);
-        $article->setPackagingUnitQuantity($dto->packaging_unit_quantity);
-
-        if ($dto->family_id) {
-            $article->setFamily($this->em->getRepository(Family::class)->find($dto->family_id));
-        }
-        if ($dto->sub_family_id) {
-            $article->setSubFamily($this->em->getRepository(SubFamily::class)->find($dto->sub_family_id));
-        }
-        if ($dto->unit_id) {
-            $article->setUnit($this->em->getRepository(Unit::class)->find($dto->unit_id));
-        }
-        if ($dto->packaging_id) {
-            $article->setPackaging($this->em->getRepository(Packaging::class)->find($dto->packaging_id));
-        }
-        if ($dto->vat_id) {
-            $article->setVat($this->em->getRepository(Vat::class)->find($dto->vat_id));
-        }
+        $form = $this->createForm(ArticleType::class, $article);
         
-        $this->em->persist($article);
-        $this->em->flush();
+        $data = json_decode($request->getContent(), true);
+        if (is_array($data)) {
+            // Manually map data to article
+            if (isset($data['name'])) {
+                $article->setName($data['name']);
+            }
+            if (isset($data['brand'])) {
+                $article->setBrand($data['brand']);
+            }
+            if (isset($data['family_id'])) {
+                $family = $this->entityManager->getRepository('App\Entity\Family')->find($data['family_id']);
+                if ($family) {
+                    $article->setFamily($family);
+                }
+            }
+            if (isset($data['sub_family_id'])) {
+                $subFamily = $this->entityManager->getRepository('App\Entity\SubFamily')->find($data['sub_family_id']);
+                if ($subFamily) {
+                    $article->setSubFamily($subFamily);
+                }
+            }
+            if (isset($data['unit_id'])) {
+                $unit = $this->entityManager->getRepository('App\Entity\Unit')->find($data['unit_id']);
+                if ($unit) {
+                    $article->setUnit($unit);
+                }
+            }
+            if (isset($data['packaging_id'])) {
+                $packaging = $this->entityManager->getRepository('App\Entity\Packaging')->find($data['packaging_id']);
+                if ($packaging) {
+                    $article->setPackaging($packaging);
+                }
+            }
+            if (isset($data['packaging_unit_quantity'])) {
+                $article->setPackagingUnitQuantity($data['packaging_unit_quantity']);
+            }
+            if (isset($data['vat_id'])) {
+                $vat = $this->entityManager->getRepository('App\Entity\Vat')->find($data['vat_id']);
+                if ($vat) {
+                    $article->setVat($vat);
+                }
+            }
+            
+            $this->entityManager->persist($article);
+            $this->entityManager->flush();
+            
+            return new JsonResponse($this->serializeArticle($article), Response::HTTP_CREATED);
+        }
 
-        return $this->json($this->serializeArticle($article, true, false), 201);
+        return new JsonResponse(['error' => 'Invalid data'], Response::HTTP_BAD_REQUEST);
     }
 
     #[Route('/{id}', name: 'api.articles.show', methods: ['GET'])]
     public function show(Article $article): Response
     {
-        return $this->json($this->serializeArticle($article, true, true));
+        return new JsonResponse($this->serializeArticle($article, true));
     }
 
     #[Route('/{id}', name: 'api.articles.update', methods: ['PUT', 'PATCH'])]
     public function update(Request $request, Article $article): Response
     {
-        $dto = new UpdateArticleDto();
-        $this->serializer->deserialize($request->getContent(), UpdateArticleDto::class, 'json', [
-            'object_to_populate' => $dto,
-        ]);
-
-        $errors = $this->validator->validate($dto);
-        if (count($errors) > 0) {
-            return $this->json(['errors' => (string) $errors], 422);
-        }
-
-        $article->setName($dto->name);
-        $article->setBrand($dto->brand);
-        $article->setPackagingUnitQuantity($dto->packaging_unit_quantity);
-
-        if ($dto->family_id) {
-            $article->setFamily($this->em->getRepository(Family::class)->find($dto->family_id));
-        }
-        if ($dto->sub_family_id) {
-            $article->setSubFamily($this->em->getRepository(SubFamily::class)->find($dto->sub_family_id));
-        }
-        if ($dto->unit_id) {
-            $article->setUnit($this->em->getRepository(Unit::class)->find($dto->unit_id));
-        }
-        if ($dto->packaging_id) {
-            $article->setPackaging($this->em->getRepository(Packaging::class)->find($dto->packaging_id));
-        }
-        if ($dto->vat_id) {
-            $article->setVat($this->em->getRepository(Vat::class)->find($dto->vat_id));
-        }
+        $data = json_decode($request->getContent(), true);
         
-        $this->em->flush();
+        if (is_array($data)) {
+            if (isset($data['name'])) {
+                $article->setName($data['name']);
+            }
+            if (isset($data['brand'])) {
+                $article->setBrand($data['brand']);
+            }
+            if (isset($data['family_id'])) {
+                $family = $this->entityManager->getRepository('App\Entity\Family')->find($data['family_id']);
+                if ($family) {
+                    $article->setFamily($family);
+                }
+            }
+            if (isset($data['sub_family_id'])) {
+                $subFamily = $this->entityManager->getRepository('App\Entity\SubFamily')->find($data['sub_family_id']);
+                if ($subFamily) {
+                    $article->setSubFamily($subFamily);
+                }
+            }
+            if (isset($data['unit_id'])) {
+                $unit = $this->entityManager->getRepository('App\Entity\Unit')->find($data['unit_id']);
+                if ($unit) {
+                    $article->setUnit($unit);
+                }
+            }
+            if (isset($data['packaging_id'])) {
+                $packaging = $this->entityManager->getRepository('App\Entity\Packaging')->find($data['packaging_id']);
+                if ($packaging) {
+                    $article->setPackaging($packaging);
+                }
+            }
+            if (isset($data['packaging_unit_quantity'])) {
+                $article->setPackagingUnitQuantity($data['packaging_unit_quantity']);
+            }
+            if (isset($data['vat_id'])) {
+                $vat = $this->entityManager->getRepository('App\Entity\Vat')->find($data['vat_id']);
+                if ($vat) {
+                    $article->setVat($vat);
+                }
+            }
+            
+            $this->entityManager->flush();
+            
+            return new JsonResponse($this->serializeArticle($article));
+        }
 
-        return $this->json($this->serializeArticle($article, true, false));
+        return new JsonResponse(['error' => 'Invalid data'], Response::HTTP_BAD_REQUEST);
     }
 
     #[Route('/{id}', name: 'api.articles.destroy', methods: ['DELETE'])]
     public function destroy(Article $article): Response
     {
-        $this->em->remove($article);
-        $this->em->flush();
+        $this->entityManager->remove($article);
+        $this->entityManager->flush();
 
-        return new JsonResponse(null, 204);
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
     #[Route('/search', name: 'api.articles.search', methods: ['GET'])]
@@ -140,137 +171,107 @@ class ArticleController extends Controller
     {
         $search = $request->query->get('search', '');
         
-        $queryBuilder = $this->em->getRepository(Article::class)->createQueryBuilder('a');
-        
-        if ($search) {
-            $queryBuilder->where('a.name LIKE :search OR a.brand LIKE :search')
+        $queryBuilder = $this->articleRepository->createQueryBuilder('a');
+        $queryBuilder
+            ->leftJoin('a.family', 'f')
+            ->leftJoin('a.subFamily', 'sf')
+            ->leftJoin('a.unit', 'u')
+            ->leftJoin('a.packaging', 'p')
+            ->leftJoin('a.vat', 'v')
+            ->leftJoin('a.priceHistories', 'ph')
+            ->orderBy('a.id', 'DESC');
+
+        if (!empty($search)) {
+            $queryBuilder
+                ->where('a.name LIKE :search OR a.brand LIKE :search')
                 ->setParameter('search', '%' . $search . '%');
         }
-        
-        $queryBuilder->orderBy('a.createdAt', 'DESC');
-        $articles = $queryBuilder->getQuery()->getResult();
-        
-        $data = array_map(function(Article $article) {
-            return $this->serializeArticle($article, true, false);
-        }, $articles);
 
-        return $this->json($data);
+        $articles = $queryBuilder->getQuery()->getResult();
+
+        $data = [];
+        foreach ($articles as $article) {
+            $data[] = $this->serializeArticle($article);
+        }
+
+        return new JsonResponse($data);
     }
 
-    private function serializeArticle(Article $article, bool $withRelations, bool $withPriceHistories): array
+    private function serializeArticle(Article $article, bool $withRelations = false): array
     {
         $data = [
             'id' => $article->getId(),
             'name' => $article->getName(),
             'brand' => $article->getBrand(),
-            'family_id' => $article->getFamily()?->getId(),
-            'sub_family_id' => $article->getSubFamily()?->getId(),
-            'unit_id' => $article->getUnit()?->getId(),
-            'packaging_id' => $article->getPackaging()?->getId(),
+            'family_id' => $article->getFamily() ? $article->getFamily()->getId() : null,
+            'sub_family_id' => $article->getSubFamily() ? $article->getSubFamily()->getId() : null,
+            'unit_id' => $article->getUnit() ? $article->getUnit()->getId() : null,
+            'packaging_id' => $article->getPackaging() ? $article->getPackaging()->getId() : null,
             'packaging_unit_quantity' => $article->getPackagingUnitQuantity(),
-            'vat_id' => $article->getVat()?->getId(),
-            'price_histories_count' => $article->getPriceHistories()->count(),
+            'vat_id' => $article->getVat() ? $article->getVat()->getId() : null,
             'created_at' => $article->getCreatedAt()->format('Y-m-d H:i:s'),
             'updated_at' => $article->getUpdatedAt()->format('Y-m-d H:i:s'),
+            'price_histories_count' => count($article->getPriceHistories()),
         ];
 
         if ($withRelations) {
-            if ($article->getFamily()) {
-                $data['family'] = [
-                    'id' => $article->getFamily()->getId(),
-                    'name' => $article->getFamily()->getName(),
-                ];
-            }
-            if ($article->getSubFamily()) {
-                $data['sub_family'] = [
-                    'id' => $article->getSubFamily()->getId(),
-                    'name' => $article->getSubFamily()->getName(),
-                ];
-            }
-            if ($article->getUnit()) {
-                $data['unit'] = [
-                    'id' => $article->getUnit()->getId(),
-                    'name' => $article->getUnit()->getName(),
-                ];
-            }
-            if ($article->getPackaging()) {
-                $data['packaging'] = [
-                    'id' => $article->getPackaging()->getId(),
-                    'name' => $article->getPackaging()->getName(),
-                ];
-            }
-            if ($article->getVat()) {
-                $data['vat'] = [
-                    'id' => $article->getVat()->getId(),
-                    'rate' => $article->getVat()->getRate(),
-                    'label' => $article->getVat()->getLabel(),
-                ];
-            }
-        }
+            $data['family'] = $article->getFamily() ? [
+                'id' => $article->getFamily()->getId(),
+                'name' => $article->getFamily()->getName(),
+            ] : null;
 
-        // Current price
-        $currentPrice = $this->getCurrentPrice($article);
-        if ($currentPrice) {
-            $data['current_price'] = [
-                'price' => $currentPrice->getPrice(),
-                'currency' => $currentPrice->getCurrency(),
-                'supplier' => $currentPrice->getSupplier()->getName(),
-                'valid_from' => $currentPrice->getValidFrom()->format('Y-m-d'),
-            ];
-        } else {
-            $data['current_price'] = null;
-        }
+            $data['sub_family'] = $article->getSubFamily() ? [
+                'id' => $article->getSubFamily()->getId(),
+                'name' => $article->getSubFamily()->getName(),
+            ] : null;
 
-        if ($withPriceHistories && $article->getPriceHistories()->count() > 0) {
-            $data['price_histories'] = array_map(function(PriceHistory $ph) {
-                return [
-                    'id' => $ph->getId(),
-                    'article_id' => $ph->getArticle()->getId(),
-                    'supplier_id' => $ph->getSupplier()->getId(),
-                    'price' => $ph->getPrice(),
-                    'currency' => $ph->getCurrency(),
-                    'price_type' => $ph->getPriceType()?->value ?? $ph->getPriceType(),
-                    'price_type_label' => $ph->getPriceTypeLabel(),
-                    'unit_price' => $ph->getUnitPrice(),
-                    'packaging_price' => $ph->getPackagingPrice(),
-                    'valid_from' => $ph->getValidFrom()->format('Y-m-d'),
-                    'valid_to' => $ph->getValidTo()?->format('Y-m-d'),
-                    'article' => [
-                        'id' => $ph->getArticle()->getId(),
-                        'name' => $ph->getArticle()->getName(),
-                        'brand' => $ph->getArticle()->getBrand(),
-                        'packaging_unit_quantity' => $ph->getArticle()->getPackagingUnitQuantity(),
-                        'unit' => $ph->getArticle()->getUnit() ? [
-                            'id' => $ph->getArticle()->getUnit()->getId(),
-                            'name' => $ph->getArticle()->getUnit()->getName(),
-                        ] : null,
-                        'packaging' => $ph->getArticle()->getPackaging() ? [
-                            'id' => $ph->getArticle()->getPackaging()->getId(),
-                            'name' => $ph->getArticle()->getPackaging()->getName(),
-                        ] : null,
-                    ],
-                    'supplier' => [
-                        'id' => $ph->getSupplier()->getId(),
-                        'name' => $ph->getSupplier()->getName(),
-                    ],
-                    'created_at' => $ph->getCreatedAt()->format('Y-m-d H:i:s'),
-                    'updated_at' => $ph->getUpdatedAt()->format('Y-m-d H:i:s'),
+            $data['unit'] = $article->getUnit() ? [
+                'id' => $article->getUnit()->getId(),
+                'name' => $article->getUnit()->getName(),
+            ] : null;
+
+            $data['packaging'] = $article->getPackaging() ? [
+                'id' => $article->getPackaging()->getId(),
+                'name' => $article->getPackaging()->getName(),
+            ] : null;
+
+            $data['vat'] = $article->getVat() ? [
+                'id' => $article->getVat()->getId(),
+                'rate' => $article->getVat()->getRate(),
+                'label' => $article->getVat()->getLabel(),
+            ] : null;
+
+            $currentPrice = $article->getCurrentPrice();
+            if ($currentPrice) {
+                $data['current_price'] = [
+                    'price' => $currentPrice->getPrice(),
+                    'currency' => $currentPrice->getCurrency(),
+                    'supplier' => $currentPrice->getSupplier() ? $currentPrice->getSupplier()->getName() : null,
+                    'valid_from' => $currentPrice->getValidFrom() ? $currentPrice->getValidFrom()->format('Y-m-d') : null,
                 ];
-            }, $article->getPriceHistories()->toArray());
+            } else {
+                $data['current_price'] = null;
+            }
+
+            $data['price_histories'] = [];
+            foreach ($article->getPriceHistories() as $priceHistory) {
+                $data['price_histories'][] = [
+                    'id' => $priceHistory->getId(),
+                    'article_id' => $priceHistory->getArticle()->getId(),
+                    'supplier_id' => $priceHistory->getSupplier() ? $priceHistory->getSupplier()->getId() : null,
+                    'price' => $priceHistory->getPrice(),
+                    'currency' => $priceHistory->getCurrency(),
+                    'price_type' => $priceHistory->getPriceType(),
+                    'valid_from' => $priceHistory->getValidFrom() ? $priceHistory->getValidFrom()->format('Y-m-d') : null,
+                    'valid_to' => $priceHistory->getValidTo() ? $priceHistory->getValidTo()->format('Y-m-d') : null,
+                    'supplier' => $priceHistory->getSupplier() ? [
+                        'id' => $priceHistory->getSupplier()->getId(),
+                        'name' => $priceHistory->getSupplier()->getName(),
+                    ] : null,
+                ];
+            }
         }
 
         return $data;
-    }
-
-    private function getCurrentPrice(Article $article): ?PriceHistory
-    {
-        $now = new \DateTime();
-        foreach ($article->getPriceHistories() as $ph) {
-            if ($ph->getValidFrom() <= $now && 
-                ($ph->getValidTo() === null || $ph->getValidTo() >= $now)) {
-                return $ph;
-            }
-        }
-        return null;
     }
 }

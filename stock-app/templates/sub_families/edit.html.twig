@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Editer Sous-Famille - {{ subFamily.name }}{% endblock %}
+
+{% block header_content %}
+    <div class="flex justify-between items-center">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            Editer Sous-Famille: {{ subFamily.name }}
+        </h2>
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <form action="{{ path('sub_families.update', {'id': subFamily.id}) }}" method="POST">
+                        {{ form_row(form.name, {'label': 'Nom', 'attr': {'class': 'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500'}}) }}
+                        {{ form_row(form.family, {'label': 'Famille', 'attr': {'class': 'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500'}}) }}
+                        
+                        <div class="mt-6">
+                            <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow transition-colors">
+                                Mettre à jour
+                            </button>
+                            <a href="{{ path('sub_families.index') }}" class="ml-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors">
+                                Annuler
+                            </a>
+                        </div>
+                        
+                        <input type="hidden" name="_token" value="{{ csrf_token('update_subfamily') }}">
+                        <input type="hidden" name="_method" value="PUT">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

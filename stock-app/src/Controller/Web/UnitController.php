@@ -2,70 +2,104 @@
 
 namespace App\Controller\Web;
 
-use App\Controller\Controller;
 use App\Entity\Unit;
 use App\Form\UnitType;
+use App\Repository\UnitRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
-class UnitController extends Controller
+#[Route('/units')]
+class UnitController extends AbstractController
 {
-    #[Route('/units', name: 'units.index')]
-    public function index(EntityManagerInterface $em): Response
-    {
-        $units = $em->getRepository(Unit::class)->findAll();
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+        private UnitRepository $unitRepository
+    ) {
+    }
 
+    #[Route('/', name: 'units.index', methods: ['GET'])]
+    public function index(): Response
+    {
+        $units = $this->unitRepository->findAll();
+        
         return $this->render('units/index.html.twig', [
             'units' => $units,
         ]);
     }
 
-    #[Route('/units/create', name: 'units.create')]
-    public function create(Request $request, EntityManagerInterface $em): Response
+    #[Route('/create', name: 'units.create', methods: ['GET'])]
+    public function create(): Response
+    {
+        $unit = new Unit();
+        $form = $this->createForm(UnitType::class, $unit);
+
+        return $this->render('units/create.html.twig', [
+            'unit' => $unit,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/', name: 'units.store', methods: ['POST'])]
+    public function store(Request $request): Response
     {
         $unit = new Unit();
         $form = $this->createForm(UnitType::class, $unit);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em->persist($unit);
-            $em->flush();
+            $this->entityManager->persist($unit);
+            $this->entityManager->flush();
 
+            $this->addFlash('success', 'Unite creee avec succes !');
             return $this->redirectToRoute('units.index');
         }
 
         return $this->render('units/create.html.twig', [
             'unit' => $unit,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
-    #[Route('/units/{id}/edit', name: 'units.edit')]
-    public function edit(Unit $unit, Request $request, EntityManagerInterface $em): Response
+    #[Route('/{id}/edit', name: 'units.edit', methods: ['GET'])]
+    public function edit(Unit $unit): Response
+    {
+        $form = $this->createForm(UnitType::class, $unit);
+
+        return $this->render('units/edit.html.twig', [
+            'unit' => $unit,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/{id}', name: 'units.update', methods: ['PUT', 'PATCH'])]
+    public function update(Request $request, Unit $unit): Response
     {
         $form = $this->createForm(UnitType::class, $unit);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em->flush();
+            $this->entityManager->flush();
 
+            $this->addFlash('success', 'Unite mise a jour avec succes !');
             return $this->redirectToRoute('units.index');
         }
 
         return $this->render('units/edit.html.twig', [
             'unit' => $unit,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
-    #[Route('/units/{id}', name: 'units.destroy', methods: ['DELETE'])]
-    public function destroy(Unit $unit, EntityManagerInterface $em): Response
+    #[Route('/{id}', name: 'units.destroy', methods: ['DELETE'])]
+    public function destroy(Unit $unit): Response
     {
-        $em->remove($unit);
-        $em->flush();
+        $this->entityManager->remove($unit);
+        $this->entityManager->flush();
 
+        $this->addFlash('success', 'Unite supprimee avec succes !');
         return $this->redirectToRoute('units.index');
     }
 }

@@ -2,80 +2,73 @@
 
 namespace App\Controller\Api;
 
-use App\Controller\Controller;
-use App\Data\Unit\CreateUnitDto;
-use App\Data\Unit\UpdateUnitDto;
 use App\Entity\Unit;
+use App\Repository\UnitRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/units')]
-class UnitController extends Controller
+#[IsGranted('ROLE_USER')]
+class UnitController extends AbstractController
 {
     public function __construct(
-        private EntityManagerInterface $em,
-        private SerializerInterface $serializer,
-        private ValidatorInterface $validator
-    ) {}
+        private EntityManagerInterface $entityManager,
+        private UnitRepository $unitRepository
+    ) {
+    }
 
     #[Route('', name: 'api.units.index', methods: ['GET'])]
     public function index(): Response
     {
-        $units = $this->em->getRepository(Unit::class)->findBy([], ['createdAt' => 'DESC']);
-        
-        $data = array_map(function(Unit $unit) {
-            return [
+        $units = $this->unitRepository->findBy([], ['id' => 'DESC']);
+
+        $data = [];
+        foreach ($units as $unit) {
+            $data[] = [
                 'id' => $unit->getId(),
                 'name' => $unit->getName(),
-                'articles_count' => $unit->getArticles()->count(),
                 'created_at' => $unit->getCreatedAt()->format('Y-m-d H:i:s'),
                 'updated_at' => $unit->getUpdatedAt()->format('Y-m-d H:i:s'),
             ];
-        }, $units);
+        }
 
-        return $this->json($data);
+        return new JsonResponse($data);
     }
 
     #[Route('', name: 'api.units.store', methods: ['POST'])]
     public function store(Request $request): Response
     {
-        $dto = new CreateUnitDto();
-        $this->serializer->deserialize($request->getContent(), CreateUnitDto::class, 'json', [
-            'object_to_populate' => $dto,
-        ]);
-
-        $errors = $this->validator->validate($dto);
-        if (count($errors) > 0) {
-            return $this->json(['errors' => (string) $errors], 422);
+        $data = json_decode($request->getContent(), true);
+        
+        if (!isset($data['name'])) {
+            return new JsonResponse(['error' => 'Name is required'], Response::HTTP_BAD_REQUEST);
         }
 
         $unit = new Unit();
-        $unit->setName($dto->name);
-        
-        $this->em->persist($unit);
-        $this->em->flush();
+        $unit->setName($data['name']);
 
-        return $this->json([
+        $this->entityManager->persist($unit);
+        $this->entityManager->flush();
+
+        return new JsonResponse([
             'id' => $unit->getId(),
             'name' => $unit->getName(),
-            'articles_count' => 0,
             'created_at' => $unit->getCreatedAt()->format('Y-m-d H:i:s'),
             'updated_at' => $unit->getUpdatedAt()->format('Y-m-d H:i:s'),
-        ], 201);
+        ], Response::HTTP_CREATED);
     }
 
     #[Route('/{id}', name: 'api.units.show', methods: ['GET'])]
     public function show(Unit $unit): Response
     {
-        return $this->json([
+        return new JsonResponse([
             'id' => $unit->getId(),
             'name' => $unit->getName(),
-            'articles_count' => $unit->getArticles()->count(),
             'created_at' => $unit->getCreatedAt()->format('Y-m-d H:i:s'),
             'updated_at' => $unit->getUpdatedAt()->format('Y-m-d H:i:s'),
         ]);
@@ -84,23 +77,18 @@ class UnitController extends Controller
     #[Route('/{id}', name: 'api.units.update', methods: ['PUT', 'PATCH'])]
     public function update(Request $request, Unit $unit): Response
     {
-        $dto = new UpdateUnitDto();
-        $this->serializer->deserialize($request->getContent(), UpdateUnitDto::class, 'json', [
-            'object_to_populate' => $dto,
-        ]);
-
-        $errors = $this->validator->validate($dto);
-        if (count($errors) > 0) {
-            return $this->json(['errors' => (string) $errors], 422);
+        $data = json_decode($request->getContent(), true);
+        
+        if (!isset($data['name'])) {
+            return new JsonResponse(['error' => 'Name is required'], Response::HTTP_BAD_REQUEST);
         }
 
-        $unit->setName($dto->name);
-        $this->em->flush();
+        $unit->setName($data['name']);
+        $this->entityManager->flush();
 
-        return $this->json([
+        return new JsonResponse([
             'id' => $unit->getId(),
             'name' => $unit->getName(),
-            'articles_count' => $unit->getArticles()->count(),
             'created_at' => $unit->getCreatedAt()->format('Y-m-d H:i:s'),
             'updated_at' => $unit->getUpdatedAt()->format('Y-m-d H:i:s'),
         ]);
@@ -109,9 +97,9 @@ class UnitController extends Controller
     #[Route('/{id}', name: 'api.units.destroy', methods: ['DELETE'])]
     public function destroy(Unit $unit): Response
     {
-        $this->em->remove($unit);
-        $this->em->flush();
+        $this->entityManager->remove($unit);
+        $this->entityManager->flush();
 
-        return new JsonResponse(null, 204);
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

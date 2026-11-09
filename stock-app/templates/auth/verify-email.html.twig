@@ -1,32 +1,35 @@
-{% extends 'layouts/guest.html.twig' %}
+{% extends 'base.html.twig' %}
 
-{% block title %}Verifier Email{% endblock %}
+{% block title %}Verify Email{% endblock %}
 
-{% block content %}
-<div class="max-w-md w-full space-y-8">
-    <div class="text-center">
-        <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
-            Verifier votre adresse email
-        </h2>
-        
-        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-            Avant de continuer, pouvez-vous verifier votre email pour un lien de verification ?
-            Si vous n'avez pas recu l'email, nous pouvons vous en envoyer un autre.
-        </p>
+{% block body %}
+    <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
+        <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
+            <p class="text-gray-600 mb-6">
+                Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn't receive the email, we will gladly send you another.
+            </p>
+            
+            <div class="flex items-center justify-between mt-4">
+                <form method="POST" action="{{ path('verification.send') }}">
+                    <button 
+                        type="submit"
+                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow transition-colors"
+                    >
+                        Resend Verification Email
+                    </button>
+                    <input type="hidden" name="_token" value="{{ csrf_token('resend_verification') }}">
+                </form>
+                
+                <form method="POST" action="{{ path('logout') }}">
+                    <button 
+                        type="submit"
+                        class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg shadow transition-colors"
+                    >
+                        Log Out
+                    </button>
+                    <input type="hidden" name="_token" value="{{ csrf_token('logout') }}">
+                </form>
+            </div>
+        </div>
     </div>
-    
-    <div class="mt-8 flex flex-col sm:flex-row items-center justify-between">
-        <form method="POST" action="{{ path('verification.send') }}" class="w-full sm:w-auto">
-            <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                Resend Verification Email
-            </button>
-        </form>
-        
-        <form method="POST" action="{{ path('logout') }}" class="mt-4 sm:mt-0 sm:ml-4">
-            <button type="submit" class="px-6 py-3 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                Logout
-            </button>
-        </form>
-    </div>
-</div>
 {% endblock %}

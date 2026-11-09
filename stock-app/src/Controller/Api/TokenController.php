@@ -2,103 +2,106 @@
 
 namespace App\Controller\Api;
 
-use App\Controller\Controller;
 use App\Entity\PersonalAccessToken;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api')]
-class TokenController extends Controller
+class TokenController extends AbstractController
 {
-    public function __construct(private EntityManagerInterface $em) {}
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+        private UserPasswordHasherInterface $passwordHasher
+    ) {
+    }
+
+    #[Route('/login', name: 'api.login', methods: ['POST'])]
+    public function login(Request $request): Response
+    {
+        $data = json_decode($request->getContent(), true);
+        
+        if (!isset($data['email']) || !isset($data['password'])) {
+            return new JsonResponse(['error' => 'Email and password are required'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $userRepository = $this->entityManager->getRepository(User::class);
+        $user = $userRepository->findOneBy(['email' => $data['email']]);
+
+        if (!$user || !$this->passwordHasher->isPasswordValid($user, $data['password'])) {
+            return new JsonResponse(['error' => 'Invalid credentials'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        // Generate a random token
+        $token = bin2hex(random_bytes(32));
+        $tokenHash = hash('sha256', $token);
+
+        $personalAccessToken = new PersonalAccessToken();
+        $personalAccessToken->setName('API Token');
+        $personalAccessToken->setToken($tokenHash);
+        $personalAccessToken->setUser($user);
+        $personalAccessToken->setCreatedAt(new \DateTime());
+        $personalAccessToken->setUpdatedAt(new \DateTime());
+
+        $this->entityManager->persist($personalAccessToken);
+        $this->entityManager->flush();
+
+        return new JsonResponse([
+            'token' => $token,
+            'user' => [
+                'id' => $user->getId(),
+                'name' => $user->getName(),
+                'email' => $user->getEmail(),
+                'role' => $user->getRole()->value,
+            ],
+        ]);
+    }
+
+    #[Route('/logout', name: 'api.logout', methods: ['POST'])]
+    public function logout(Request $request): Response
+    {
+        $tokenString = $request->headers->get('Authorization');
+        
+        if (!$tokenString || strpos($tokenString, 'Bearer ') !== 0) {
+            return new JsonResponse(['error' => 'Token not provided'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $token = substr($tokenString, 7);
+        $tokenHash = hash('sha256', $token);
+
+        $tokenRepository = $this->entityManager->getRepository(PersonalAccessToken::class);
+        $personalAccessToken = $tokenRepository->findOneBy(['token' => $tokenHash]);
+
+        if ($personalAccessToken) {
+            $this->entityManager->remove($personalAccessToken);
+            $this->entityManager->flush();
+        }
+
+        return new JsonResponse(['message' => 'Successfully logged out']);
+    }
 
     #[Route('/user', name: 'api.user', methods: ['GET'])]
-    public function user(): Response
+    public function user(Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
         
-        return $this->json([
+        if (!$user || !$user instanceof User) {
+            return new JsonResponse(['error' => 'Unauthenticated'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        return new JsonResponse([
             'id' => $user->getId(),
             'name' => $user->getName(),
             'email' => $user->getEmail(),
             'role' => $user->getRole()->value,
+            'email_verified_at' => $user->getEmailVerifiedAt() ? $user->getEmailVerifiedAt()->format('Y-m-d H:i:s') : null,
+            'created_at' => $user->getCreatedAt()->format('Y-m-d H:i:s'),
+            'updated_at' => $user->getUpdatedAt()->format('Y-m-d H:i:s'),
         ]);
-    }
-
-    #[Route('/tokens', name: 'api.tokens.index', methods: ['GET'])]
-    public function index(): Response
-    {
-        /** @var User $user */
-        $user = $this->getUser();
-        
-        $tokens = $this->em->getRepository(PersonalAccessToken::class)
-            ->findBy(['tokenableType' => User::class, 'tokenableId' => $user->getId()]);
-        
-        $data = array_map(function(PersonalAccessToken $token) {
-            return [
-                'id' => $token->getId(),
-                'name' => $token->getName(),
-                'token' => $token->getToken(),
-                'abilities' => $token->getAbilities(),
-                'created_at' => $token->getCreatedAt()->format('Y-m-d H:i:s'),
-                'updated_at' => $token->getUpdatedAt()->format('Y-m-d H:i:s'),
-            ];
-        }, $tokens);
-        
-        return $this->json($data);
-    }
-
-    #[Route('/tokens', name: 'api.tokens.store', methods: ['POST'])]
-    public function store(Request $request): Response
-    {
-        /** @var User $user */
-        $user = $this->getUser();
-        
-        $name = $request->request->get('name', 'Personal Access Token');
-        $abilities = $request->request->all('abilities', []);
-        
-        // Generate a random token
-        $plainTextToken = bin2hex(random_bytes(40));
-        
-        $token = new PersonalAccessToken();
-        $token->setName($name);
-        $token->setToken(hash('sha256', $plainTextToken));
-        $token->setAbilities($abilities);
-        $token->setTokenableType(User::class);
-        $token->setTokenableId($user->getId());
-        
-        $this->em->persist($token);
-        $this->em->flush();
-        
-        return $this->json([
-            'id' => $token->getId(),
-            'name' => $token->getName(),
-            'token' => $plainTextToken,
-            'abilities' => $token->getAbilities(),
-            'created_at' => $token->getCreatedAt()->format('Y-m-d H:i:s'),
-            'updated_at' => $token->getUpdatedAt()->format('Y-m-d H:i:s'),
-        ], 201);
-    }
-
-    #[Route('/tokens/{id}', name: 'api.tokens.destroy', methods: ['DELETE'])]
-    public function destroy(PersonalAccessToken $token): Response
-    {
-        /** @var User $user */
-        $user = $this->getUser();
-        
-        if ($token->getTokenableId() !== $user->getId() || $token->getTokenableType() !== User::class) {
-            return new JsonResponse(['message' => 'Unauthorized'], 403);
-        }
-        
-        $this->em->remove($token);
-        $this->em->flush();
-        
-        return new JsonResponse(null, 204);
     }
 }

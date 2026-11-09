@@ -2,65 +2,101 @@
 
 namespace App\Controller\Web;
 
-use App\Controller\Controller;
 use App\Entity\Article;
-use App\Entity\Family;
 use App\Entity\Inventory;
+use App\Form\InventoryType;
+use App\Repository\ArticleRepository;
+use App\Repository\FamilyRepository;
+use App\Repository\InventoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
-class InventoryController extends Controller
+#[Route('/inventory')]
+class InventoryController extends AbstractController
 {
-    #[Route('/inventory', name: 'inventories.index')]
-    public function index(Request $request, EntityManagerInterface $em): Response
-    {
-        return $this->search($request, $em);
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+        private InventoryRepository $inventoryRepository,
+        private ArticleRepository $articleRepository,
+        private FamilyRepository $familyRepository
+    ) {
     }
 
-    #[Route('/inventory/search', name: 'inventories.search', methods: ['GET', 'POST'])]
-    public function search(Request $request, EntityManagerInterface $em): Response
+    #[Route('/', name: 'inventories.index', methods: ['GET'])]
+    public function index(Request $request): Response
+    {
+        return $this->search($request);
+    }
+
+    #[Route('/search', name: 'inventories.search', methods: ['GET', 'POST'])]
+    public function search(Request $request): Response
     {
         $search = $request->query->get('search', '');
-        $familyId = $request->query->get('family_id', null);
+        $familyId = $request->query->get('family_id');
 
-        $queryBuilder = $em->getRepository(Article::class)->createQueryBuilder('a')
+        $queryBuilder = $this->articleRepository->createQueryBuilder('a');
+        $queryBuilder
+            ->leftJoin('a.priceHistories', 'ph')
             ->leftJoin('a.packaging', 'p')
             ->leftJoin('a.unit', 'u')
             ->leftJoin('a.family', 'f')
-            ->leftJoin('a.priceHistories', 'ph')
             ->orderBy('a.name', 'ASC');
 
         if ($familyId) {
-            $queryBuilder->andWhere('a.family = :familyId')->setParameter('familyId', $familyId);
+            $queryBuilder->andWhere('a.family = :familyId')
+                ->setParameter('familyId', $familyId);
         }
 
         if (!empty($search)) {
-            $queryBuilder->andWhere('a.name LIKE :search')->setParameter('search', '%' . $search . '%');
+            $queryBuilder->andWhere('a.name LIKE :search')
+                ->setParameter('search', '%' . $search . '%');
         }
 
         $articles = $queryBuilder->getQuery()->getResult();
 
-        $todayInventories = $em->getRepository(Inventory::class)->findBy([
-            'date' => new \DateTime('today'),
-        ], ['createdAt' => 'DESC']);
+        $today = new \DateTime();
+        $todayString = $today->format('Y-m-d');
 
-        $families = $em->getRepository(Family::class)->findAll();
+        $todayInventories = $this->inventoryRepository->createQueryBuilder('i')
+            ->leftJoin('i.article', 'a')
+            ->leftJoin('a.packaging', 'p')
+            ->leftJoin('a.unit', 'u')
+            ->leftJoin('a.priceHistories', 'ph')
+            ->where('DATE(i.date) = :today')
+            ->setParameter('today', $todayString)
+            ->orderBy('i.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        $families = $this->familyRepository->findBy([], ['name' => 'ASC']);
 
         $previousStocks = [];
         $todayStocks = [];
 
         foreach ($articles as $article) {
-            $lastInventory = $em->getRepository(Inventory::class)->findOneBy([
-                'article' => $article,
-            ], ['date' => 'DESC']);
+            $lastInventory = $this->inventoryRepository->createQueryBuilder('i')
+                ->where('i.article = :article')
+                ->andWhere('DATE(i.date) < :today')
+                ->setParameter('article', $article)
+                ->setParameter('today', $todayString)
+                ->orderBy('i.date', 'DESC')
+                ->setMaxResults(1)
+                ->getQuery()
+                ->getOneOrNullResult();
             $previousStocks[$article->getId()] = $lastInventory ? $lastInventory->getQuantity() : 0;
 
-            $todayInventory = $em->getRepository(Inventory::class)->findOneBy([
-                'article' => $article,
-                'date' => new \DateTime('today'),
-            ]);
+            $todayInventory = $this->inventoryRepository->createQueryBuilder('i')
+                ->where('i.article = :article')
+                ->andWhere('DATE(i.date) = :today')
+                ->setParameter('article', $article)
+                ->setParameter('today', $todayString)
+                ->setMaxResults(1)
+                ->getQuery()
+                ->getOneOrNullResult();
             $todayStocks[$article->getId()] = $todayInventory ? $todayInventory->getQuantity() : null;
         }
 
@@ -75,62 +111,105 @@ class InventoryController extends Controller
         ]);
     }
 
-    #[Route('/inventory/article/{id}', name: 'inventories.create', methods: ['GET'])]
-    public function create(Article $article, EntityManagerInterface $em): Response
+    #[Route('/article/{id}', name: 'inventories.create', methods: ['GET'])]
+    public function create(Article $article): Response
     {
-        $todayInventories = $em->getRepository(Inventory::class)->findBy([
-            'date' => new \DateTime('today'),
-        ], ['createdAt' => 'DESC']);
+        $today = new \DateTime();
+        $todayString = $today->format('Y-m-d');
+
+        $todayInventories = $this->inventoryRepository->createQueryBuilder('i')
+            ->leftJoin('i.article', 'a')
+            ->leftJoin('a.packaging', 'p')
+            ->leftJoin('a.unit', 'u')
+            ->where('DATE(i.date) = :today')
+            ->setParameter('today', $todayString)
+            ->orderBy('i.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        $form = $this->createForm(InventoryType::class, new Inventory());
 
         return $this->render('inventories/create.html.twig', [
             'article' => $article,
             'todayInventories' => $todayInventories,
+            'form' => $form->createView(),
         ]);
     }
 
-    #[Route('/inventory/article/{id}', name: 'inventories.store', methods: ['POST'])]
-    public function store(Article $article, Request $request, EntityManagerInterface $em): Response
+    #[Route('/article/{id}', name: 'inventories.store', methods: ['POST'])]
+    public function store(Request $request, Article $article): RedirectResponse
     {
-        $quantity = $request->request->get('quantity');
+        $inventory = new Inventory();
+        $form = $this->createForm(InventoryType::class, $inventory);
+        $form->handleRequest($request);
+
         $familyId = $request->query->get('family_id');
 
-        if (!$quantity) {
-            return $this->redirectToRoute('inventories.search', ['family_id' => $familyId]);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $today = new \DateTime();
+            $todayString = $today->format('Y-m-d');
+
+            $existing = $this->inventoryRepository->createQueryBuilder('i')
+                ->where('i.article = :article')
+                ->andWhere('DATE(i.date) = :today')
+                ->setParameter('article', $article)
+                ->setParameter('today', $todayString)
+                ->getQuery()
+                ->getOneOrNullResult();
+
+            if ($existing) {
+                $request->getSession()->set('pending_inventory', [
+                    'article_id' => $article->getId(),
+                    'quantity' => $inventory->getQuantity(),
+                    'existing_id' => $existing->getId(),
+                    'existing_quantity' => $existing->getQuantity(),
+                    'family_id' => $familyId,
+                ]);
+
+                $redirectRoute = $this->generateUrl('inventories.confirm-duplicate', ['id' => $article->getId()]);
+                if ($familyId) {
+                    $redirectRoute .= '?family_id=' . $familyId;
+                }
+
+                $this->addFlash('warning', 'Cet article a déjà été inventorié aujourd\'hui !');
+
+                return $this->redirect($redirectRoute);
+            }
+
+            $inventory->setArticle($article);
+            $inventory->setDate(new \DateTime());
+            $this->entityManager->persist($inventory);
+            $this->entityManager->flush();
+
+            $this->addFlash('success', 'Inventaire enregistré avec succès !');
+
+            $redirectRoute = $this->generateUrl('inventories.search');
+            if ($familyId) {
+                $redirectRoute .= '?family_id=' . $familyId;
+            }
+
+            return $this->redirect($redirectRoute);
         }
 
-        $existing = $em->getRepository(Inventory::class)->findOneBy([
+        $todayInventories = $this->inventoryRepository->createQueryBuilder('i')
+            ->leftJoin('i.article', 'a')
+            ->leftJoin('a.packaging', 'p')
+            ->leftJoin('a.unit', 'u')
+            ->where('DATE(i.date) = :today')
+            ->setParameter('today', (new \DateTime())->format('Y-m-d'))
+            ->orderBy('i.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('inventories/create.html.twig', [
             'article' => $article,
-            'date' => new \DateTime('today'),
+            'todayInventories' => $todayInventories,
+            'form' => $form->createView(),
         ]);
-
-        if ($existing) {
-            $request->getSession()->set('pending_inventory', [
-                'article_id' => $article->getId(),
-                'quantity' => $quantity,
-                'existing_id' => $existing->getId(),
-                'existing_quantity' => $existing->getQuantity(),
-                'family_id' => $familyId,
-            ]);
-
-            return $this->redirectToRoute('inventories.confirm_duplicate', [
-                'id' => $article->getId(),
-                'family_id' => $familyId,
-            ]);
-        }
-
-        $inventory = new Inventory();
-        $inventory->setArticle($article);
-        $inventory->setQuantity($quantity);
-        $inventory->setDate(new \DateTime());
-
-        $em->persist($inventory);
-        $em->flush();
-
-        return $this->redirectToRoute('inventories.search', ['family_id' => $familyId]);
     }
 
-    #[Route('/inventory/article/{id}/confirm-duplicate', name: 'inventories.confirm_duplicate')]
-    public function confirmDuplicate(Article $article, Request $request): Response
+    #[Route('/article/{id}/confirm-duplicate', name: 'inventories.confirm-duplicate', methods: ['GET'])]
+    public function confirmDuplicate(Request $request, Article $article): Response
     {
         $pending = $request->getSession()->get('pending_inventory');
 
@@ -138,48 +217,78 @@ class InventoryController extends Controller
             return $this->redirectToRoute('inventories.index');
         }
 
-        $existing = $pending['existing_id'] ? $this->getDoctrine()->getRepository(Inventory::class)->find($pending['existing_id']) : null;
+        $existing = $this->inventoryRepository->find($pending['existing_id']);
 
-        return $this->render('inventories/confirm_duplicate.html.twig', [
+        if (!$existing) {
+            return $this->redirectToRoute('inventories.index');
+        }
+
+        return $this->render('inventories/confirm-duplicate.html.twig', [
             'article' => $article,
             'existing' => $existing,
             'pending' => $pending,
         ]);
     }
 
-    #[Route('/inventory/article/{id}/process-duplicate', name: 'inventories.process_duplicate', methods: ['POST'])]
-    public function processDuplicate(Article $article, Request $request, EntityManagerInterface $em): Response
+    #[Route('/article/{id}/process-duplicate', name: 'inventories.process-duplicate', methods: ['POST'])]
+    public function processDuplicate(Request $request, Article $article): RedirectResponse
     {
-        $pending = $request->getSession()->get('pending_inventory');
-        $request->getSession()->remove('pending_inventory');
+        $session = $request->getSession();
+        $pending = $session->get('pending_inventory');
 
         if (!$pending) {
             return $this->redirectToRoute('inventories.index');
         }
 
-        $familyId = $request->query->get('family_id', $pending['family_id'] ?? null);
+        $session->remove('pending_inventory');
+
+        $familyId = $request->request->get('family_id', $pending['family_id'] ?? null);
+
+        $existing = $this->inventoryRepository->find($pending['existing_id']);
         $action = $request->request->get('action');
 
-        $existing = $pending['existing_id'] ? $em->getRepository(Inventory::class)->find($pending['existing_id']) : null;
-
-        if ($existing && $action === 'add') {
-            $existing->setQuantity((string)($existing->getQuantity() + $pending['quantity']));
-            $em->flush();
-        } elseif ($existing && $action === 'replace') {
-            $existing->setQuantity($pending['quantity']);
-            $em->flush();
+        switch ($action) {
+            case 'add':
+                $existing->setQuantity($existing->getQuantity() + $pending['quantity']);
+                break;
+            case 'replace':
+                $existing->setQuantity($pending['quantity']);
+                break;
+            case 'cancel':
+            default:
+                break;
         }
 
-        return $this->redirectToRoute('inventories.search', ['family_id' => $familyId]);
+        if ($action !== 'cancel') {
+            $this->entityManager->flush();
+        }
+
+        $redirectRoute = $this->generateUrl('inventories.search');
+        if ($familyId) {
+            $redirectRoute .= '?family_id=' . $familyId;
+        }
+
+        $this->addFlash('success', 'Inventaire mis à jour !');
+
+        return $this->redirect($redirectRoute);
     }
 
-    #[Route('/inventory/{id}', name: 'inventories.destroy', methods: ['DELETE'])]
-    public function destroy(Inventory $inventory, EntityManagerInterface $em): Response
+    #[Route('/{id}', name: 'inventories.destroy', methods: ['DELETE'])]
+    public function destroy(Inventory $inventory): RedirectResponse
     {
-        $familyId = $inventory->getArticle()?->getFamily()?->getId();
-        $em->remove($inventory);
-        $em->flush();
+        $article = $inventory->getArticle();
+        $familyId = $article ? $article->getFamily() ? $article->getFamily()->getId() : null : null;
 
-        return $this->redirectToRoute('inventories.search', ['family_id' => $familyId]);
+        $this->entityManager->remove($inventory);
+        $this->entityManager->flush();
+
+        $redirectRoute = $this->generateUrl('inventories.search');
+        if ($familyId) {
+            $redirectRoute .= '?family_id=' . $familyId;
+        }
+
+        $this->addFlash('success', 'Inventaire supprimé avec succès !');
+
+        return $this->redirect($redirectRoute);
     }
 }

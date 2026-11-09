@@ -1,56 +1,149 @@
-{% extends 'layouts/app.html.twig' %}
+{% extends 'base.html.twig' %}
 
-{% block page_title %}Inventaire{% endblock %}
+{% block title %}Inventaire{% endblock %}
 
-{% block content %}
-<div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Inventaire</h1>
+{% block header_content %}
+    <div class="flex justify-between items-center">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            Inventaire des articles
+        </h2>
     </div>
-    
-    {% if todayInventories|length > 0 %}
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-slate-700">
-                <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wider">Article</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wider">Quantite</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wider">Date</th>
-                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wider">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {% for inventory in todayInventories %}
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                        {{ inventory.article.name }}
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-slate-400">
-                        {{ inventory.quantity }}
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-slate-400">
-                        {{ inventory.date|date('d/m/Y') }}
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-right">
-                        <form action="{{ path('inventories.destroy', {'id': inventory.id}) }}" method="POST" onsubmit="return confirm('Etes-vous sur de vouloir supprimer cet inventaire ?')">
-                            <input type="hidden" name="_method" value="DELETE">
-                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ inventory.id) }}">
-                            <button type="submit" class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full">
+{% endblock %}
+
+{% block body %}
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <!-- Family Selection -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <form method="POST" action="{{ path('inventories.search') }}" class="space-y-4">
+                        <div>
+                            <label for="family_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                Sélectionner une famille
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <select 
+                                id="family_id"
+                                name="family_id"
+                                class="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            >
+                                <option value="">-- Sélectionner une famille --</option>
+                                {% for family in families %}
+                                    <option value="{{ family.id }}" {% if familyId == family.id %}selected{% endif %}>
+                                        {{ family.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        {% if familyId %}
+                        <div class="flex gap-3">
+                            <div class="flex-1 relative">
+                                <input 
+                                    type="text" 
+                                    name="search" 
+                                    value="{{ search }}"
+                                    placeholder="Rechercher un article dans cette famille..."
+                                    class="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900"
+                                >
+                            </div>
+                            <button 
+                                type="submit"
+                                class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium flex items-center space-x-2"
+                            >
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                 </svg>
+                                <span>Rechercher</span>
                             </button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                            {% if search %}
+                            <a 
+                                href="{{ path('inventories.search') }}?family_id={{ familyId }}"
+                                class="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium flex items-center space-x-2"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                <span>Effacer</span>
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+            
+            {% if familyId and articles|length > 0 %}
+            <form method="POST" action="{{ path('inventories.search') }}">
+                <input type="hidden" name="family_id" value="{{ familyId }}">
+                <input type="hidden" name="search" value="{{ search }}">
+                
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b border-gray-200">
+                                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Article</th>
+                                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Conditionnement</th>
+                                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Qté/Cond.</th>
+                                        <th class="text-right py-3 px-4 text-sm font-medium text-gray-500">Stock Précédent</th>
+                                        <th class="text-right py-3 px-4 text-sm font-medium text-gray-500">Stock Aujourd'hui</th>
+                                        <th class="text-right py-3 px-4 text-sm font-medium text-gray-500">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for article in articles %}
+                                    {% set hasTodayInventory = todayStocks[article.id] is not null %}
+                                    <tr class="border-b border-gray-100 {% if hasTodayInventory %}bg-green-50{% endif %}">
+                                        <td class="py-3 px-4 text-gray-800">
+                                            {{ article.name }}
+                                            {% if article.brand %}
+                                            <br><span class="text-sm text-gray-500">{{ article.brand }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="py-3 px-4 text-gray-600">
+                                            {{ article.packaging?article.packaging.name:'N/A' }}
+                                        </td>
+                                        <td class="py-3 px-4 text-gray-600">
+                                            {{ article.packagingUnitQuantity }} {{ article.unit?article.unit.name:'' }}
+                                        </td>
+                                        <td class="py-3 px-4 text-right text-gray-800">
+                                            {{ previousStocks[article.id] }}
+                                        </td>
+                                        <td class="py-3 px-4 text-right text-gray-800">
+                                            {{ todayStocks[article.id] ?? '-' }}
+                                        </td>
+                                        <td class="py-3 px-4 text-right">
+                                            <a 
+                                                href="{{ path('inventories.create', {'id': article.id}) }}?family_id={{ familyId }}"
+                                                class="px-4 py-2 {% if hasTodayInventory %}bg-yellow-600 hover:bg-yellow-700{% else %}bg-green-600 hover:bg-green-700{% endif %} text-white text-sm rounded-lg transition-colors font-medium"
+                                            >
+                                                {% if hasTodayInventory %}
+                                                    Modifier inventaire
+                                                {% else %}
+                                                    Inventorier cet article
+                                                {% endif %}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 text-sm text-gray-500">
+                            {{ articles|length }} articles dans cette famille
+                        </div>
+                    </div>
+                </div>
+            </form>
+            {% elseif familyId and articles|length == 0 %}
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-center text-gray-500">
+                    Aucun article trouvé dans cette famille.
+                </div>
+            </div>
+            {% endif %}
+        </div>
     </div>
-    {% else %}
-    <div class="text-center py-8 text-gray-500 dark:text-slate-400">
-        Aucun inventaire trouve pour aujourd'hui.
-    </div>
-    {% endif %}
-</div>
 {% endblock %}

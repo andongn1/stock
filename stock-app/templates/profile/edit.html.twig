@@ -1,77 +1,194 @@
-{% extends 'layouts/app.html.twig' %}
+{% extends 'base.html.twig' %}
 
-{% block page_title %}Profile{% endblock %}
+{% block title %}Profile{% endblock %}
 
-{% block content %}
-<div class="space-y-6">
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
-        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Informations du profile</h2>
-        
-        {{ form_start(profileForm) }}
-        <div class="space-y-4">
-            <div>
-                <label for="profile_name" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nom</label>
-                {{ form_widget(profileForm.name, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white'}}) }}
-                <div class="text-red-500 text-sm mt-1">{{ form_errors(profileForm.name) }}</div>
+{% block header_content %}
+    <div class="flex justify-between items-center">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            Profile
+        </h2>
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <!-- Update Profile Information -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <div class="max-w-xl">
+                        <section>
+                            <header>
+                                <h2 class="text-lg font-medium text-gray-900">
+                                    Informations du profil
+                                </h2>
+                                <p class="mt-1 text-sm text-gray-600">
+                                    Mettez à jour les informations de profil et l'adresse e-mail de votre compte.
+                                </p>
+                            </header>
+
+                            <form method="POST" action="{{ path('profile.update') }}" class="mt-6 space-y-6">
+                                <input type="hidden" name="_token" value="{{ csrf_token('update_profile') }}">
+                                <input type="hidden" name="_method" value="PATCH">
+
+                                <div>
+                                    <label for="name" class="block text-sm font-medium text-gray-700">Nom</label>
+                                    <input 
+                                        id="name" 
+                                        name="name" 
+                                        type="text" 
+                                        value="{{ user.name }}"
+                                        required 
+                                        autofocus 
+                                        autocomplete="name"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    >
+                                </div>
+
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                                    <input 
+                                        id="email" 
+                                        name="email" 
+                                        type="email" 
+                                        value="{{ user.email }}"
+                                        required 
+                                        autocomplete="username"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    >
+                                </div>
+
+                                <div class="flex items-center gap-4">
+                                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow transition-colors">
+                                        Enregistrer
+                                    </button>
+                                </div>
+                            </form>
+                        </section>
+                    </div>
+                </div>
             </div>
-            
-            <div>
-                <label for="profile_email" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Email</label>
-                {{ form_widget(profileForm.email, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white'}}) }}
-                <div class="text-red-500 text-sm mt-1">{{ form_errors(profileForm.email) }}</div>
+
+            <!-- Update Password -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <div class="max-w-xl">
+                        <section>
+                            <header>
+                                <h2 class="text-lg font-medium text-gray-900">
+                                    Mettre à jour le mot de passe
+                                </h2>
+                                <p class="mt-1 text-sm text-gray-600">
+                                    Assurez-vous que votre compte utilise un mot de passe long et aléatoire pour rester en sécurité.
+                                </p>
+                            </header>
+
+                            <form method="POST" action="{{ path('password.update') }}" class="mt-6 space-y-6">
+                                <input type="hidden" name="_token" value="{{ csrf_token('update_password') }}">
+                                <input type="hidden" name="_method" value="PUT">
+
+                                <div>
+                                    <label for="current_password" class="block text-sm font-medium text-gray-700">Mot de passe actuel</label>
+                                    <input 
+                                        id="current_password" 
+                                        name="current_password" 
+                                        type="password" 
+                                        autocomplete="current-password"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    >
+                                </div>
+
+                                <div>
+                                    <label for="password" class="block text-sm font-medium text-gray-700">Nouveau mot de passe</label>
+                                    <input 
+                                        id="password" 
+                                        name="password" 
+                                        type="password" 
+                                        autocomplete="new-password"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    >
+                                </div>
+
+                                <div>
+                                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirmer le mot de passe</label>
+                                    <input 
+                                        id="password_confirmation" 
+                                        name="password_confirmation" 
+                                        type="password" 
+                                        autocomplete="new-password"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    >
+                                </div>
+
+                                <div class="flex items-center gap-4">
+                                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow transition-colors">
+                                        Enregistrer
+                                    </button>
+                                </div>
+                            </form>
+                        </section>
+                    </div>
+                </div>
             </div>
-            
-            <div class="flex justify-end">
-                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-                    Mettre a jour
-                </button>
+
+            <!-- Delete Account -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <div class="max-w-xl">
+                        <section class="space-y-6">
+                            <header>
+                                <h2 class="text-lg font-medium text-gray-900">
+                                    Supprimer le compte
+                                </h2>
+                                <p class="mt-1 text-sm text-gray-600">
+                                    Une fois votre compte supprimé, toutes ses ressources et données seront définitivement supprimées. Avant de supprimer votre compte, veuillez télécharger toutes les données ou informations que vous souhaitez conserver.
+                                </p>
+                            </header>
+
+                            <form method="POST" action="{{ path('profile.destroy') }}" class="p-6">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_account') }}">
+                                <input type="hidden" name="_method" value="DELETE">
+
+                                <h2 class="text-lg font-medium text-gray-900">
+                                    Etes-vous sûr de vouloir supprimer votre compte ?
+                                </h2>
+
+                                <p class="mt-1 text-sm text-gray-600">
+                                    Une fois votre compte supprimé, toutes ses ressources et données seront définitivement supprimées. Veuillez entrer votre mot de passe pour confirmer que vous souhaitez supprimer définitivement votre compte.
+                                </p>
+
+                                <div class="mt-6">
+                                    <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
+                                    <input 
+                                        id="password" 
+                                        name="password" 
+                                        type="password" 
+                                        class="mt-1 block w-3/4 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        placeholder="Mot de passe"
+                                    >
+                                </div>
+
+                                <div class="mt-6 flex justify-end">
+                                    <a 
+                                        href="{{ path('dashboard') }}"
+                                        class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors"
+                                    >
+                                        Annuler
+                                    </a>
+
+                                    <button 
+                                        type="submit"
+                                        onclick="return confirm('Etes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')"
+                                        class="ml-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                                    >
+                                        Supprimer le compte
+                                    </button>
+                                </div>
+                            </form>
+                        </section>
+                    </div>
+                </div>
             </div>
         </div>
-        {{ form_end(profileForm) }}
     </div>
-    
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
-        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Mettre a jour le mot de passe</h2>
-        
-        {{ form_start(passwordForm) }}
-        <div class="space-y-4">
-            <div>
-                <label for="password_current_password" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Mot de passe actuel</label>
-                {{ form_widget(passwordForm.current_password, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white'}}) }}
-                <div class="text-red-500 text-sm mt-1">{{ form_errors(passwordForm.current_password) }}</div>
-            </div>
-            
-            <div>
-                <label for="password_new_password" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nouveau mot de passe</label>
-                {{ form_widget(passwordForm.new_password, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white'}}) }}
-                <div class="text-red-500 text-sm mt-1">{{ form_errors(passwordForm.new_password) }}</div>
-            </div>
-            
-            <div>
-                <label for="password_new_password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Confirmer le nouveau mot de passe</label>
-                {{ form_widget(passwordForm.new_password_confirmation, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white'}}) }}
-                <div class="text-red-500 text-sm mt-1">{{ form_errors(passwordForm.new_password_confirmation) }}</div>
-            </div>
-            
-            <div class="flex justify-end">
-                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-                    Mettre a jour le mot de passe
-                </button>
-            </div>
-        </div>
-        {{ form_end(passwordForm) }}
-    </div>
-    
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
-        <h2 class="text-xl font-semibold text-red-600 dark:text-red-400 mb-4">Supprimer le compte</h2>
-        <p class="text-gray-600 dark:text-slate-400 mb-4">Une fois votre compte supprime, toutes ses ressources et donnees seront definitivement supprimees.</p>
-        
-        <form action="{{ path('profile.destroy') }}" method="POST" onsubmit="return confirm('Etes-vous sur de vouloir supprimer votre compte ? Cette action est irreversible.')">
-            <input type="hidden" name="_method" value="DELETE">
-            <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
-                Supprimer le compte
-            </button>
-        </form>
-    </div>
-</div>
 {% endblock %}

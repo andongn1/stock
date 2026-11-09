@@ -2,21 +2,21 @@
 
 namespace App\Repository;
 
-use App\Entity\'${entity}';
+use App\Entity\Family;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<'${entity}'>
+ * @extends ServiceEntityRepository<Family>
  */
-class ${entity}Repository extends ServiceEntityRepository
+class FamilyRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, '${entity}'::class);
+        parent::__construct($registry, Family::class);
     }
 
-    public function save('${entity}' $entity, bool $flush = false): void
+    public function save(Family $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
         if ($flush) {
@@ -24,7 +24,7 @@ class ${entity}Repository extends ServiceEntityRepository
         }
     }
 
-    public function remove('${entity}' $entity, bool $flush = false): void
+    public function remove(Family $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
         if ($flush) {

@@ -2,84 +2,79 @@
 
 namespace App\Controller\Api;
 
-use App\Controller\Controller;
-use App\Data\Supplier\CreateSupplierDto;
-use App\Data\Supplier\UpdateSupplierDto;
 use App\Entity\Supplier;
+use App\Repository\SupplierRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/suppliers')]
-class SupplierController extends Controller
+#[IsGranted('ROLE_USER')]
+class SupplierController extends AbstractController
 {
     public function __construct(
-        private EntityManagerInterface $em,
-        private SerializerInterface $serializer,
-        private ValidatorInterface $validator
-    ) {}
+        private EntityManagerInterface $entityManager,
+        private SupplierRepository $supplierRepository
+    ) {
+    }
 
     #[Route('', name: 'api.suppliers.index', methods: ['GET'])]
     public function index(): Response
     {
-        $suppliers = $this->em->getRepository(Supplier::class)->findBy([], ['createdAt' => 'DESC']);
-        
-        $data = array_map(function(Supplier $supplier) {
-            return [
+        $suppliers = $this->supplierRepository->findBy([], ['id' => 'DESC']);
+
+        $data = [];
+        foreach ($suppliers as $supplier) {
+            $data[] = [
                 'id' => $supplier->getId(),
                 'name' => $supplier->getName(),
                 'contact_info' => $supplier->getContactInfo(),
-                'price_histories_count' => $supplier->getPriceHistories()->count(),
                 'created_at' => $supplier->getCreatedAt()->format('Y-m-d H:i:s'),
                 'updated_at' => $supplier->getUpdatedAt()->format('Y-m-d H:i:s'),
             ];
-        }, $suppliers);
+        }
 
-        return $this->json($data);
+        return new JsonResponse($data);
     }
 
     #[Route('', name: 'api.suppliers.store', methods: ['POST'])]
     public function store(Request $request): Response
     {
-        $dto = new CreateSupplierDto();
-        $this->serializer->deserialize($request->getContent(), CreateSupplierDto::class, 'json', [
-            'object_to_populate' => $dto,
-        ]);
-
-        $errors = $this->validator->validate($dto);
-        if (count($errors) > 0) {
-            return $this->json(['errors' => (string) $errors], 422);
+        $data = json_decode($request->getContent(), true);
+        
+        if (!isset($data['name'])) {
+            return new JsonResponse(['error' => 'Name is required'], Response::HTTP_BAD_REQUEST);
         }
 
         $supplier = new Supplier();
-        $supplier->setName($dto->name);
-        $supplier->setContactInfo($dto->contact_info);
-        
-        $this->em->persist($supplier);
-        $this->em->flush();
+        $supplier->setName($data['name']);
+        if (isset($data['contact_info'])) {
+            $supplier->setContactInfo($data['contact_info']);
+        }
 
-        return $this->json([
+        $this->entityManager->persist($supplier);
+        $this->entityManager->flush();
+
+        return new JsonResponse([
             'id' => $supplier->getId(),
             'name' => $supplier->getName(),
             'contact_info' => $supplier->getContactInfo(),
-            'price_histories_count' => 0,
             'created_at' => $supplier->getCreatedAt()->format('Y-m-d H:i:s'),
             'updated_at' => $supplier->getUpdatedAt()->format('Y-m-d H:i:s'),
-        ], 201);
+        ], Response::HTTP_CREATED);
     }
 
     #[Route('/{id}', name: 'api.suppliers.show', methods: ['GET'])]
     public function show(Supplier $supplier): Response
     {
-        return $this->json([
+        return new JsonResponse([
             'id' => $supplier->getId(),
             'name' => $supplier->getName(),
             'contact_info' => $supplier->getContactInfo(),
-            'price_histories_count' => $supplier->getPriceHistories()->count(),
             'created_at' => $supplier->getCreatedAt()->format('Y-m-d H:i:s'),
             'updated_at' => $supplier->getUpdatedAt()->format('Y-m-d H:i:s'),
         ]);
@@ -88,25 +83,22 @@ class SupplierController extends Controller
     #[Route('/{id}', name: 'api.suppliers.update', methods: ['PUT', 'PATCH'])]
     public function update(Request $request, Supplier $supplier): Response
     {
-        $dto = new UpdateSupplierDto();
-        $this->serializer->deserialize($request->getContent(), UpdateSupplierDto::class, 'json', [
-            'object_to_populate' => $dto,
-        ]);
-
-        $errors = $this->validator->validate($dto);
-        if (count($errors) > 0) {
-            return $this->json(['errors' => (string) $errors], 422);
+        $data = json_decode($request->getContent(), true);
+        
+        if (!isset($data['name'])) {
+            return new JsonResponse(['error' => 'Name is required'], Response::HTTP_BAD_REQUEST);
         }
 
-        $supplier->setName($dto->name);
-        $supplier->setContactInfo($dto->contact_info);
-        $this->em->flush();
+        $supplier->setName($data['name']);
+        if (isset($data['contact_info'])) {
+            $supplier->setContactInfo($data['contact_info']);
+        }
+        $this->entityManager->flush();
 
-        return $this->json([
+        return new JsonResponse([
             'id' => $supplier->getId(),
             'name' => $supplier->getName(),
             'contact_info' => $supplier->getContactInfo(),
-            'price_histories_count' => $supplier->getPriceHistories()->count(),
             'created_at' => $supplier->getCreatedAt()->format('Y-m-d H:i:s'),
             'updated_at' => $supplier->getUpdatedAt()->format('Y-m-d H:i:s'),
         ]);
@@ -115,9 +107,9 @@ class SupplierController extends Controller
     #[Route('/{id}', name: 'api.suppliers.destroy', methods: ['DELETE'])]
     public function destroy(Supplier $supplier): Response
     {
-        $this->em->remove($supplier);
-        $this->em->flush();
+        $this->entityManager->remove($supplier);
+        $this->entityManager->flush();
 
-        return new JsonResponse(null, 204);
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

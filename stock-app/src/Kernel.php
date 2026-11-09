@@ -9,8 +9,11 @@ class Kernel extends BaseKernel
 {
     use MicroKernelTrait;
 
-    public function getProjectDir(): string
+    /**
+     * @return list<string> An array of allowed values for APP_ENV
+     */
+    private function getAllowedEnvs(): array
     {
-        return \dirname(__DIR__);
+        return ['prod', 'dev', 'test'];
     }
 }

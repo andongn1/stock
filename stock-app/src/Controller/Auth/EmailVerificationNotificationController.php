@@ -2,17 +2,17 @@
 
 namespace App\Controller\Auth;
 
-use App\Controller\Controller;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
-class EmailVerificationNotificationController extends Controller
+class EmailVerificationNotificationController extends AbstractController
 {
     #[Route('/email/verification-notification', name: 'verification.send', methods: ['POST'])]
-    public function store(): Response
+    public function store(Request $request): Response
     {
-        // TODO: Send verification email
+        // TODO: Implement sending verification email
         return $this->redirectToRoute('dashboard');
     }
 }

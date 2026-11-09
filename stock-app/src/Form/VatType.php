@@ -8,6 +8,9 @@ use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Unique;
 
 class VatType extends AbstractType
 {
@@ -15,12 +18,24 @@ class VatType extends AbstractType
     {
         $builder
             ->add('rate', NumberType::class, [
-                'label' => 'Taux (%)',
-                'attr' => ['class' => 'form-control', 'step' => '0.01'],
+                'label' => 'Taux',
+                'scale' => 2,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Le taux de TVA est obligatoire.',
+                    ]),
+                ],
             ])
             ->add('label', TextType::class, [
                 'label' => 'Libelle',
-                'attr' => ['class' => 'form-control'],
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Le libelle est obligatoire.',
+                    ]),
+                    new Length([
+                        'max' => 255,
+                    ]),
+                ],
             ]);
     }
 

@@ -5,7 +5,6 @@ namespace App\Entity;
 use App\Repository\SubFamilyRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SubFamilyRepository::class)]
@@ -14,10 +13,10 @@ class SubFamily
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::STRING, length: 255)]
+    #[ORM\Column(type: 'string', length: 255)]
     private string $name;
 
     #[ORM\ManyToOne(targetEntity: Family::class, inversedBy: 'subFamilles')]
@@ -27,17 +26,15 @@ class SubFamily
     #[ORM\OneToMany(mappedBy: 'subFamily', targetEntity: Article::class, orphanRemoval: true)]
     private Collection $articles;
 
-    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
-    private \DateTimeImmutable $createdAt;
+    #[ORM\Column(type: 'datetime')]
+    private \DateTimeInterface $createdAt;
 
-    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
-    private \DateTimeImmutable $updatedAt;
+    #[ORM\Column(type: 'datetime')]
+    private \DateTimeInterface $updatedAt;
 
     public function __construct()
     {
         $this->articles = new ArrayCollection();
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -50,7 +47,7 @@ class SubFamily
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(string $name): static
     {
         $this->name = $name;
         return $this;
@@ -61,18 +58,21 @@ class SubFamily
         return $this->family;
     }
 
-    public function setFamily(?Family $family): self
+    public function setFamily(?Family $family): static
     {
         $this->family = $family;
         return $this;
     }
 
+    /**
+     * @return Collection<int, Article>
+     */
     public function getArticles(): Collection
     {
         return $this->articles;
     }
 
-    public function addArticle(Article $article): self
+    public function addArticle(Article $article): static
     {
         if (!$this->articles->contains($article)) {
             $this->articles->add($article);
@@ -81,7 +81,7 @@ class SubFamily
         return $this;
     }
 
-    public function removeArticle(Article $article): self
+    public function removeArticle(Article $article): static
     {
         if ($this->articles->removeElement($article)) {
             if ($article->getSubFamily() === $this) {
@@ -91,31 +91,30 @@ class SubFamily
         return $this;
     }
 
-    public function getCreatedAt(): \DateTimeImmutable
+    public function getCreatedAt(): \DateTimeInterface
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): self
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
     {
         $this->createdAt = $createdAt;
         return $this;
     }
 
-    public function getUpdatedAt(): \DateTimeImmutable
+    public function getUpdatedAt(): \DateTimeInterface
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): self
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
         return $this;
     }
 
-    #[ORM\PreUpdate]
-    public function preUpdate(): void
+    public function __toString(): string
     {
-        $this->updatedAt = new \DateTimeImmutable();
+        return $this->name;
     }
 }

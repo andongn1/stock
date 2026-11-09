@@ -27,30 +27,23 @@ class PriceHistory
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private string $price;
 
-    #[ORM\Column(type: Types::STRING, length: 3)]
+    #[ORM\Column(type: Types::STRING, length: 3, options: ['default' => 'EUR'])]
     private string $currency = 'EUR';
 
-    #[ORM\Column(type: Types::STRING, length: 20)]
-    private string $priceType = 'per_unit';
+    #[ORM\Column(type: Types::STRING, length: 20, enumType: PriceType::class)]
+    private PriceType $priceType = PriceType::PER_UNIT;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private \DateTimeInterface $validFrom;
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $validFrom = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $validTo = null;
 
-    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
-    private \DateTimeImmutable $createdAt;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private \DateTimeInterface $createdAt;
 
-    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
-    private \DateTimeImmutable $updatedAt;
-
-    public function __construct()
-    {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
-        $this->validFrom = new \DateTime();
-    }
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private \DateTimeInterface $updatedAt;
 
     public function getId(): ?int
     {
@@ -62,7 +55,7 @@ class PriceHistory
         return $this->article;
     }
 
-    public function setArticle(?Article $article): self
+    public function setArticle(?Article $article): static
     {
         $this->article = $article;
         return $this;
@@ -73,7 +66,7 @@ class PriceHistory
         return $this->supplier;
     }
 
-    public function setSupplier(?Supplier $supplier): self
+    public function setSupplier(?Supplier $supplier): static
     {
         $this->supplier = $supplier;
         return $this;
@@ -84,7 +77,7 @@ class PriceHistory
         return $this->price;
     }
 
-    public function setPrice(string $price): self
+    public function setPrice(string $price): static
     {
         $this->price = $price;
         return $this;
@@ -95,29 +88,29 @@ class PriceHistory
         return $this->currency;
     }
 
-    public function setCurrency(string $currency): self
+    public function setCurrency(string $currency): static
     {
         $this->currency = $currency;
         return $this;
     }
 
-    public function getPriceType(): string
+    public function getPriceType(): PriceType
     {
         return $this->priceType;
     }
 
-    public function setPriceType(string $priceType): self
+    public function setPriceType(PriceType $priceType): static
     {
         $this->priceType = $priceType;
         return $this;
     }
 
-    public function getValidFrom(): \DateTimeInterface
+    public function getValidFrom(): ?\DateTimeInterface
     {
         return $this->validFrom;
     }
 
-    public function setValidFrom(\DateTimeInterface $validFrom): self
+    public function setValidFrom(?\DateTimeInterface $validFrom): static
     {
         $this->validFrom = $validFrom;
         return $this;
@@ -128,40 +121,44 @@ class PriceHistory
         return $this->validTo;
     }
 
-    public function setValidTo(?\DateTimeInterface $validTo): self
+    public function setValidTo(?\DateTimeInterface $validTo): static
     {
         $this->validTo = $validTo;
         return $this;
     }
 
-    public function getCreatedAt(): \DateTimeImmutable
+    public function getCreatedAt(): \DateTimeInterface
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): self
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
     {
         $this->createdAt = $createdAt;
         return $this;
     }
 
-    public function getUpdatedAt(): \DateTimeImmutable
+    public function getUpdatedAt(): \DateTimeInterface
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): self
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
         return $this;
     }
 
+    /**
+     * Get the unit price based on the price type.
+     */
     public function getUnitPrice(): float
     {
-        if ($this->priceType === 'per_unit') {
+        if ($this->priceType === PriceType::PER_UNIT) {
             return (float) $this->price;
         }
 
+        // Price is per packaging, calculate unit price
         if ($this->article && $this->article->getPackagingUnitQuantity() > 0) {
             return (float) ($this->price / $this->article->getPackagingUnitQuantity());
         }
@@ -169,12 +166,16 @@ class PriceHistory
         return (float) $this->price;
     }
 
+    /**
+     * Get the packaging price based on the price type.
+     */
     public function getPackagingPrice(): float
     {
-        if ($this->priceType === 'per_packaging') {
+        if ($this->priceType === PriceType::PER_PACKAGING) {
             return (float) $this->price;
         }
 
+        // Price is per unit, calculate packaging price
         if ($this->article && $this->article->getPackagingUnitQuantity() > 0) {
             return (float) ($this->price * $this->article->getPackagingUnitQuantity());
         }
@@ -182,18 +183,11 @@ class PriceHistory
         return (float) $this->price;
     }
 
+    /**
+     * Get the formatted price type label.
+     */
     public function getPriceTypeLabel(): string
     {
-        $priceType = PriceType::tryFrom($this->priceType);
-        if ($priceType) {
-            return $priceType->label();
-        }
-        return ucfirst(str_replace('_', ' ', $this->priceType));
-    }
-
-    #[ORM\PreUpdate]
-    public function preUpdate(): void
-    {
-        $this->updatedAt = new \DateTimeImmutable();
+        return $this->priceType->label();
     }
 }

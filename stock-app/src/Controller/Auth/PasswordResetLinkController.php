@@ -2,13 +2,12 @@
 
 namespace App\Controller\Auth;
 
-use App\Controller\Controller;
-use App\Form\PasswordFormType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
-class PasswordResetLinkController extends Controller
+class PasswordResetLinkController extends AbstractController
 {
     #[Route('/forgot-password', name: 'password.request', methods: ['GET'])]
     public function create(): Response
@@ -19,8 +18,8 @@ class PasswordResetLinkController extends Controller
     #[Route('/forgot-password', name: 'password.email', methods: ['POST'])]
     public function store(Request $request): Response
     {
-        // TODO: Implement password reset email sending
-        // For now, just redirect back
+        // TODO: Implement password reset link sending
+        // For now, just redirect back with a success message
         return $this->redirectToRoute('login');
     }
 }

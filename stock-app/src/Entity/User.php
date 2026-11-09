@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Enum\UserRole;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -12,7 +14,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'users')]
-#[UniqueEntity(fields: ['email'], message: 'Cette adresse email est deja utilisee.')]
+#[UniqueEntity(fields: ['email'], message: 'This email is already in use.')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -26,28 +28,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::STRING, length: 255, unique: true)]
     private string $email;
 
-    #[ORM\Column(type: Types::STRING, length: 255)]
-    private string $password;
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    private ?string $password = null;
 
-    #[ORM\Column(type: Types::STRING, length: 255, enumType: UserRole::class)]
+    #[ORM\Column(type: Types::STRING, length: 20, enumType: UserRole::class, options: ['default' => UserRole::USER->value])]
     private UserRole $role = UserRole::USER;
 
-    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $emailVerifiedAt = null;
 
-    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
-    private ?string $rememberToken = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private \DateTimeInterface $createdAt;
 
-    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
-    private \DateTimeImmutable $createdAt;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private \DateTimeInterface $updatedAt;
 
-    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
-    private \DateTimeImmutable $updatedAt;
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: PersonalAccessToken::class, orphanRemoval: true)]
+    private Collection $personalAccessTokens;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->personalAccessTokens = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -60,7 +61,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(string $name): static
     {
         $this->name = $name;
         return $this;
@@ -71,18 +72,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;
     }
 
-    public function setEmail(string $email): self
+    public function setEmail(string $email): static
     {
         $this->email = $email;
         return $this;
     }
 
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
         return $this->password;
     }
 
-    public function setPassword(string $password): self
+    public function setPassword(?string $password): static
     {
         $this->password = $password;
         return $this;
@@ -93,7 +94,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->role;
     }
 
-    public function setRole(UserRole $role): self
+    public function setRole(UserRole $role): static
     {
         $this->role = $role;
         return $this;
@@ -104,63 +105,82 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->emailVerifiedAt;
     }
 
-    public function setEmailVerifiedAt(?\DateTimeInterface $emailVerifiedAt): self
+    public function setEmailVerifiedAt(?\DateTimeInterface $emailVerifiedAt): static
     {
         $this->emailVerifiedAt = $emailVerifiedAt;
         return $this;
     }
 
-    public function getRememberToken(): ?string
-    {
-        return $this->rememberToken;
-    }
-
-    public function setRememberToken(?string $rememberToken): self
-    {
-        $this->rememberToken = $rememberToken;
-        return $this;
-    }
-
-    public function getCreatedAt(): \DateTimeImmutable
+    public function getCreatedAt(): \DateTimeInterface
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): self
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
     {
         $this->createdAt = $createdAt;
         return $this;
     }
 
-    public function getUpdatedAt(): \DateTimeImmutable
+    public function getUpdatedAt(): \DateTimeInterface
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): self
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
         return $this;
     }
 
+    /**
+     * @return Collection<int, PersonalAccessToken>
+     */
+    public function getPersonalAccessTokens(): Collection
+    {
+        return $this->personalAccessTokens;
+    }
+
+    public function addPersonalAccessToken(PersonalAccessToken $personalAccessToken): static
+    {
+        if (!$this->personalAccessTokens->contains($personalAccessToken)) {
+            $this->personalAccessTokens->add($personalAccessToken);
+            $personalAccessToken->setUser($this);
+        }
+        return $this;
+    }
+
+    public function removePersonalAccessToken(PersonalAccessToken $personalAccessToken): static
+    {
+        if ($this->personalAccessTokens->removeElement($personalAccessToken)) {
+            if ($personalAccessToken->getUser() === $this) {
+                $personalAccessToken->setUser(null);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * Check if user is admin.
+     */
     public function isAdmin(): bool
     {
         return $this->role === UserRole::ADMIN;
     }
 
+    /**
+     * Check if user is regular user.
+     */
     public function isUser(): bool
     {
         return $this->role === UserRole::USER;
     }
 
-    // UserInterface
+    // UserInterface methods
+
     public function getRoles(): array
     {
         return ['ROLE_' . strtoupper($this->role->value)];
-    }
-
-    public function eraseCredentials(): void
-    {
     }
 
     public function getUserIdentifier(): string
@@ -168,27 +188,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;
     }
 
-    public function __serialize(): array
+    public function getSalt(): ?string
     {
-        return [
-            'id' => $this->id,
-            'email' => $this->email,
-            'password' => $this->password,
-            'role' => $this->role->value,
-        ];
+        return null;
     }
 
-    public function __unserialize(array $data): void
+    public function getUsername(): string
     {
-        $this->id = $data['id'];
-        $this->email = $data['email'];
-        $this->password = $data['password'];
-        $this->role = UserRole::from($data['role']);
+        return $this->email;
     }
 
-    #[ORM\PreUpdate]
-    public function preUpdate(): void
+    public function eraseCredentials(): void
     {
-        $this->updatedAt = new \DateTimeImmutable();
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
+    }
+
+    public function __toString(): string
+    {
+        return $this->name;
     }
 }

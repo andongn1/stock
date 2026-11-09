@@ -2,14 +2,15 @@
 
 namespace App\Controller\Auth;
 
-use App\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
-class EmailVerificationPromptController extends Controller
+class EmailVerificationPromptController extends AbstractController
 {
     #[Route('/verify-email', name: 'verification.notice', methods: ['GET'])]
-    public function index(): Response
+    public function __invoke(Request $request): Response
     {
         return $this->render('auth/verify-email.html.twig');
     }

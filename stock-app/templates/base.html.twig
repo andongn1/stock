@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Stock Management{% endblock %}</title>
+        <meta name="csrf-token" content="{{ csrf_token('') }}">
+        
+        {% block stylesheets %}
+            <script src="https://cdn.tailwindcss.com"></script>
+            <style>
+                [x-cloak] { display: none !important; }
+            </style>
+        {% endblock %}
+        
+        {% block javascripts %}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% endblock %}
+    </head>
+    <body class="bg-gray-100 font-sans antialiased">
+        <div class="min-h-screen">
+            {% include 'partials/navigation.html.twig' %}
+            
+            <!-- Page Heading -->
+            {% block header %}
+                <header class="bg-white shadow">
+                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                        {% block header_content %}{% endblock %}
+                    </div>
+                </header>
+            {% endblock %}
+
+            <!-- Flash Messages -->
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="max-w-7xl mx-auto mt-4 px-4 sm:px-6 lg:px-8">
+                        <div class="bg-{{ label == 'success' ? 'green' : label == 'error' ? 'red' : label == 'warning' ? 'yellow' : 'blue' }}-100 border border-{{ label == 'success' ? 'green' : label == 'error' ? 'red' : label == 'warning' ? 'yellow' : 'blue' }}-400 text-{{ label == 'success' ? 'green' : label == 'error' ? 'red' : label == 'warning' ? 'yellow' : 'blue' }}-700 px-4 py-3 rounded relative" role="alert">
+                            <span class="block sm:inline">{{ message }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <!-- Page Content -->
+            <main>
+                {% block body %}{% endblock %}
+            </main>
+        </div>
+    </body>
+</html>

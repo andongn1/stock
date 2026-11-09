@@ -1,0 +1,80 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Entrée - {{ article.name }}{% endblock %}
+
+{% block header_content %}
+    <div class="flex justify-between items-center">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            Entrée de stock: {{ article.name }}
+        </h2>
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <!-- Article Info -->
+                    <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <h3 class="font-semibold text-gray-800 mb-2">
+                            Informations de l'article
+                        </h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Nom:</span>
+                                <span class="font-medium text-gray-800">{{ article.name }}</span>
+                            </div>
+                            {% if article.brand %}
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Marque:</span>
+                                <span class="font-medium text-gray-800">{{ article.brand }}</span>
+                            </div>
+                            {% endif %}
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Conditionnement:</span>
+                                <span class="font-medium text-gray-800">{{ article.packaging?article.packaging.name:'N/A' }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Quantité par conditionnement:</span>
+                                <span class="font-medium text-gray-800">
+                                    {{ article.packagingUnitQuantity }} {{ article.unit?article.unit.name:'' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Form -->
+                    <form method="POST" action="{{ path('entries.store', {'id': article.id}) }}" class="space-y-6">
+                        {{ form_row(form.quantity, {'label': 'Quantité reçue (en ' ~ (article.packaging?article.packaging.name:'conditionnements') ~ ')', 'attr': {'class': 'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500', 'step': '0.0001', 'min': '0'}}) }}
+                        
+                        <div class="p-4 bg-blue-50 rounded-lg text-sm text-blue-700">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Exemple: Si le conditionnement est "Sac" et contient 10kg, entrez le nombre de sacs reçus (ex: 5). 
+                            La valeur totale sera calculée automatiquement (ex: 5 sacs = 50kg).
+                        </div>
+                        
+                        <div class="flex space-x-4">
+                            <button 
+                                type="submit"
+                                class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium"
+                            >
+                                Enregistrer l'entrée
+                            </button>
+                            <a 
+                                href="{{ path('entries.index') }}"
+                                class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium"
+                            >
+                                Annuler
+                            </a>
+                        </div>
+                        
+                        <input type="hidden" name="_token" value="{{ csrf_token('entry_' ~ article.id) }}">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

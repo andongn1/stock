@@ -2,99 +2,82 @@
 
 namespace App\Controller\Api;
 
-use App\Controller\Controller;
-use App\Data\SubFamily\CreateSubFamilyDto;
-use App\Data\SubFamily\UpdateSubFamilyDto;
-use App\Entity\Family;
 use App\Entity\SubFamily;
+use App\Repository\SubFamilyRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/sub-families')]
-class SubFamilyController extends Controller
+#[IsGranted('ROLE_USER')]
+class SubFamilyController extends AbstractController
 {
     public function __construct(
-        private EntityManagerInterface $em,
-        private SerializerInterface $serializer,
-        private ValidatorInterface $validator
-    ) {}
+        private EntityManagerInterface $entityManager,
+        private SubFamilyRepository $subFamilyRepository
+    ) {
+    }
 
     #[Route('', name: 'api.sub_families.index', methods: ['GET'])]
     public function index(): Response
     {
-        $subFamilies = $this->em->getRepository(SubFamily::class)->findBy([], ['createdAt' => 'DESC']);
-        
-        $data = array_map(function(SubFamily $subFamily) {
-            return [
+        $subFamilies = $this->subFamilyRepository->findBy([], ['id' => 'DESC']);
+
+        $data = [];
+        foreach ($subFamilies as $subFamily) {
+            $data[] = [
                 'id' => $subFamily->getId(),
                 'name' => $subFamily->getName(),
-                'family_id' => $subFamily->getFamily()?->getId(),
-                'family' => $subFamily->getFamily() ? [
-                    'id' => $subFamily->getFamily()->getId(),
-                    'name' => $subFamily->getFamily()->getName(),
-                ] : null,
-                'articles_count' => $subFamily->getArticles()->count(),
+                'family_id' => $subFamily->getFamily() ? $subFamily->getFamily()->getId() : null,
                 'created_at' => $subFamily->getCreatedAt()->format('Y-m-d H:i:s'),
                 'updated_at' => $subFamily->getUpdatedAt()->format('Y-m-d H:i:s'),
             ];
-        }, $subFamilies);
+        }
 
-        return $this->json($data);
+        return new JsonResponse($data);
     }
 
     #[Route('', name: 'api.sub_families.store', methods: ['POST'])]
     public function store(Request $request): Response
     {
-        $dto = new CreateSubFamilyDto();
-        $this->serializer->deserialize($request->getContent(), CreateSubFamilyDto::class, 'json', [
-            'object_to_populate' => $dto,
-        ]);
-
-        $errors = $this->validator->validate($dto);
-        if (count($errors) > 0) {
-            return $this->json(['errors' => (string) $errors], 422);
+        $data = json_decode($request->getContent(), true);
+        
+        if (!isset($data['name']) || !isset($data['family_id'])) {
+            return new JsonResponse(['error' => 'Name and family_id are required'], Response::HTTP_BAD_REQUEST);
         }
 
-        $family = $this->em->getRepository(Family::class)->find($dto->family_id);
-        
-        $subFamily = new SubFamily();
-        $subFamily->setName($dto->name);
-        $subFamily->setFamily($family);
-        
-        $this->em->persist($subFamily);
-        $this->em->flush();
+        $family = $this->entityManager->getRepository('App\Entity\Family')->find($data['family_id']);
+        if (!$family) {
+            return new JsonResponse(['error' => 'Family not found'], Response::HTTP_NOT_FOUND);
+        }
 
-        return $this->json([
+        $subFamily = new SubFamily();
+        $subFamily->setName($data['name']);
+        $subFamily->setFamily($family);
+
+        $this->entityManager->persist($subFamily);
+        $this->entityManager->flush();
+
+        return new JsonResponse([
             'id' => $subFamily->getId(),
             'name' => $subFamily->getName(),
-            'family_id' => $subFamily->getFamily()?->getId(),
-            'family' => [
-                'id' => $family->getId(),
-                'name' => $family->getName(),
-            ],
-            'articles_count' => 0,
+            'family_id' => $family->getId(),
             'created_at' => $subFamily->getCreatedAt()->format('Y-m-d H:i:s'),
             'updated_at' => $subFamily->getUpdatedAt()->format('Y-m-d H:i:s'),
-        ], 201);
+        ], Response::HTTP_CREATED);
     }
 
     #[Route('/{id}', name: 'api.sub_families.show', methods: ['GET'])]
     public function show(SubFamily $subFamily): Response
     {
-        return $this->json([
+        return new JsonResponse([
             'id' => $subFamily->getId(),
             'name' => $subFamily->getName(),
-            'family_id' => $subFamily->getFamily()?->getId(),
-            'family' => $subFamily->getFamily() ? [
-                'id' => $subFamily->getFamily()->getId(),
-                'name' => $subFamily->getFamily()->getName(),
-            ] : null,
-            'articles_count' => $subFamily->getArticles()->count(),
+            'family_id' => $subFamily->getFamily() ? $subFamily->getFamily()->getId() : null,
             'created_at' => $subFamily->getCreatedAt()->format('Y-m-d H:i:s'),
             'updated_at' => $subFamily->getUpdatedAt()->format('Y-m-d H:i:s'),
         ]);
@@ -103,34 +86,25 @@ class SubFamilyController extends Controller
     #[Route('/{id}', name: 'api.sub_families.update', methods: ['PUT', 'PATCH'])]
     public function update(Request $request, SubFamily $subFamily): Response
     {
-        $dto = new UpdateSubFamilyDto();
-        $this->serializer->deserialize($request->getContent(), UpdateSubFamilyDto::class, 'json', [
-            'object_to_populate' => $dto,
-        ]);
-
-        $errors = $this->validator->validate($dto);
-        if (count($errors) > 0) {
-            return $this->json(['errors' => (string) $errors], 422);
+        $data = json_decode($request->getContent(), true);
+        
+        if (!isset($data['name']) || !isset($data['family_id'])) {
+            return new JsonResponse(['error' => 'Name and family_id are required'], Response::HTTP_BAD_REQUEST);
         }
 
-        $subFamily->setName($dto->name);
-        
-        if ($dto->family_id) {
-            $family = $this->em->getRepository(Family::class)->find($dto->family_id);
-            $subFamily->setFamily($family);
+        $family = $this->entityManager->getRepository('App\Entity\Family')->find($data['family_id']);
+        if (!$family) {
+            return new JsonResponse(['error' => 'Family not found'], Response::HTTP_NOT_FOUND);
         }
-        
-        $this->em->flush();
 
-        return $this->json([
+        $subFamily->setName($data['name']);
+        $subFamily->setFamily($family);
+        $this->entityManager->flush();
+
+        return new JsonResponse([
             'id' => $subFamily->getId(),
             'name' => $subFamily->getName(),
-            'family_id' => $subFamily->getFamily()?->getId(),
-            'family' => $subFamily->getFamily() ? [
-                'id' => $subFamily->getFamily()->getId(),
-                'name' => $subFamily->getFamily()->getName(),
-            ] : null,
-            'articles_count' => $subFamily->getArticles()->count(),
+            'family_id' => $family->getId(),
             'created_at' => $subFamily->getCreatedAt()->format('Y-m-d H:i:s'),
             'updated_at' => $subFamily->getUpdatedAt()->format('Y-m-d H:i:s'),
         ]);
@@ -139,9 +113,9 @@ class SubFamilyController extends Controller
     #[Route('/{id}', name: 'api.sub_families.destroy', methods: ['DELETE'])]
     public function destroy(SubFamily $subFamily): Response
     {
-        $this->em->remove($subFamily);
-        $this->em->flush();
+        $this->entityManager->remove($subFamily);
+        $this->entityManager->flush();
 
-        return new JsonResponse(null, 204);
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

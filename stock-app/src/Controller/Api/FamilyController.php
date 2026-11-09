@@ -2,121 +2,109 @@
 
 namespace App\Controller\Api;
 
-use App\Controller\Controller;
-use App\Data\Family\CreateFamilyDto;
-use App\Data\Family\UpdateFamilyDto;
 use App\Entity\Family;
-use App\Serializer\FamilyNormalizer;
+use App\Form\FamilyType;
+use App\Repository\FamilyRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/families')]
-class FamilyController extends Controller
+#[IsGranted('ROLE_USER')]
+class FamilyController extends AbstractController
 {
     public function __construct(
-        private EntityManagerInterface $em,
-        private SerializerInterface $serializer,
-        private ValidatorInterface $validator
-    ) {}
+        private EntityManagerInterface $entityManager,
+        private FamilyRepository $familyRepository
+    ) {
+    }
 
     #[Route('', name: 'api.families.index', methods: ['GET'])]
     public function index(): Response
     {
-        $families = $this->em->getRepository(Family::class)->findBy([], ['createdAt' => 'DESC']);
-        
-        $data = array_map(function(Family $family) {
-            return [
+        $families = $this->familyRepository->findBy([], ['id' => 'DESC']);
+
+        $data = [];
+        foreach ($families as $family) {
+            $data[] = [
                 'id' => $family->getId(),
                 'name' => $family->getName(),
                 'created_at' => $family->getCreatedAt()->format('Y-m-d H:i:s'),
                 'updated_at' => $family->getUpdatedAt()->format('Y-m-d H:i:s'),
-                'sub_families_count' => $family->getSubFamilles()->count(),
-                'articles_count' => $family->getArticles()->count(),
+                'sub_families_count' => count($family->getSubFamilles()),
+                'articles_count' => count($family->getArticles()),
             ];
-        }, $families);
+        }
 
-        return $this->json($data);
+        return new JsonResponse($data);
     }
 
     #[Route('', name: 'api.families.store', methods: ['POST'])]
     public function store(Request $request): Response
     {
-        $dto = new CreateFamilyDto();
-        $this->serializer->deserialize($request->getContent(), CreateFamilyDto::class, 'json', [
-            'object_to_populate' => $dto,
-        ]);
-
-        $errors = $this->validator->validate($dto);
-        if (count($errors) > 0) {
-            return $this->json(['errors' => (string) $errors], 422);
+        $data = json_decode($request->getContent(), true);
+        
+        if (!is_array($data) || !isset($data['name'])) {
+            return new JsonResponse(['error' => 'Name is required'], Response::HTTP_BAD_REQUEST);
         }
 
         $family = new Family();
-        $family->setName($dto->name);
-        
-        $this->em->persist($family);
-        $this->em->flush();
+        $family->setName($data['name']);
 
-        return $this->json([
+        $this->entityManager->persist($family);
+        $this->entityManager->flush();
+
+        return new JsonResponse([
             'id' => $family->getId(),
             'name' => $family->getName(),
             'created_at' => $family->getCreatedAt()->format('Y-m-d H:i:s'),
             'updated_at' => $family->getUpdatedAt()->format('Y-m-d H:i:s'),
-            'sub_families_count' => 0,
-            'articles_count' => 0,
-        ], 201);
+        ], Response::HTTP_CREATED);
     }
 
     #[Route('/{id}', name: 'api.families.show', methods: ['GET'])]
     public function show(Family $family): Response
     {
-        return $this->json([
+        return new JsonResponse([
             'id' => $family->getId(),
             'name' => $family->getName(),
             'created_at' => $family->getCreatedAt()->format('Y-m-d H:i:s'),
             'updated_at' => $family->getUpdatedAt()->format('Y-m-d H:i:s'),
-            'sub_families_count' => $family->getSubFamilles()->count(),
-            'articles_count' => $family->getArticles()->count(),
+            'sub_families_count' => count($family->getSubFamilles()),
+            'articles_count' => count($family->getArticles()),
         ]);
     }
 
     #[Route('/{id}', name: 'api.families.update', methods: ['PUT', 'PATCH'])]
     public function update(Request $request, Family $family): Response
     {
-        $dto = new UpdateFamilyDto();
-        $this->serializer->deserialize($request->getContent(), UpdateFamilyDto::class, 'json', [
-            'object_to_populate' => $dto,
-        ]);
-
-        $errors = $this->validator->validate($dto);
-        if (count($errors) > 0) {
-            return $this->json(['errors' => (string) $errors], 422);
+        $data = json_decode($request->getContent(), true);
+        
+        if (!is_array($data) || !isset($data['name'])) {
+            return new JsonResponse(['error' => 'Name is required'], Response::HTTP_BAD_REQUEST);
         }
 
-        $family->setName($dto->name);
-        $this->em->flush();
+        $family->setName($data['name']);
+        $this->entityManager->flush();
 
-        return $this->json([
+        return new JsonResponse([
             'id' => $family->getId(),
             'name' => $family->getName(),
             'created_at' => $family->getCreatedAt()->format('Y-m-d H:i:s'),
             'updated_at' => $family->getUpdatedAt()->format('Y-m-d H:i:s'),
-            'sub_families_count' => $family->getSubFamilles()->count(),
-            'articles_count' => $family->getArticles()->count(),
         ]);
     }
 
     #[Route('/{id}', name: 'api.families.destroy', methods: ['DELETE'])]
     public function destroy(Family $family): Response
     {
-        $this->em->remove($family);
-        $this->em->flush();
+        $this->entityManager->remove($family);
+        $this->entityManager->flush();
 
-        return new JsonResponse(null, 204);
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

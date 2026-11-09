@@ -1,24 +1,36 @@
-{% extends 'layouts/app.html.twig' %}
+{% extends 'base.html.twig' %}
 
-{% block page_title %}Creer une famille{% endblock %}
+{% block title %}Créer une Famille{% endblock %}
 
-{% block content %}
-<div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Creer une famille</h1>
-        <a href="{{ path('families.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
-            Retour
-        </a>
+{% block header_content %}
+    <div class="flex justify-between items-center">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            Créer une Famille
+        </h2>
     </div>
-    
-    <form method="POST" action="{{ path('families.create') }}">
-        {{ form_row(form.name, {'label': 'Nom', 'attr': {'class': 'form-control'}}) }}
-        
-        <div class="mt-6">
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-                Enregistrer
-            </button>
+{% endblock %}
+
+{% block body %}
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <form action="{{ path('families.store') }}" method="POST">
+                        {{ form_row(form.name, {'label': 'Nom', 'attr': {'class': 'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500'}}) }}
+                        
+                        <div class="mt-6">
+                            <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow transition-colors">
+                                Créer la Famille
+                            </button>
+                            <a href="{{ path('families.index') }}" class="ml-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors">
+                                Annuler
+                            </a>
+                        </div>
+                        
+                        <input type="hidden" name="_token" value="{{ csrf_token('create_family') }}">
+                    </form>
+                </div>
+            </div>
         </div>
-    </form>
-</div>
+    </div>
 {% endblock %}

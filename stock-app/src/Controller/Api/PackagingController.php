@@ -2,80 +2,73 @@
 
 namespace App\Controller\Api;
 
-use App\Controller\Controller;
-use App\Data\Packaging\CreatePackagingDto;
-use App\Data\Packaging\UpdatePackagingDto;
 use App\Entity\Packaging;
+use App\Repository\PackagingRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/packagings')]
-class PackagingController extends Controller
+#[IsGranted('ROLE_USER')]
+class PackagingController extends AbstractController
 {
     public function __construct(
-        private EntityManagerInterface $em,
-        private SerializerInterface $serializer,
-        private ValidatorInterface $validator
-    ) {}
+        private EntityManagerInterface $entityManager,
+        private PackagingRepository $packagingRepository
+    ) {
+    }
 
     #[Route('', name: 'api.packagings.index', methods: ['GET'])]
     public function index(): Response
     {
-        $packagings = $this->em->getRepository(Packaging::class)->findBy([], ['createdAt' => 'DESC']);
-        
-        $data = array_map(function(Packaging $packaging) {
-            return [
+        $packagings = $this->packagingRepository->findBy([], ['id' => 'DESC']);
+
+        $data = [];
+        foreach ($packagings as $packaging) {
+            $data[] = [
                 'id' => $packaging->getId(),
                 'name' => $packaging->getName(),
-                'articles_count' => $packaging->getArticles()->count(),
                 'created_at' => $packaging->getCreatedAt()->format('Y-m-d H:i:s'),
                 'updated_at' => $packaging->getUpdatedAt()->format('Y-m-d H:i:s'),
             ];
-        }, $packagings);
+        }
 
-        return $this->json($data);
+        return new JsonResponse($data);
     }
 
     #[Route('', name: 'api.packagings.store', methods: ['POST'])]
     public function store(Request $request): Response
     {
-        $dto = new CreatePackagingDto();
-        $this->serializer->deserialize($request->getContent(), CreatePackagingDto::class, 'json', [
-            'object_to_populate' => $dto,
-        ]);
-
-        $errors = $this->validator->validate($dto);
-        if (count($errors) > 0) {
-            return $this->json(['errors' => (string) $errors], 422);
+        $data = json_decode($request->getContent(), true);
+        
+        if (!isset($data['name'])) {
+            return new JsonResponse(['error' => 'Name is required'], Response::HTTP_BAD_REQUEST);
         }
 
         $packaging = new Packaging();
-        $packaging->setName($dto->name);
-        
-        $this->em->persist($packaging);
-        $this->em->flush();
+        $packaging->setName($data['name']);
 
-        return $this->json([
+        $this->entityManager->persist($packaging);
+        $this->entityManager->flush();
+
+        return new JsonResponse([
             'id' => $packaging->getId(),
             'name' => $packaging->getName(),
-            'articles_count' => 0,
             'created_at' => $packaging->getCreatedAt()->format('Y-m-d H:i:s'),
             'updated_at' => $packaging->getUpdatedAt()->format('Y-m-d H:i:s'),
-        ], 201);
+        ], Response::HTTP_CREATED);
     }
 
     #[Route('/{id}', name: 'api.packagings.show', methods: ['GET'])]
     public function show(Packaging $packaging): Response
     {
-        return $this->json([
+        return new JsonResponse([
             'id' => $packaging->getId(),
             'name' => $packaging->getName(),
-            'articles_count' => $packaging->getArticles()->count(),
             'created_at' => $packaging->getCreatedAt()->format('Y-m-d H:i:s'),
             'updated_at' => $packaging->getUpdatedAt()->format('Y-m-d H:i:s'),
         ]);
@@ -84,23 +77,18 @@ class PackagingController extends Controller
     #[Route('/{id}', name: 'api.packagings.update', methods: ['PUT', 'PATCH'])]
     public function update(Request $request, Packaging $packaging): Response
     {
-        $dto = new UpdatePackagingDto();
-        $this->serializer->deserialize($request->getContent(), UpdatePackagingDto::class, 'json', [
-            'object_to_populate' => $dto,
-        ]);
-
-        $errors = $this->validator->validate($dto);
-        if (count($errors) > 0) {
-            return $this->json(['errors' => (string) $errors], 422);
+        $data = json_decode($request->getContent(), true);
+        
+        if (!isset($data['name'])) {
+            return new JsonResponse(['error' => 'Name is required'], Response::HTTP_BAD_REQUEST);
         }
 
-        $packaging->setName($dto->name);
-        $this->em->flush();
+        $packaging->setName($data['name']);
+        $this->entityManager->flush();
 
-        return $this->json([
+        return new JsonResponse([
             'id' => $packaging->getId(),
             'name' => $packaging->getName(),
-            'articles_count' => $packaging->getArticles()->count(),
             'created_at' => $packaging->getCreatedAt()->format('Y-m-d H:i:s'),
             'updated_at' => $packaging->getUpdatedAt()->format('Y-m-d H:i:s'),
         ]);
@@ -109,9 +97,9 @@ class PackagingController extends Controller
     #[Route('/{id}', name: 'api.packagings.destroy', methods: ['DELETE'])]
     public function destroy(Packaging $packaging): Response
     {
-        $this->em->remove($packaging);
-        $this->em->flush();
+        $this->entityManager->remove($packaging);
+        $this->entityManager->flush();
 
-        return new JsonResponse(null, 204);
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

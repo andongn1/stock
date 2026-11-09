@@ -2,12 +2,12 @@
 
 namespace App\Controller\Auth;
 
-use App\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
-class NewPasswordController extends Controller
+class NewPasswordController extends AbstractController
 {
     #[Route('/reset-password/{token}', name: 'password.reset', methods: ['GET'])]
     public function create(string $token): Response

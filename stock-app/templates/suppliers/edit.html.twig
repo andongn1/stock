@@ -1,52 +1,39 @@
-{% extends 'layouts/app.html.twig' %}
+{% extends 'base.html.twig' %}
 
-{% block page_title %}Editer Fournisseur{% endblock %}
+{% block title %}Editer Fournisseur{% endblock %}
 
-{% block content %}
-<div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Editer Fournisseur</h1>
-        <a href="{{ path('suppliers.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
-            Retour
-        </a>
+{% block header_content %}
+    <div class="flex justify-between items-center">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            Editer Fournisseur
+        </h2>
     </div>
-    
-    {{ form_start(form) }}
-    <div class="space-y-6">
-        <div>
-            <label for="supplier_name" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nom *</label>
-            {{ form_widget(form.name, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white'}}) }}
-            <div class="text-red-500 text-sm mt-1">
-                {{ form_errors(form.name) }}
+{% endblock %}
+
+{% block body %}
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <form action="{{ path('suppliers.update', {'id': supplier.id}) }}" method="POST">
+                        {{ form_row(form.name, {'label': 'Nom du Fournisseur', 'attr': {'class': 'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500'}}) }}
+                        
+                        {{ form_row(form.contact_info, {'label': 'Informations de contact', 'attr': {'class': 'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500', 'rows': 3}}) }}
+                        
+                        <div class="mt-6">
+                            <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow transition-colors">
+                                Mettre à jour
+                            </button>
+                            <a href="{{ path('suppliers.index') }}" class="ml-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors">
+                                Annuler
+                            </a>
+                        </div>
+                        
+                        <input type="hidden" name="_token" value="{{ csrf_token('update_supplier_' ~ supplier.id) }}">
+                        <input type="hidden" name="_method" value="PUT">
+                    </form>
+                </div>
             </div>
         </div>
-        
-        <div>
-            <label for="supplier_contact_info" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Informations de contact</label>
-            {{ form_widget(form.contact_info, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white', 'rows': 3}}) }}
-            <div class="text-red-500 text-sm mt-1">
-                {{ form_errors(form.contact_info) }}
-            </div>
-        </div>
-        
-        <div class="flex justify-end space-x-4">
-            <a 
-                href="{{ path('suppliers.index') }}"
-                class="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
-            >
-                Annuler
-            </a>
-            <button 
-                type="submit" 
-                class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-                <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                Mettre a jour
-            </button>
-        </div>
     </div>
-    {{ form_end(form) }}
-</div>
 {% endblock %}

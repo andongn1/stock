@@ -21,6 +21,10 @@ class PersonalAccessToken
     #[ORM\Column(type: Types::INTEGER)]
     private int $tokenableId;
 
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'personalAccessTokens')]
+    #[ORM\JoinColumn(name: 'tokenable_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    private ?User $user = null;
+
     #[ORM\Column(type: Types::TEXT)]
     private string $name;
 
@@ -30,23 +34,17 @@ class PersonalAccessToken
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $abilities = null;
 
-    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $lastUsedAt = null;
 
-    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['index' => true])]
     private ?\DateTimeInterface $expiresAt = null;
 
-    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE, nullable: true)]
-    private ?\DateTimeImmutable $createdAt = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private \DateTimeInterface $createdAt;
 
-    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE, nullable: true)]
-    private ?\DateTimeImmutable $updatedAt = null;
-
-    public function __construct()
-    {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
-    }
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private \DateTimeInterface $updatedAt;
 
     public function getId(): ?int
     {
@@ -58,7 +56,7 @@ class PersonalAccessToken
         return $this->tokenableType;
     }
 
-    public function setTokenableType(string $tokenableType): self
+    public function setTokenableType(string $tokenableType): static
     {
         $this->tokenableType = $tokenableType;
         return $this;
@@ -69,9 +67,24 @@ class PersonalAccessToken
         return $this->tokenableId;
     }
 
-    public function setTokenableId(int $tokenableId): self
+    public function setTokenableId(int $tokenableId): static
     {
         $this->tokenableId = $tokenableId;
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
+        if ($user) {
+            $this->tokenableId = $user->getId();
+            $this->tokenableType = User::class;
+        }
         return $this;
     }
 
@@ -80,7 +93,7 @@ class PersonalAccessToken
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(string $name): static
     {
         $this->name = $name;
         return $this;
@@ -91,7 +104,7 @@ class PersonalAccessToken
         return $this->token;
     }
 
-    public function setToken(string $token): self
+    public function setToken(string $token): static
     {
         $this->token = $token;
         return $this;
@@ -102,7 +115,7 @@ class PersonalAccessToken
         return $this->abilities;
     }
 
-    public function setAbilities(?string $abilities): self
+    public function setAbilities(?string $abilities): static
     {
         $this->abilities = $abilities;
         return $this;
@@ -113,7 +126,7 @@ class PersonalAccessToken
         return $this->lastUsedAt;
     }
 
-    public function setLastUsedAt(?\DateTimeInterface $lastUsedAt): self
+    public function setLastUsedAt(?\DateTimeInterface $lastUsedAt): static
     {
         $this->lastUsedAt = $lastUsedAt;
         return $this;
@@ -124,37 +137,31 @@ class PersonalAccessToken
         return $this->expiresAt;
     }
 
-    public function setExpiresAt(?\DateTimeInterface $expiresAt): self
+    public function setExpiresAt(?\DateTimeInterface $expiresAt): static
     {
         $this->expiresAt = $expiresAt;
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): \DateTimeInterface
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(?\DateTimeImmutable $createdAt): self
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
     {
         $this->createdAt = $createdAt;
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeImmutable
+    public function getUpdatedAt(): \DateTimeInterface
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): self
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
         return $this;
-    }
-
-    #[ORM\PreUpdate]
-    public function preUpdate(): void
-    {
-        $this->updatedAt = new \DateTimeImmutable();
     }
 }

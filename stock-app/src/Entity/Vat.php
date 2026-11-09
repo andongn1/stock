@@ -5,7 +5,6 @@ namespace App\Entity;
 use App\Repository\VatRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: VatRepository::class)]
@@ -14,29 +13,27 @@ class Vat
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
     private string $rate;
 
-    #[ORM\Column(type: Types::STRING, length: 255)]
+    #[ORM\Column(type: 'string', length: 255)]
     private string $label;
 
     #[ORM\OneToMany(mappedBy: 'vat', targetEntity: Article::class, orphanRemoval: true)]
     private Collection $articles;
 
-    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
-    private \DateTimeImmutable $createdAt;
+    #[ORM\Column(type: 'datetime')]
+    private \DateTimeInterface $createdAt;
 
-    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
-    private \DateTimeImmutable $updatedAt;
+    #[ORM\Column(type: 'datetime')]
+    private \DateTimeInterface $updatedAt;
 
     public function __construct()
     {
         $this->articles = new ArrayCollection();
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -49,7 +46,7 @@ class Vat
         return $this->rate;
     }
 
-    public function setRate(string $rate): self
+    public function setRate(string $rate): static
     {
         $this->rate = $rate;
         return $this;
@@ -60,18 +57,21 @@ class Vat
         return $this->label;
     }
 
-    public function setLabel(string $label): self
+    public function setLabel(string $label): static
     {
         $this->label = $label;
         return $this;
     }
 
+    /**
+     * @return Collection<int, Article>
+     */
     public function getArticles(): Collection
     {
         return $this->articles;
     }
 
-    public function addArticle(Article $article): self
+    public function addArticle(Article $article): static
     {
         if (!$this->articles->contains($article)) {
             $this->articles->add($article);
@@ -80,7 +80,7 @@ class Vat
         return $this;
     }
 
-    public function removeArticle(Article $article): self
+    public function removeArticle(Article $article): static
     {
         if ($this->articles->removeElement($article)) {
             if ($article->getVat() === $this) {
@@ -90,31 +90,30 @@ class Vat
         return $this;
     }
 
-    public function getCreatedAt(): \DateTimeImmutable
+    public function getCreatedAt(): \DateTimeInterface
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): self
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
     {
         $this->createdAt = $createdAt;
         return $this;
     }
 
-    public function getUpdatedAt(): \DateTimeImmutable
+    public function getUpdatedAt(): \DateTimeInterface
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): self
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
         return $this;
     }
 
-    #[ORM\PreUpdate]
-    public function preUpdate(): void
+    public function __toString(): string
     {
-        $this->updatedAt = new \DateTimeImmutable();
+        return $this->label . ' (' . $this->rate . '%)';
     }
 }

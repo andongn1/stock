@@ -53,17 +53,17 @@ class Article
     #[ORM\OneToMany(mappedBy: 'article', targetEntity: SellingPrice::class, orphanRemoval: true, cascade: ['persist'])]
     private Collection $sellingPrices;
 
-    #[ORM\OneToMany(mappedBy: 'article', targetEntity: Inventory::class, orphanRemoval: true, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'article', targetEntity: Inventory::class, orphanRemoval: true)]
     private Collection $inventories;
 
-    #[ORM\OneToMany(mappedBy: 'article', targetEntity: Entry::class, orphanRemoval: true, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'article', targetEntity: Entry::class, orphanRemoval: true)]
     private Collection $entries;
 
-    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
-    private \DateTimeImmutable $createdAt;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private \DateTimeInterface $createdAt;
 
-    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
-    private \DateTimeImmutable $updatedAt;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private \DateTimeInterface $updatedAt;
 
     public function __construct()
     {
@@ -71,8 +71,6 @@ class Article
         $this->sellingPrices = new ArrayCollection();
         $this->inventories = new ArrayCollection();
         $this->entries = new ArrayCollection();
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -85,7 +83,7 @@ class Article
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(string $name): static
     {
         $this->name = $name;
         return $this;
@@ -96,7 +94,7 @@ class Article
         return $this->brand;
     }
 
-    public function setBrand(?string $brand): self
+    public function setBrand(?string $brand): static
     {
         $this->brand = $brand;
         return $this;
@@ -107,7 +105,7 @@ class Article
         return $this->family;
     }
 
-    public function setFamily(?Family $family): self
+    public function setFamily(?Family $family): static
     {
         $this->family = $family;
         return $this;
@@ -118,7 +116,7 @@ class Article
         return $this->subFamily;
     }
 
-    public function setSubFamily(?SubFamily $subFamily): self
+    public function setSubFamily(?SubFamily $subFamily): static
     {
         $this->subFamily = $subFamily;
         return $this;
@@ -129,7 +127,7 @@ class Article
         return $this->unit;
     }
 
-    public function setUnit(?Unit $unit): self
+    public function setUnit(?Unit $unit): static
     {
         $this->unit = $unit;
         return $this;
@@ -140,7 +138,7 @@ class Article
         return $this->packaging;
     }
 
-    public function setPackaging(?Packaging $packaging): self
+    public function setPackaging(?Packaging $packaging): static
     {
         $this->packaging = $packaging;
         return $this;
@@ -151,7 +149,7 @@ class Article
         return $this->packagingUnitQuantity;
     }
 
-    public function setPackagingUnitQuantity(?string $packagingUnitQuantity): self
+    public function setPackagingUnitQuantity(?string $packagingUnitQuantity): static
     {
         $this->packagingUnitQuantity = $packagingUnitQuantity;
         return $this;
@@ -162,18 +160,21 @@ class Article
         return $this->vat;
     }
 
-    public function setVat(?Vat $vat): self
+    public function setVat(?Vat $vat): static
     {
         $this->vat = $vat;
         return $this;
     }
 
+    /**
+     * @return Collection<int, PriceHistory>
+     */
     public function getPriceHistories(): Collection
     {
         return $this->priceHistories;
     }
 
-    public function addPriceHistory(PriceHistory $priceHistory): self
+    public function addPriceHistory(PriceHistory $priceHistory): static
     {
         if (!$this->priceHistories->contains($priceHistory)) {
             $this->priceHistories->add($priceHistory);
@@ -182,7 +183,7 @@ class Article
         return $this;
     }
 
-    public function removePriceHistory(PriceHistory $priceHistory): self
+    public function removePriceHistory(PriceHistory $priceHistory): static
     {
         if ($this->priceHistories->removeElement($priceHistory)) {
             if ($priceHistory->getArticle() === $this) {
@@ -192,12 +193,15 @@ class Article
         return $this;
     }
 
+    /**
+     * @return Collection<int, SellingPrice>
+     */
     public function getSellingPrices(): Collection
     {
         return $this->sellingPrices;
     }
 
-    public function addSellingPrice(SellingPrice $sellingPrice): self
+    public function addSellingPrice(SellingPrice $sellingPrice): static
     {
         if (!$this->sellingPrices->contains($sellingPrice)) {
             $this->sellingPrices->add($sellingPrice);
@@ -206,7 +210,7 @@ class Article
         return $this;
     }
 
-    public function removeSellingPrice(SellingPrice $sellingPrice): self
+    public function removeSellingPrice(SellingPrice $sellingPrice): static
     {
         if ($this->sellingPrices->removeElement($sellingPrice)) {
             if ($sellingPrice->getArticle() === $this) {
@@ -216,12 +220,15 @@ class Article
         return $this;
     }
 
+    /**
+     * @return Collection<int, Inventory>
+     */
     public function getInventories(): Collection
     {
         return $this->inventories;
     }
 
-    public function addInventory(Inventory $inventory): self
+    public function addInventory(Inventory $inventory): static
     {
         if (!$this->inventories->contains($inventory)) {
             $this->inventories->add($inventory);
@@ -230,7 +237,7 @@ class Article
         return $this;
     }
 
-    public function removeInventory(Inventory $inventory): self
+    public function removeInventory(Inventory $inventory): static
     {
         if ($this->inventories->removeElement($inventory)) {
             if ($inventory->getArticle() === $this) {
@@ -240,12 +247,15 @@ class Article
         return $this;
     }
 
+    /**
+     * @return Collection<int, Entry>
+     */
     public function getEntries(): Collection
     {
         return $this->entries;
     }
 
-    public function addEntry(Entry $entry): self
+    public function addEntry(Entry $entry): static
     {
         if (!$this->entries->contains($entry)) {
             $this->entries->add($entry);
@@ -254,7 +264,7 @@ class Article
         return $this;
     }
 
-    public function removeEntry(Entry $entry): self
+    public function removeEntry(Entry $entry): static
     {
         if ($this->entries->removeElement($entry)) {
             if ($entry->getArticle() === $this) {
@@ -264,14 +274,35 @@ class Article
         return $this;
     }
 
+    public function getCreatedAt(): \DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function getUpdatedAt(): \DateTimeInterface
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
+        return $this;
+    }
+
+    /**
+     * Get the current price (most recent by valid_from date).
+     */
     public function getCurrentPrice(): ?PriceHistory
     {
         $prices = $this->priceHistories->toArray();
-        if (empty($prices)) {
-            return null;
-        }
-
-        usort($prices, function($a, $b) {
+        usort($prices, function ($a, $b) {
             $dateA = $a->getValidFrom() ?: new \DateTime();
             $dateB = $b->getValidFrom() ?: new \DateTime();
             if ($dateA == $dateB) {
@@ -279,24 +310,24 @@ class Article
             }
             return $dateB <=> $dateA;
         });
-
         return $prices[0] ?? null;
     }
 
+    /**
+     * Get the current selling price.
+     */
     public function getCurrentSellingPrice(): ?SellingPrice
     {
         $prices = $this->sellingPrices->toArray();
-        if (empty($prices)) {
-            return null;
-        }
-
-        usort($prices, function($a, $b) {
-            return $b->getCreatedAt() <=> $a->getCreatedAt();
+        usort($prices, function ($a, $b) {
+            return $b->getId() <=> $a->getId();
         });
-
         return $prices[0] ?? null;
     }
 
+    /**
+     * Get the formatted packaging unit info (e.g., "10 kg", "250 pieces").
+     */
     public function getPackagingUnitInfo(): string
     {
         if ($this->packagingUnitQuantity && $this->unit) {
@@ -305,31 +336,8 @@ class Article
         return '';
     }
 
-    public function getCreatedAt(): \DateTimeImmutable
+    public function __toString(): string
     {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): self
-    {
-        $this->createdAt = $createdAt;
-        return $this;
-    }
-
-    public function getUpdatedAt(): \DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): self
-    {
-        $this->updatedAt = $updatedAt;
-        return $this;
-    }
-
-    #[ORM\PreUpdate]
-    public function preUpdate(): void
-    {
-        $this->updatedAt = new \DateTimeImmutable();
+        return $this->name;
     }
 }

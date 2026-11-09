@@ -2,43 +2,64 @@
 
 namespace App\Controller\Web;
 
-use App\Controller\Controller;
 use App\Entity\Article;
 use App\Entity\Entry;
+use App\Form\EntryType;
+use App\Repository\EntryRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
-class EntryController extends Controller
+#[Route('/entries')]
+class EntryController extends AbstractController
 {
-    #[Route('/entries', name: 'entries.index')]
-    public function index(Request $request, EntityManagerInterface $em): Response
-    {
-        return $this->search($request, $em);
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+        private EntryRepository $entryRepository,
+        private \App\Repository\ArticleRepository $articleRepository
+    ) {
     }
 
-    #[Route('/entries/search', name: 'entries.search', methods: ['GET'])]
-    public function search(Request $request, EntityManagerInterface $em): Response
+    #[Route('/', name: 'entries.index', methods: ['GET'])]
+    public function index(Request $request): Response
+    {
+        return $this->search($request);
+    }
+
+    #[Route('/search', name: 'entries.search', methods: ['GET'])]
+    public function search(Request $request): Response
     {
         $search = $request->query->get('search', '');
 
         $articles = [];
         if (!empty($search)) {
-            $articles = $em->getRepository(Article::class)->createQueryBuilder('a')
+            $queryBuilder = $this->articleRepository->createQueryBuilder('a');
+            $queryBuilder
                 ->leftJoin('a.packaging', 'p')
                 ->leftJoin('a.unit', 'u')
-                ->leftJoin('a.priceHistories', 'ph')
                 ->where('a.name LIKE :search')
                 ->setParameter('search', '%' . $search . '%')
                 ->orderBy('a.name', 'ASC')
-                ->setMaxResults(10)
-                ->getQuery()->getResult();
+                ->setMaxResults(10);
+            $articles = $queryBuilder->getQuery()->getResult();
         }
 
-        $todayEntries = $em->getRepository(Entry::class)->findBy([
-            'date' => new \DateTime('today'),
-        ], ['createdAt' => 'DESC']);
+        $today = new \DateTime();
+        $todayString = $today->format('Y-m-d');
+
+        $todayEntries = $this->entryRepository->createQueryBuilder('e')
+            ->leftJoin('e.article', 'a')
+            ->leftJoin('a.packaging', 'p')
+            ->leftJoin('a.unit', 'u')
+            ->leftJoin('a.priceHistories', 'ph')
+            ->where('DATE(e.date) = :today')
+            ->setParameter('today', $todayString)
+            ->orderBy('e.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
 
         return $this->render('entries/index.html.twig', [
             'articles' => $articles,
@@ -47,44 +68,70 @@ class EntryController extends Controller
         ]);
     }
 
-    #[Route('/entries/article/{id}', name: 'entries.create', methods: ['GET'])]
-    public function create(Article $article, EntityManagerInterface $em): Response
+    #[Route('/article/{id}', name: 'entries.create', methods: ['GET'])]
+    public function create(Article $article): Response
     {
-        $todayEntries = $em->getRepository(Entry::class)->findBy([
-            'date' => new \DateTime('today'),
-        ], ['createdAt' => 'DESC']);
+        $todayEntries = $this->entryRepository->createQueryBuilder('e')
+            ->leftJoin('e.article', 'a')
+            ->leftJoin('a.packaging', 'p')
+            ->leftJoin('a.unit', 'u')
+            ->where('DATE(e.date) = :today')
+            ->setParameter('today', (new \DateTime())->format('Y-m-d'))
+            ->orderBy('e.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        $form = $this->createForm(EntryType::class, new Entry());
 
         return $this->render('entries/create.html.twig', [
             'article' => $article,
             'todayEntries' => $todayEntries,
+            'form' => $form->createView(),
         ]);
     }
 
-    #[Route('/entries/article/{id}', name: 'entries.store', methods: ['POST'])]
-    public function store(Article $article, Request $request, EntityManagerInterface $em): Response
+    #[Route('/article/{id}', name: 'entries.store', methods: ['POST'])]
+    public function store(Request $request, Article $article): RedirectResponse
     {
-        $quantity = $request->request->get('quantity');
+        $entry = new Entry();
+        $form = $this->createForm(EntryType::class, $entry);
+        $form->handleRequest($request);
 
-        if (!$quantity) {
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entry->setArticle($article);
+            $entry->setDate(new \DateTime());
+            $this->entityManager->persist($entry);
+            $this->entityManager->flush();
+
+            $this->addFlash('success', 'Entrée de stock enregistrée avec succès !');
+
             return $this->redirectToRoute('entries.index');
         }
 
-        $entry = new Entry();
-        $entry->setArticle($article);
-        $entry->setQuantity($quantity);
-        $entry->setDate(new \DateTime());
+        $todayEntries = $this->entryRepository->createQueryBuilder('e')
+            ->leftJoin('e.article', 'a')
+            ->leftJoin('a.packaging', 'p')
+            ->leftJoin('a.unit', 'u')
+            ->where('DATE(e.date) = :today')
+            ->setParameter('today', (new \DateTime())->format('Y-m-d'))
+            ->orderBy('e.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
 
-        $em->persist($entry);
-        $em->flush();
-
-        return $this->redirectToRoute('entries.index');
+        return $this->render('entries/create.html.twig', [
+            'article' => $article,
+            'todayEntries' => $todayEntries,
+            'form' => $form->createView(),
+        ]);
     }
 
-    #[Route('/entries/{id}', name: 'entries.destroy', methods: ['DELETE'])]
-    public function destroy(Entry $entry, EntityManagerInterface $em): Response
+    #[Route('/{id}', name: 'entries.destroy', methods: ['DELETE'])]
+    public function destroy(Entry $entry): RedirectResponse
     {
-        $em->remove($entry);
-        $em->flush();
+        $this->entityManager->remove($entry);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Entrée de stock supprimée avec succès !');
 
         return $this->redirectToRoute('entries.index');
     }

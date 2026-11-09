@@ -1,73 +1,74 @@
-{% extends 'layouts/app.html.twig' %}
+{% extends 'base.html.twig' %}
 
-{% block page_title %}Conditionnements{% endblock %}
+{% block title %}Conditionnements{% endblock %}
 
-{% block content %}
-<div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Conditionnements</h1>
-        <a href="{{ path('packagings.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-            <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+{% block header_content %}
+    <div class="flex justify-between items-center">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            Gestion des Conditionnements
+        </h2>
+        <a href="{{ path('packagings.create') }}" 
+           class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow transition-colors flex items-center space-x-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>
-            Ajouter
+            <span>Ajouter un Conditionnement</span>
         </a>
     </div>
-    
-    {% if packagings|length > 0 %}
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-slate-700">
-                <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wider">Nom</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wider">Date de creation</th>
-                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wider">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {% for packaging in packagings %}
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                        {{ packaging.name }}
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-slate-400">
-                        {{ packaging.createdAt|date('d/m/Y H:i') }}
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-right">
-                        <div class="flex justify-end space-x-2">
-                            <a 
-                                href="{{ path('packagings.edit', {'id': packaging.id}) }}"
-                                class="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-full"
-                                title="Editer"
-                            >
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                </svg>
-                            </a>
-                            <form action="{{ path('packagings.destroy', {'id': packaging.id}) }}" method="POST" onsubmit="return confirm('Etes-vous sur de vouloir supprimer ce conditionnement ?')">
-                                <input type="hidden" name="_method" value="DELETE">
-                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ packaging.id) }}">
-                                <button 
-                                    type="submit"
-                                    class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full"
-                                    title="Supprimer"
-                                >
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                    </svg>
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+{% endblock %}
+
+{% block body %}
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Nom
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {% for packaging in packagings %}
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {{ packaging.name }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <a href="{{ path('packagings.edit', {'id': packaging.id}) }}" 
+                                               class="text-green-600 hover:text-green-900 mr-2">
+                                                Editer
+                                            </a>
+                                            <form action="{{ path('packagings.destroy', {'id': packaging.id}) }}" 
+                                                  method="POST" class="inline-block">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ packaging.id) }}">
+                                                <input type="hidden" name="_method" value="DELETE">
+                                                <button type="submit" 
+                                                        class="text-red-600 hover:text-red-900"
+                                                        onclick="return confirm('Etes-vous sur de vouloir supprimer ce conditionnement ?')">
+                                                    Supprimer
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="2" class="px-6 py-4 text-center text-sm text-gray-500">
+                                            Aucun conditionnement trouvé.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    {% else %}
-    <div class="text-center py-8 text-gray-500 dark:text-slate-400">
-        Aucun conditionnement trouve.
-    </div>
-    {% endif %}
-</div>
 {% endblock %}

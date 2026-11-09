@@ -2,33 +2,34 @@
 
 namespace App\Controller\Web;
 
-use App\Controller\Controller;
-use App\Data\User\CreateUserDto;
-use App\Data\User\UpdateUserDto;
 use App\Entity\User;
 use App\Enum\UserRole;
+use App\Form\UserType;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/users')]
-class UserController extends Controller
+#[IsGranted('ROLE_ADMIN')]
+class UserController extends AbstractController
 {
     public function __construct(
-        private EntityManagerInterface $em,
-        private SerializerInterface $serializer,
-        private ValidatorInterface $validator,
+        private EntityManagerInterface $entityManager,
+        private UserRepository $userRepository,
         private UserPasswordHasherInterface $passwordHasher
-    ) {}
+    ) {
+    }
 
-    #[Route('', name: 'users.index', methods: ['GET'])]
+    #[Route('/', name: 'users.index', methods: ['GET'])]
     public function index(): Response
     {
-        $users = $this->em->getRepository(User::class)->findBy([], ['name' => 'ASC']);
+        $users = $this->userRepository->findBy([], ['name' => 'ASC']);
 
         return $this->render('users/index.html.twig', [
             'users' => $users,
@@ -38,36 +39,54 @@ class UserController extends Controller
     #[Route('/create', name: 'users.create', methods: ['GET'])]
     public function create(): Response
     {
-        $roles = [UserRole::Admin->value, UserRole::User->value];
+        $user = new User();
+        $form = $this->createForm(UserType::class, $user, [
+            'is_edit' => false,
+            'include_password' => true,
+        ]);
+
+        $roles = [UserRole::ADMIN, UserRole::USER];
 
         return $this->render('users/create.html.twig', [
+            'user' => $user,
+            'form' => $form->createView(),
             'roles' => $roles,
         ]);
     }
 
-    #[Route('', name: 'users.store', methods: ['POST'])]
+    #[Route('/', name: 'users.store', methods: ['POST'])]
     public function store(Request $request): Response
     {
-        $dto = new CreateUserDto();
-        $this->serializer->deserialize($request->getContent(), CreateUserDto::class, 'json', [
-            'object_to_populate' => $dto,
+        $user = new User();
+        $form = $this->createForm(UserType::class, $user, [
+            'is_edit' => false,
+            'include_password' => true,
         ]);
+        $form->handleRequest($request);
 
-        $errors = $this->validator->validate($dto);
-        if (count($errors) > 0) {
-            return $this->json(['errors' => (string) $errors], 422);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $plainPassword = $request->request->get('user')['plainPassword'] ?? null;
+            
+            if ($plainPassword) {
+                $hashedPassword = $this->passwordHasher->hashPassword($user, $plainPassword);
+                $user->setPassword($hashedPassword);
+            }
+
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+
+            $this->addFlash('success', 'Utilisateur cree avec succes !');
+
+            return $this->redirectToRoute('users.index');
         }
 
-        $user = new User();
-        $user->setName($dto->name);
-        $user->setEmail($dto->email);
-        $user->setRole(UserRole::from($dto->role));
-        $user->setPassword($this->passwordHasher->hashPassword($user, $dto->password));
+        $roles = [UserRole::ADMIN, UserRole::USER];
 
-        $this->em->persist($user);
-        $this->em->flush();
-
-        return $this->redirectToRoute('users.index');
+        return $this->render('users/create.html.twig', [
+            'user' => $user,
+            'form' => $form->createView(),
+            'roles' => $roles,
+        ]);
     }
 
     #[Route('/{id}', name: 'users.show', methods: ['GET'])]
@@ -81,10 +100,16 @@ class UserController extends Controller
     #[Route('/{id}/edit', name: 'users.edit', methods: ['GET'])]
     public function edit(User $user): Response
     {
-        $roles = [UserRole::Admin->value, UserRole::User->value];
+        $form = $this->createForm(UserType::class, $user, [
+            'is_edit' => true,
+            'include_password' => false,
+        ]);
+
+        $roles = [UserRole::ADMIN, UserRole::USER];
 
         return $this->render('users/edit.html.twig', [
             'user' => $user,
+            'form' => $form->createView(),
             'roles' => $roles,
         ]);
     }
@@ -92,42 +117,58 @@ class UserController extends Controller
     #[Route('/{id}', name: 'users.update', methods: ['PUT', 'PATCH'])]
     public function update(Request $request, User $user): Response
     {
-        $dto = new UpdateUserDto();
-        $this->serializer->deserialize($request->getContent(), UpdateUserDto::class, 'json', [
-            'object_to_populate' => $dto,
+        $form = $this->createForm(UserType::class, $user, [
+            'is_edit' => true,
+            'include_password' => true,
         ]);
+        $form->handleRequest($request);
 
-        $errors = $this->validator->validate($dto);
-        if (count($errors) > 0) {
-            return $this->json(['errors' => (string) $errors], 422);
-        }
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $request->request->get('user') ?? [];
+            
+            $user->setName($data['name'] ?? $user->getName());
+            $user->setEmail($data['email'] ?? $user->getEmail());
+            
+            if (isset($data['role'])) {
+                $role = UserRole::from($data['role']);
+                $user->setRole($role);
+            }
+            
+            if (!empty($data['plainPassword'])) {
+                $hashedPassword = $this->passwordHasher->hashPassword($user, $data['plainPassword']);
+                $user->setPassword($hashedPassword);
+            }
 
-        $user->setName($dto->name);
-        $user->setEmail($dto->email);
-        $user->setRole(UserRole::from($dto->role));
+            $this->entityManager->flush();
 
-        if ($dto->password) {
-            $user->setPassword($this->passwordHasher->hashPassword($user, $dto->password));
-        }
+            $this->addFlash('success', 'Utilisateur mis a jour avec succes !');
 
-        $this->em->flush();
-
-        return $this->redirectToRoute('users.index');
-    }
-
-    #[Route('/{id}', name: 'users.destroy', methods: ['DELETE'])]
-    public function destroy(User $user): Response
-    {
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-        // Prevent deleting own account
-        if ($user->getId() === $currentUser->getId()) {
             return $this->redirectToRoute('users.index');
         }
 
-        $this->em->remove($user);
-        $this->em->flush();
+        $roles = [UserRole::ADMIN, UserRole::USER];
+
+        return $this->render('users/edit.html.twig', [
+            'user' => $user,
+            'form' => $form->createView(),
+            'roles' => $roles,
+        ]);
+    }
+
+    #[Route('/{id}', name: 'users.destroy', methods: ['DELETE'])]
+    public function destroy(User $user): RedirectResponse
+    {
+        $currentUser = $this->getUser();
+
+        if ($currentUser && $user->getId() === $currentUser->getId()) {
+            $this->addFlash('error', 'Vous ne pouvez pas supprimer votre propre compte !');
+            return $this->redirectToRoute('users.index');
+        }
+
+        $this->entityManager->remove($user);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Utilisateur supprime avec succes !');
 
         return $this->redirectToRoute('users.index');
     }
