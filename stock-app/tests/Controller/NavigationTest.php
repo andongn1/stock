@@ -36,7 +36,7 @@ class NavigationTest extends WebTestCase
 
         $this->assertResponseIsSuccessful();
         // Navigation should contain the app name
-        $this->assertSelectorTextContains('nav', 'Stock Management');
+        $this->assertSelectorTextContains('aside', 'Mercuriale');
     }
 
     public function testNavigationRendersOnArticles(): void
@@ -54,7 +54,7 @@ class NavigationTest extends WebTestCase
         $client->request('GET', '/families/');
 
         $this->assertResponseIsSuccessful();
-        $this->assertSelectorTextContains('nav', 'Families');
+        $this->assertSelectorTextContains('nav', 'Familles');
     }
 
     public function testNavigationRendersOnSuppliers(): void

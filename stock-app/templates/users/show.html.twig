@@ -4,16 +4,16 @@
 
 {% block header_content %}
     <div class="flex justify-between items-center">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        
             Détails de l'utilisateur
-        </h2>
+        
     </div>
 {% endblock %}
 
 {% block body %}
-    <div class="py-12">
+    <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -26,7 +26,7 @@
                                     <label class="block text-sm font-medium text-gray-500 mb-1">
                                         Nom complet
                                     </label>
-                                    <div class="text-gray-800">
+                                    <div class="text-gray-800 dark:text-white">
                                         {{ user.name }}
                                     </div>
                                 </div>
@@ -35,7 +35,7 @@
                                     <label class="block text-sm font-medium text-gray-500 mb-1">
                                         Email
                                     </label>
-                                    <div class="text-gray-800">
+                                    <div class="text-gray-800 dark:text-white">
                                         {{ user.email }}
                                     </div>
                                 </div>
@@ -61,7 +61,7 @@
                                     <label class="block text-sm font-medium text-gray-500 mb-1">
                                         ID
                                     </label>
-                                    <div class="text-gray-800">
+                                    <div class="text-gray-800 dark:text-white">
                                         {{ user.id }}
                                     </div>
                                 </div>
@@ -70,7 +70,7 @@
                                     <label class="block text-sm font-medium text-gray-500 mb-1">
                                         Date de création
                                     </label>
-                                    <div class="text-gray-800">
+                                    <div class="text-gray-800 dark:text-white">
                                         {{ user.createdAt|date('d/m/Y H:i:s') }}
                                     </div>
                                 </div>
@@ -79,7 +79,7 @@
                                     <label class="block text-sm font-medium text-gray-500 mb-1">
                                         Dernière mise à jour
                                     </label>
-                                    <div class="text-gray-800">
+                                    <div class="text-gray-800 dark:text-white">
                                         {{ user.updatedAt|date('d/m/Y H:i:s') }}
                                     </div>
                                 </div>

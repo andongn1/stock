@@ -4,25 +4,25 @@
 
 {% block header_content %}
     <div class="flex justify-between items-center">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        
             Profile
-        </h2>
+        
     </div>
 {% endblock %}
 
 {% block body %}
-    <div class="py-12">
+    <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <!-- Update Profile Information -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <div class="max-w-xl">
                         <section>
                             <header>
-                                <h2 class="text-lg font-medium text-gray-900">
+                                
                                     Informations du profil
-                                </h2>
-                                <p class="mt-1 text-sm text-gray-600">
+                                
+                                <p class="mt-1 text-sm text-gray-600 dark:text-slate-400">
                                     Mettez à jour les informations de profil et l'adresse e-mail de votre compte.
                                 </p>
                             </header>
@@ -32,7 +32,7 @@
                                 <input type="hidden" name="_method" value="PATCH">
 
                                 <div>
-                                    <label for="name" class="block text-sm font-medium text-gray-700">Nom</label>
+                                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Nom</label>
                                     <input 
                                         id="name" 
                                         name="name" 
@@ -46,7 +46,7 @@
                                 </div>
 
                                 <div>
-                                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Email</label>
                                     <input 
                                         id="email" 
                                         name="email" 
@@ -59,7 +59,7 @@
                                 </div>
 
                                 <div class="flex items-center gap-4">
-                                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow transition-colors">
+                                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow transition-colors">
                                         Enregistrer
                                     </button>
                                 </div>
@@ -70,15 +70,15 @@
             </div>
 
             <!-- Update Password -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <div class="max-w-xl">
                         <section>
                             <header>
-                                <h2 class="text-lg font-medium text-gray-900">
+                                
                                     Mettre à jour le mot de passe
-                                </h2>
-                                <p class="mt-1 text-sm text-gray-600">
+                                
+                                <p class="mt-1 text-sm text-gray-600 dark:text-slate-400">
                                     Assurez-vous que votre compte utilise un mot de passe long et aléatoire pour rester en sécurité.
                                 </p>
                             </header>
@@ -88,7 +88,7 @@
                                 <input type="hidden" name="_method" value="PUT">
 
                                 <div>
-                                    <label for="current_password" class="block text-sm font-medium text-gray-700">Mot de passe actuel</label>
+                                    <label for="current_password" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Mot de passe actuel</label>
                                     <input 
                                         id="current_password" 
                                         name="current_password" 
@@ -99,7 +99,7 @@
                                 </div>
 
                                 <div>
-                                    <label for="password" class="block text-sm font-medium text-gray-700">Nouveau mot de passe</label>
+                                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Nouveau mot de passe</label>
                                     <input 
                                         id="password" 
                                         name="password" 
@@ -110,7 +110,7 @@
                                 </div>
 
                                 <div>
-                                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirmer le mot de passe</label>
+                                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Confirmer le mot de passe</label>
                                     <input 
                                         id="password_confirmation" 
                                         name="password_confirmation" 
@@ -121,7 +121,7 @@
                                 </div>
 
                                 <div class="flex items-center gap-4">
-                                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow transition-colors">
+                                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow transition-colors">
                                         Enregistrer
                                     </button>
                                 </div>
@@ -132,15 +132,15 @@
             </div>
 
             <!-- Delete Account -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <div class="max-w-xl">
                         <section class="space-y-6">
                             <header>
-                                <h2 class="text-lg font-medium text-gray-900">
+                                
                                     Supprimer le compte
-                                </h2>
-                                <p class="mt-1 text-sm text-gray-600">
+                                
+                                <p class="mt-1 text-sm text-gray-600 dark:text-slate-400">
                                     Une fois votre compte supprimé, toutes ses ressources et données seront définitivement supprimées. Avant de supprimer votre compte, veuillez télécharger toutes les données ou informations que vous souhaitez conserver.
                                 </p>
                             </header>
@@ -149,16 +149,16 @@
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete_account') }}">
                                 <input type="hidden" name="_method" value="DELETE">
 
-                                <h2 class="text-lg font-medium text-gray-900">
+                                
                                     Etes-vous sûr de vouloir supprimer votre compte ?
-                                </h2>
+                                
 
-                                <p class="mt-1 text-sm text-gray-600">
+                                <p class="mt-1 text-sm text-gray-600 dark:text-slate-400">
                                     Une fois votre compte supprimé, toutes ses ressources et données seront définitivement supprimées. Veuillez entrer votre mot de passe pour confirmer que vous souhaitez supprimer définitivement votre compte.
                                 </p>
 
                                 <div class="mt-6">
-                                    <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
+                                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Mot de passe</label>
                                     <input 
                                         id="password" 
                                         name="password" 
@@ -171,7 +171,7 @@
                                 <div class="mt-6 flex justify-end">
                                     <a 
                                         href="{{ path('dashboard') }}"
-                                        class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors"
+                                        class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
                                     >
                                         Annuler
                                     </a>

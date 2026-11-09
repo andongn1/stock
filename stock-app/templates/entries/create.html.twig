@@ -4,40 +4,40 @@
 
 {% block header_content %}
     <div class="flex justify-between items-center">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        
             Entrée de stock: {{ article.name }}
-        </h2>
+        
     </div>
 {% endblock %}
 
 {% block body %}
-    <div class="py-12">
+    <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <!-- Article Info -->
-                    <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200 dark:border-gray-700">
                         <h3 class="font-semibold text-gray-800 mb-2">
                             Informations de l'article
                         </h3>
                         <div class="space-y-2">
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Nom:</span>
-                                <span class="font-medium text-gray-800">{{ article.name }}</span>
+                                <span class="text-gray-600 dark:text-slate-400">Nom:</span>
+                                <span class="font-medium text-gray-800 dark:text-white">{{ article.name }}</span>
                             </div>
                             {% if article.brand %}
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Marque:</span>
-                                <span class="font-medium text-gray-800">{{ article.brand }}</span>
+                                <span class="text-gray-600 dark:text-slate-400">Marque:</span>
+                                <span class="font-medium text-gray-800 dark:text-white">{{ article.brand }}</span>
                             </div>
                             {% endif %}
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Conditionnement:</span>
-                                <span class="font-medium text-gray-800">{{ article.packaging?article.packaging.name:'N/A' }}</span>
+                                <span class="text-gray-600 dark:text-slate-400">Conditionnement:</span>
+                                <span class="font-medium text-gray-800 dark:text-white">{{ article.packaging?article.packaging.name:'N/A' }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Quantité par conditionnement:</span>
-                                <span class="font-medium text-gray-800">
+                                <span class="text-gray-600 dark:text-slate-400">Quantité par conditionnement:</span>
+                                <span class="font-medium text-gray-800 dark:text-white">
                                     {{ article.packagingUnitQuantity }} {{ article.unit?article.unit.name:'' }}
                                 </span>
                             </div>
@@ -59,7 +59,7 @@
                         <div class="flex space-x-4">
                             <button 
                                 type="submit"
-                                class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium"
+                                class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium"
                             >
                                 Enregistrer l'entrée
                             </button>

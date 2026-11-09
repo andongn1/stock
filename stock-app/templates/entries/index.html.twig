@@ -4,17 +4,17 @@
 
 {% block header_content %}
     <div class="flex justify-between items-center">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        
             Entrées de stock
-        </h2>
+        
     </div>
 {% endblock %}
 
 {% block body %}
-    <div class="py-12">
+    <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <!-- Search Section -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <form method="GET" action="{{ path('entries.search') }}" class="space-y-4">
                         <div class="flex gap-3">
@@ -23,12 +23,12 @@
                                 name="search" 
                                 value="{{ search }}"
                                 placeholder="Rechercher un article (nom)..."
-                                class="flex-1 p-3 border border-gray-300 rounded-lg bg-white text-gray-900"
+                                class="flex-1 p-3 border border-gray-300 rounded-lg bg-white text-gray-900 dark:text-white"
                                 required
                             >
                             <button 
                                 type="submit"
-                                class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium flex items-center space-x-2"
+                                class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium flex items-center space-x-2"
                             >
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -46,13 +46,13 @@
                         </h3>
                         <div class="space-y-2 max-h-48 overflow-y-auto">
                             {% for article in articles %}
-                            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 flex justify-between items-center">
+                            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 dark:border-gray-700 flex justify-between items-center">
                                 <div>
-                                    <span class="font-medium text-gray-800">{{ article.name }}</span>
+                                    <span class="font-medium text-gray-800 dark:text-white">{{ article.name }}</span>
                                     {% if article.brand %}
                                     <span class="text-sm text-gray-500 ml-2">- {{ article.brand }}</span>
                                     {% endif %}
-                                    <div class="text-sm text-gray-600">
+                                    <div class="text-sm text-gray-600 dark:text-slate-400">
                                         {{ article.packaging?article.packaging.name:'N/A' }} 
                                         {% if article.packagingUnitQuantity %}
                                         ({{ article.packagingUnitQuantity }} {{ article.unit?article.unit.name:'' }})
@@ -79,7 +79,7 @@
             
             <!-- Entries Table -->
             {% if todayEntries|length > 0 %}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <h3 class="text-lg font-medium text-gray-700 mb-4">
                         Entrées de stock du {{ 'now'|date('d/m/Y') }}
@@ -87,35 +87,35 @@
                     <div class="overflow-x-auto">
                         <table class="w-full">
                             <thead>
-                                <tr class="border-b border-gray-200">
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Article</th>
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Conditionnement</th>
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Qté/Conditionnement</th>
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Qté Reçue</th>
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Valeur Totale (Quantité)</th>
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Valeur Totale (€)</th>
-                                    <th class="text-right py-3 px-4 text-sm font-medium text-gray-500">Actions</th>
+                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-slate-400">Article</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-slate-400">Conditionnement</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-slate-400">Qté/Conditionnement</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-slate-400">Qté Reçue</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-slate-400">Valeur Totale (Quantité)</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-slate-400">Valeur Totale (€)</th>
+                                    <th class="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-slate-400">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for entry in todayEntries %}
                                 <tr class="border-b border-gray-100">
-                                    <td class="py-3 px-4 text-gray-800">
+                                    <td class="py-3 px-4 text-gray-800 dark:text-white">
                                         {{ entry.article.name }}
                                     </td>
-                                    <td class="py-3 px-4 text-gray-600">
+                                    <td class="py-3 px-4 text-gray-600 dark:text-slate-400">
                                         {{ entry.article.packaging?entry.article.packaging.name:'N/A' }}
                                     </td>
-                                    <td class="py-3 px-4 text-gray-600">
+                                    <td class="py-3 px-4 text-gray-600 dark:text-slate-400">
                                         {{ entry.article.packagingUnitQuantity }} {{ entry.article.unit?entry.article.unit.name:'' }}
                                     </td>
-                                    <td class="py-3 px-4 text-gray-800">
+                                    <td class="py-3 px-4 text-gray-800 dark:text-white">
                                         {{ entry.quantity }}
                                     </td>
-                                    <td class="py-3 px-4 text-gray-800">
+                                    <td class="py-3 px-4 text-gray-800 dark:text-white">
                                         {{ "%.2f"|format(entry.totalQuantity) }} {{ entry.article.unit?entry.article.unit.name:'' }}
                                     </td>
-                                    <td class="py-3 px-4 text-gray-800">
+                                    <td class="py-3 px-4 text-gray-800 dark:text-white">
                                         {{ "%.2f"|format(entry.monetaryValue) }} €
                                     </td>
                                     <td class="py-3 px-4 text-right">
@@ -138,7 +138,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="mt-4 text-sm text-gray-500">
+                    <div class="mt-4 text-sm text-gray-500 dark:text-slate-400">
                         Total: {{ todayEntries|length }} entrées enregistrées aujourd'hui
                     </div>
                 </div>

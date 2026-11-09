@@ -61,7 +61,7 @@ class AuthControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/login');
         $this->assertResponseIsSuccessful();
 
-        $form = $crawler->selectButton('Log in')->form([
+        $form = $crawler->selectButton('Connexion')->form([
             'email' => 'admin@mercuriale.com',
             'password' => 'password',
         ]);
@@ -77,7 +77,7 @@ class AuthControllerTest extends WebTestCase
         $client = static::createClient();
         $crawler = $client->request('GET', '/login');
 
-        $form = $crawler->selectButton('Log in')->form([
+        $form = $crawler->selectButton('Connexion')->form([
             'email' => 'admin@mercuriale.com',
             'password' => 'wrong-password',
         ]);

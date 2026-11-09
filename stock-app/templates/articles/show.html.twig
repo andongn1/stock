@@ -4,12 +4,12 @@
 
 {% block header_content %}
     <div class="flex justify-between items-center">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        
             {{ article.name }}
             {% if article.brand %}
-                <span class="text-gray-500">- {{ article.brand }}</span>
+                <span class="text-gray-500 dark:text-slate-400">- {{ article.brand }}</span>
             {% endif %}
-        </h2>
+        
         <div class="flex space-x-3">
             <a href="{{ path('articles.edit', {'id': article.id}) }}" 
                class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center space-x-2">
@@ -31,7 +31,7 @@
 
             <!-- Article Details Card -->
             <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-4">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 dark:border-gray-700 pb-4">
                     Informations de base
                 </h3>
                 
@@ -43,7 +43,7 @@
                                 <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                                 </svg>
-                                <span class="text-gray-800">{{ article.family.name }}</span>
+                                <span class="text-gray-800 dark:text-white">{{ article.family.name }}</span>
                             </div>
                         </div>
                         
@@ -53,14 +53,14 @@
                                 <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                                 </svg>
-                                <span class="text-gray-800">{{ article.subFamily.name }}</span>
+                                <span class="text-gray-800 dark:text-white">{{ article.subFamily.name }}</span>
                             </div>
                         </div>
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-500 mb-1">Unité</label>
                             <div class="flex items-center space-x-2">
-                                <span class="text-gray-800">{{ article.unit.name }}</span>
+                                <span class="text-gray-800 dark:text-white">{{ article.unit.name }}</span>
                             </div>
                         </div>
                     </div>
@@ -69,16 +69,16 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-500 mb-1">Conditionnement</label>
                             <div class="flex items-center space-x-2">
-                                <span class="text-gray-800">{{ article.packaging.name }}</span>
+                                <span class="text-gray-800 dark:text-white">{{ article.packaging.name }}</span>
                             </div>
                         </div>
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-500 mb-1">Quantité unitaire</label>
                             <div class="flex items-center space-x-2">
-                                <span class="text-gray-800">{{ article.packagingUnitQuantity ?? '-' }}</span>
+                                <span class="text-gray-800 dark:text-white">{{ article.packagingUnitQuantity ?? '-' }}</span>
                                 {% if article.packagingUnitQuantity and article.unit %}
-                                    <span class="text-gray-500">{{ article.unit.name }}</span>
+                                    <span class="text-gray-500 dark:text-slate-400">{{ article.unit.name }}</span>
                                 {% endif %}
                             </div>
                         </div>
@@ -86,7 +86,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-500 mb-1">TVA</label>
                             <div class="flex items-center space-x-2">
-                                <span class="text-gray-800">{{ article.vat.label }} ({{ article.vat.rate }}%)</span>
+                                <span class="text-gray-800 dark:text-white">{{ article.vat.label }} ({{ article.vat.rate }}%)</span>
                             </div>
                         </div>
                     </div>
@@ -96,7 +96,7 @@
             <!-- Current Price Section -->
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
+                    <h3 class="text-lg font-semibold text-gray-800 border-b border-gray-200 dark:border-gray-700 pb-2">
                         Prix Actuel
                     </h3>
                     <a href="{{ path('articles.price-histories', {'id': article.id}) }}" 
@@ -109,38 +109,38 @@
                     <div class="bg-blue-50 p-4 rounded-lg">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <p class="text-sm text-gray-500">Prix</p>
+                                <p class="text-sm text-gray-500 dark:text-slate-400">Prix</p>
                                 <p class="text-xl font-bold text-blue-800">{{ currentPrice.price }} {{ currentPrice.currency }}</p>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-500">Fournisseur</p>
+                                <p class="text-sm text-gray-500 dark:text-slate-400">Fournisseur</p>
                                 <p class="font-semibold">{{ currentPrice.supplier.name }}</p>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-500">Type</p>
+                                <p class="text-sm text-gray-500 dark:text-slate-400">Type</p>
                                 <p>{{ currentPrice.priceType|replace({'_': ' '})|capitalize }}</p>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-500">Valide depuis</p>
+                                <p class="text-sm text-gray-500 dark:text-slate-400">Valide depuis</p>
                                 <p>{{ currentPrice.validFrom ? currentPrice.validFrom|date('d/m/Y') : 'N/A' }}</p>
                             </div>
                         </div>
                     </div>
                 {% else %}
-                    <p class="text-gray-500">Aucun prix actuel pour cet article.</p>
+                    <p class="text-gray-500 dark:text-slate-400">Aucun prix actuel pour cet article.</p>
                 {% endif %}
             </div>
 
             <!-- Add Price Form -->
             <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
                     Ajouter un Prix
                 </h3>
                 
                 <form action="{{ path('articles.add-price', {'id': article.id}) }}" method="POST" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label for="supplier_id" class="block text-sm font-medium text-gray-700">Fournisseur</label>
+                            <label for="supplier_id" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Fournisseur</label>
                             <select name="supplier_id" id="supplier_id" required 
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="">Sélectionnez un fournisseur</option>
@@ -150,12 +150,12 @@
                             </select>
                         </div>
                         <div>
-                            <label for="price" class="block text-sm font-medium text-gray-700">Prix</label>
+                            <label for="price" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Prix</label>
                             <input type="number" step="0.01" name="price" id="price" required 
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                         <div>
-                            <label for="currency" class="block text-sm font-medium text-gray-700">Devise</label>
+                            <label for="currency" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Devise</label>
                             <select name="currency" id="currency" required 
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="EUR" selected>EUR</option>
@@ -165,7 +165,7 @@
                         </div>
                     </div>
                     <div>
-                        <label for="price_type" class="block text-sm font-medium text-gray-700">Type de prix</label>
+                        <label for="price_type" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Type de prix</label>
                         <select name="price_type" id="price_type" required 
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             <option value="per_unit">Par unité</option>
@@ -174,7 +174,7 @@
                     </div>
                     
                     <div class="flex space-x-4">
-                        <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
+                        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
                             Ajouter le Prix
                         </button>
                     </div>
@@ -185,7 +185,7 @@
 
             <!-- Selling Price Section -->
             <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
                     Prix de Vente
                 </h3>
                 
@@ -193,15 +193,15 @@
                     <div class="bg-green-50 p-4 rounded-lg mb-4">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <p class="text-sm text-gray-500">Prix TTC</p>
+                                <p class="text-sm text-gray-500 dark:text-slate-400">Prix TTC</p>
                                 <p class="text-xl font-bold text-green-800">{{ article.currentSellingPrice.priceTtc }} {{ article.currentSellingPrice.currency }}</p>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-500">Type de vente</p>
+                                <p class="text-sm text-gray-500 dark:text-slate-400">Type de vente</p>
                                 <p>{{ article.currentSellingPrice.saleType|replace({'_': ' '})|capitalize }}</p>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-500">Quantité</p>
+                                <p class="text-sm text-gray-500 dark:text-slate-400">Quantité</p>
                                 <p>{{ article.currentSellingPrice.quantity }}</p>
                             </div>
                         </div>
@@ -211,13 +211,13 @@
                 <form action="{{ path('articles.update-selling-price', {'id': article.id}) }}" method="POST" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label for="price_ttc" class="block text-sm font-medium text-gray-700">Prix TTC *</label>
+                            <label for="price_ttc" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Prix TTC *</label>
                             <input type="number" step="0.01" name="price_ttc" id="price_ttc" required 
                                    value="{{ article.currentSellingPrice ? article.currentSellingPrice.priceTtc : '' }}"
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                         <div>
-                            <label for="sale_type" class="block text-sm font-medium text-gray-700">Type de vente *</label>
+                            <label for="sale_type" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Type de vente *</label>
                             <select name="sale_type" id="sale_type" required 
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="per_unit" {{ article.currentSellingPrice and article.currentSellingPrice.saleType == 'per_unit' ? 'selected' }}>
@@ -229,14 +229,14 @@
                             </select>
                         </div>
                         <div>
-                            <label for="quantity" class="block text-sm font-medium text-gray-700">Quantité</label>
+                            <label for="quantity" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Quantité</label>
                             <input type="number" step="0.0001" name="quantity" id="quantity" 
                                    value="{{ article.currentSellingPrice ? article.currentSellingPrice.quantity : 1 }}"
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                     </div>
                     <div>
-                        <label for="currency_selling" class="block text-sm font-medium text-gray-700">Devise *</label>
+                        <label for="currency_selling" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Devise *</label>
                         <select name="currency" id="currency_selling" required 
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             <option value="EUR" {{ article.currentSellingPrice and article.currentSellingPrice.currency == 'EUR' ? 'selected' }}>
@@ -264,7 +264,7 @@
             <!-- Set Current Supplier Form -->
             {% if currentPrice and pricesBySupplier|length > 0 %}
                 <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
                         Changer de Fournisseur Actuel
                     </h3>
                     
@@ -274,7 +274,7 @@
                     
                     <form action="{{ path('articles.set-current-supplier', {'id': article.id}) }}" method="POST" class="space-y-4">
                         <div>
-                            <label for="price_history_id" class="block text-sm font-medium text-gray-700">
+                            <label for="price_history_id" class="block text-sm font-medium text-gray-700 dark:text-slate-300">
                                 Prix dans l'historique
                             </label>
                             <select name="price_history_id" id="price_history_id" required 

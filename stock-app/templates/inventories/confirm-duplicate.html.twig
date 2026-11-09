@@ -4,16 +4,16 @@
 
 {% block header_content %}
     <div class="flex justify-between items-center">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        
             Confirmer l'inventaire
-        </h2>
+        
     </div>
 {% endblock %}
 
 {% block body %}
-    <div class="py-12">
+    <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <div class="bg-yellow-50 px-4 pt-5 pb-4 rounded-lg mb-6">
                         <div class="flex items-start">
@@ -48,8 +48,8 @@
                             <input type="hidden" name="family_id" value="{{ pending.family_id ?? '' }}">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <h4 class="font-medium text-gray-800">Ajouter au stock existant</h4>
-                                    <p class="text-sm text-gray-600">
+                                    <h4 class="font-medium text-gray-800 dark:text-white">Ajouter au stock existant</h4>
+                                    <p class="text-sm text-gray-600 dark:text-slate-400">
                                         Le nouveau stock sera ajouté à l'ancien. 
                                         {% if article.packaging?article.packaging.name %}
                                         Ex: {{ existing.quantity }} + {{ pending.quantity }} = {{ existing.quantity + pending.quantity }} {{ article.packaging.name }}
@@ -74,8 +74,8 @@
                             <input type="hidden" name="family_id" value="{{ pending.family_id ?? '' }}">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <h4 class="font-medium text-gray-800">Remplacer le stock existant</h4>
-                                    <p class="text-sm text-gray-600">
+                                    <h4 class="font-medium text-gray-800 dark:text-white">Remplacer le stock existant</h4>
+                                    <p class="text-sm text-gray-600 dark:text-slate-400">
                                         Le stock actuel sera remplacé par le nouveau. 
                                         {% if article.packaging?article.packaging.name %}
                                         Ex: {{ pending.quantity }} {{ article.packaging.name }} (au lieu de {{ existing.quantity }})
@@ -100,8 +100,8 @@
                             <input type="hidden" name="family_id" value="{{ pending.family_id ?? '' }}">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <h4 class="font-medium text-gray-800">Annuler</h4>
-                                    <p class="text-sm text-gray-600">
+                                    <h4 class="font-medium text-gray-800 dark:text-white">Annuler</h4>
+                                    <p class="text-sm text-gray-600 dark:text-slate-400">
                                         Ne pas enregistrer cette modification et revenir à la liste.
                                     </p>
                                 </div>

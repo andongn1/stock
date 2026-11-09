@@ -4,17 +4,17 @@
 
 {% block header_content %}
     <div class="flex justify-between items-center">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        
             Inventaire des articles
-        </h2>
+        
     </div>
 {% endblock %}
 
 {% block body %}
-    <div class="py-12">
+    <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <!-- Family Selection -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <form method="POST" action="{{ path('inventories.search') }}" class="space-y-4">
                         <div>
@@ -44,12 +44,12 @@
                                     name="search" 
                                     value="{{ search }}"
                                     placeholder="Rechercher un article dans cette famille..."
-                                    class="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900"
+                                    class="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900 dark:text-white"
                                 >
                             </div>
                             <button 
                                 type="submit"
-                                class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium flex items-center space-x-2"
+                                class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium flex items-center space-x-2"
                             >
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -78,40 +78,40 @@
                 <input type="hidden" name="family_id" value="{{ familyId }}">
                 <input type="hidden" name="search" value="{{ search }}">
                 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <div class="overflow-x-auto">
                             <table class="w-full">
                                 <thead>
-                                    <tr class="border-b border-gray-200">
-                                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Article</th>
-                                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Conditionnement</th>
-                                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Qté/Cond.</th>
-                                        <th class="text-right py-3 px-4 text-sm font-medium text-gray-500">Stock Précédent</th>
-                                        <th class="text-right py-3 px-4 text-sm font-medium text-gray-500">Stock Aujourd'hui</th>
-                                        <th class="text-right py-3 px-4 text-sm font-medium text-gray-500">Actions</th>
+                                    <tr class="border-b border-gray-200 dark:border-gray-700">
+                                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-slate-400">Article</th>
+                                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-slate-400">Conditionnement</th>
+                                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-slate-400">Qté/Cond.</th>
+                                        <th class="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-slate-400">Stock Précédent</th>
+                                        <th class="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-slate-400">Stock Aujourd'hui</th>
+                                        <th class="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-slate-400">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for article in articles %}
                                     {% set hasTodayInventory = todayStocks[article.id] is not null %}
                                     <tr class="border-b border-gray-100 {% if hasTodayInventory %}bg-green-50{% endif %}">
-                                        <td class="py-3 px-4 text-gray-800">
+                                        <td class="py-3 px-4 text-gray-800 dark:text-white">
                                             {{ article.name }}
                                             {% if article.brand %}
-                                            <br><span class="text-sm text-gray-500">{{ article.brand }}</span>
+                                            <br><span class="text-sm text-gray-500 dark:text-slate-400">{{ article.brand }}</span>
                                             {% endif %}
                                         </td>
-                                        <td class="py-3 px-4 text-gray-600">
+                                        <td class="py-3 px-4 text-gray-600 dark:text-slate-400">
                                             {{ article.packaging?article.packaging.name:'N/A' }}
                                         </td>
-                                        <td class="py-3 px-4 text-gray-600">
+                                        <td class="py-3 px-4 text-gray-600 dark:text-slate-400">
                                             {{ article.packagingUnitQuantity }} {{ article.unit?article.unit.name:'' }}
                                         </td>
-                                        <td class="py-3 px-4 text-right text-gray-800">
+                                        <td class="py-3 px-4 text-right text-gray-800 dark:text-white">
                                             {{ previousStocks[article.id] }}
                                         </td>
-                                        <td class="py-3 px-4 text-right text-gray-800">
+                                        <td class="py-3 px-4 text-right text-gray-800 dark:text-white">
                                             {{ todayStocks[article.id] ?? '-' }}
                                         </td>
                                         <td class="py-3 px-4 text-right">
@@ -131,15 +131,15 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="mt-4 text-sm text-gray-500">
+                        <div class="mt-4 text-sm text-gray-500 dark:text-slate-400">
                             {{ articles|length }} articles dans cette famille
                         </div>
                     </div>
                 </div>
             </form>
             {% elseif familyId and articles|length == 0 %}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-center text-gray-500">
+            <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-center text-gray-500 dark:text-slate-400">
                     Aucun article trouvé dans cette famille.
                 </div>
             </div>
